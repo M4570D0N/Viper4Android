@@ -7,8 +7,6 @@ LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v13
 
-LOCAL_STATIC_JAVA_LIBRARIES := RootTools-2.6.jar
-
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := ViPER4Android
