@@ -897,8 +897,8 @@ public class Utils
             File hfOutput = new File(szDstName);
             if (hfOutput.exists()) hfOutput.delete();
 
-            myOutput = new FileOutputStream(outFileName)
-            myInput = ctx.getAssets().open(szSourceName)
+            myOutput = new FileOutputStream(outFileName);
+            myInput = ctx.getAssets().open(szSourceName);
             byte[] tBuffer = new byte[1024];
             int nLength = 0;
             while ((nLength = myInput.read(tBuffer)) > 0)

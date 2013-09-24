@@ -441,7 +441,7 @@ public class HeadsetService extends Service {
 
             if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 mUseHeadset = intent.getIntExtra("state", 0) == 1;
-            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED))
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)
                     || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 mUseBluetooth = am.isBluetoothA2dpOn();
             } else if (action.equals(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG)) {

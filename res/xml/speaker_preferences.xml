@@ -60,7 +60,6 @@
 
         <CheckBoxPreference
             android:key="viper4android.headphonefx.reverb.enable"
-            android:disableDependentsState="false"
             android:summaryOn="@string/pref_reverb_summary_on"
             android:summaryOff="@string/pref_reverb_summary_off"
             android:disableDependentsState="false"
