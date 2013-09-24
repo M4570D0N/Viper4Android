@@ -12,7 +12,7 @@ public class BootCompletedReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
-    	Log.i("ViPER4Android", "Starting service, reason = BootCompletedReceiver");
+        Log.i("ViPER4Android", "Starting service, reason = BootCompletedReceiver");
         context.startService(new Intent(context, HeadsetService.class));
     }
 }

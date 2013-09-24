@@ -164,6 +164,7 @@
 
         <CheckBoxPreference
             android:key="viper4android.headphonefx.reverb.enable"
+            android:disableDependentsState="false"
             android:summaryOn="@string/pref_reverb_summary_on"
             android:summaryOff="@string/pref_reverb_summary_off"
             android:disableDependentsState="false"
@@ -350,6 +351,7 @@
             android:defaultValue="100"
             android:title="@string/pref_fx_limiter_threshold"
             android:entryValues="@array/output_db_values"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>
