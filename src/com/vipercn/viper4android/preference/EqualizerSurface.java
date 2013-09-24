@@ -16,7 +16,7 @@ import android.view.View;
 
 import com.vipercn.viper4android.preference.Biquad;
 import com.vipercn.viper4android.preference.Complex;
-import com.vipercn.viper4android.R
+import com.vipercn.viper4android.R;
 
 public class EqualizerSurface extends SurfaceView {
     private static double FreqTable[] = {27.34375f, 54.6875f, 109.375f, 218.75f, 437.5f, 875f, 1750f, 3500f, 7000f, 14000f};
