@@ -1,6 +1,7 @@
 package com.vipercn.viper4android.preference;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
@@ -16,7 +17,7 @@ import android.view.View;
 
 import com.vipercn.viper4android.preference.Biquad;
 import com.vipercn.viper4android.preference.Complex;
-import com.vipercn.viper4android.R
+import com.vipercn.viper4android.R;
 
 public class EqualizerSurface extends SurfaceView {
     private static double FreqTable[] = {27.34375f, 54.6875f, 109.375f, 218.75f, 437.5f, 875f, 1750f, 3500f, 7000f, 14000f};
@@ -30,6 +31,7 @@ public class EqualizerSurface extends SurfaceView {
     private int mWidth;
     private int mHeight;
 
+    /* Fixme: generalize with frequencies read from equalizer object */
     private float[] mLevels = new float[10];
     private final Paint mWhite, mGridLines, mControlBarText, mControlBar, mControlBarKnob;
     private final Paint mFrequencyResponseBg;
@@ -277,10 +279,13 @@ public class EqualizerSurface extends SurfaceView {
             double freq = FreqTable[i];
             float x = projectX(freq) * mWidth;
             float y = projectY(mLevels[i]) * mHeight;
+            String frequencyText = String.format(freq < 1000 ? "%.0f" : "%.0fk",
+                    freq < 1000 ? freq : freq / 1000);
+
             canvas.drawLine(x, mHeight, x, y, mControlBar);
             canvas.drawCircle(x, y, mControlBar.getStrokeWidth() * 0.66f, mControlBarKnob);
             canvas.drawText(String.format("%+1.1f", mLevels[i]), x, mHeight - 2, mControlBarText);
-            canvas.drawText(String.format(freq < 1000 ? "%.0f" : "%.0fk", freq < 1000 ? freq : freq / 1000), x, mWhite.getTextSize(), mControlBarText);
+            canvas.drawText(frequencyText, x, mWhite.getTextSize(), mControlBarText);
         }
     }
 
@@ -288,7 +293,7 @@ public class EqualizerSurface extends SurfaceView {
         double pos = Math.log(freq);
         double minPos = Math.log(MIN_FREQ);
         double maxPos = Math.log(MAX_FREQ);
-        return (float)((pos - minPos) / (maxPos - minPos));
+        return (float) ((pos - minPos) / (maxPos - minPos));
     }
 
     private double reverseProjectX(float pos) {

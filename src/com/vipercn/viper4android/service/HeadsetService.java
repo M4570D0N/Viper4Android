@@ -4,8 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.bluetooth.BluetoothClass;
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothA2dp;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -437,19 +436,17 @@ public class HeadsetService extends Service {
             final String action = intent.getAction();
             final boolean prevUseHeadset = mUseHeadset;
             final boolean prevUseBluetooth = mUseBluetooth;
-            final boolean prevUseUDB = mUseUSB;
+            final boolean prevUseUSB = mUseUSB;
             final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
             if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 mUseHeadset = intent.getIntExtra("state", 0) == 1;
-            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED))
-                    || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                mUseBluetooth = am.isBluetoothA2dpOn();
+            } else if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothA2dp.EXTRA_STATE,
+                        BluetoothA2dp.STATE_DISCONNECTED);
+                mUseBluetooth = state == BluetoothA2dp.STATE_CONNECTED;
             } else if (action.equals(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG)) {
                 mUseUSB = intent.getIntExtra("state", 0) == 1;
-            } else if (action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-                mUseBluetooth = audioManager.isBluetoothA2dpOn();
-                mUseHeadset = audioManager.isWiredHeadsetOn();
             }
 
             Log.i("ViPER4Android", "Headset=" + mUseHeadset + ", Bluetooth=" + mUseBluetooth +
@@ -535,15 +532,17 @@ public class HeadsetService extends Service {
             registerReceiver(mScreenOnReceiver, screenFilter);
 
             final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-            intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-            intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+            intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
             intentFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
             intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
             registerReceiver(mRoutingReceiver, intentFilter);
 
-            registerReceiver(mPreferenceUpdateReceiver, new IntentFilter(ViPER4Android.ACTION_UPDATE_PREFERENCES));
-            registerReceiver(mShowNotifyReceiver, new IntentFilter(ViPER4Android.ACTION_SHOW_NOTIFY));
-            registerReceiver(mCancelNotifyReceiver, new IntentFilter(ViPER4Android.ACTION_CANCEL_NOTIFY));
+            registerReceiver(mPreferenceUpdateReceiver,
+                    new IntentFilter(ViPER4Android.ACTION_UPDATE_PREFERENCES));
+            registerReceiver(mShowNotifyReceiver,
+                    new IntentFilter(ViPER4Android.ACTION_SHOW_NOTIFY));
+            registerReceiver(mCancelNotifyReceiver,
+                    new IntentFilter(ViPER4Android.ACTION_CANCEL_NOTIFY));
 
             Log.i("ViPER4Android", "Service launched.");
 
@@ -604,8 +603,8 @@ public class HeadsetService extends Service {
         SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
         String szLockedEffect = prefSettings.getString("viper4android.settings.lock_effect", "none");
         if (szLockedEffect.equalsIgnoreCase("none")) {
-            if (mUseBluetooth) return "bluetooth";
             if (mUseHeadset) return "headset";
+            if (mUseBluetooth) return "bluetooth";
             if (mUseUSB) return "usb";
             return "speaker";
         }

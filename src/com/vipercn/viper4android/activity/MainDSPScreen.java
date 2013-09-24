@@ -3,7 +3,6 @@ package com.vipercn.viper4android.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,9 +13,18 @@ import android.util.Log;
 import com.vipercn.viper4android.R;
 import com.vipercn.viper4android.preference.EqualizerPreference;
 import com.vipercn.viper4android.preference.SummariedListPreference;
+import com.vipercn.viper4android.service.HeadsetService;
 
-public final class MainDSPScreen extends PreferenceFragment
-{
+public final class MainDSPScreen extends PreferenceFragment {
+
+    public static final String PREF_KEY_EQ = "viper4android.headphonefx.fireq";
+    public static final String PREF_KEY_CUSTOM_EQ = "viper4android.headphonefx.fireq.custom";
+    public static final String EQ_VALUE_CUSTOM = "custom";
+
+    public static final String PREF_KEY_CONVOLVER = "viper4android.headphonefx.convolver";
+    public static final String PREF_KEY_KERNEL_CONVOLVER = "viper4android.headphonefx.convolver.kernel";
+    public static final String CONVOLVER_VALUE_KERNEL = "kernel";
+
     private Context mParentContext = null;
 
     public void setParentContext(Context mCtx) {
@@ -29,40 +37,41 @@ public final class MainDSPScreen extends PreferenceFragment
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             Log.i("ViPER4Android", "Update key = " + key);
 
-            if ("viper4android.headphonefx.fireq".equals(key)) {
+            if (PREF_KEY_EQ.equals(key)) {
                 String newValue = prefs.getString(key, null);
-                if (!"custom".equals(newValue)) {
-                    Editor e = prefs.edit();
-                    e.putString("viper4android.headphonefx.fireq.custom", newValue);
-                    e.commit();
+                if (!EQ_VALUE_CUSTOM.equals(newValue)) {
+                    prefs.edit().putString(PREF_KEY_CUSTOM_EQ, newValue).commit();
+
+                    /* Now tell the equalizer that it must display something else. */
                     EqualizerPreference eq =
-                            (EqualizerPreference)getPreferenceScreen().findPreference("viper4android.headphonefx.fireq.custom");
+                            (EqualizerPreference) findPreference(PREF_KEY_CUSTOM_EQ);
                     eq.refreshFromPreference();
                 }
             }
 
-            if ("viper4android.headphonefx.fireq.custom".equals(key))
-            {
+            /* If the equalizer surface is updated, select matching pref entry or "custom". */
+            if (PREF_KEY_CUSTOM_EQ.equals(key)) {
                 String newValue = prefs.getString(key, null);
 
-                String desiredValue = "custom";
+                String desiredValue = EQ_VALUE_CUSTOM;
                 SummariedListPreference preset =
-                        (SummariedListPreference)getPreferenceScreen().findPreference("viper4android.headphonefx.fireq");
+                        (SummariedListPreference) findPreference(PREF_KEY_EQ);
+
                 for (CharSequence entry : preset.getEntryValues()) {
                     if (entry.equals(newValue)) {
                         desiredValue = newValue;
                         break;
                     }
                 }
+
+                /* Tell listpreference that it must display something else. */
                 if (!desiredValue.equals(preset.getEntry())) {
-                    Editor e = prefs.edit();
-                    e.putString("viper4android.headphonefx.fireq", desiredValue);
-                    e.commit();
+                    prefs.edit().putString(PREF_KEY_EQ, desiredValue).commit();
                     preset.refreshFromPreference();
                 }
             }
 
-            if ("viper4android.headphonefx.convolver.kernel".equals(key))
+            if ("PREF_KEY_KERNEL_CONVOLVER".equals(key))
             {
                 if (mParentContext != null)
                 {
@@ -117,6 +126,7 @@ public final class MainDSPScreen extends PreferenceFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String config = getArguments().getString("config");
+        PreferenceManager prefMgr = getPreferenceManager();
 
         prefMgr.setSharedPreferencesName(ViPER4Android.SHARED_PREFERENCES_BASENAME + "." + config);
 
