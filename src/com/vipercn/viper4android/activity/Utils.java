@@ -26,16 +26,13 @@ import java.util.Random;
 import com.stericson.RootTools.*;
 
 
-public class Utils
-{
+public class Utils {
     protected static final String TAG = "ViPER4Android";
 
     // Check if the specified file exists.
-    public static boolean fileExists(String filename)
-    {
+    public static boolean fileExists(String filename) {
         boolean bExist = new File(filename).exists();
-        if (!bExist)
-        {
+        if (!bExist) {
             RootTools.useRoot = true;
             bExist = RootTools.exists(filename);
         }
@@ -43,14 +40,10 @@ public class Utils
     }
 
     // Get a file length
-    public static long GetFileLength(String szFileName)
-    {
-        try
-        {
+    public static long GetFileLength(String szFileName) {
+        try {
             return new File(szFileName).length();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return 0;
         }
     }
@@ -58,8 +51,7 @@ public class Utils
     // Download a file from internet
     public static boolean DownloadFile(String szURL, String szFileName, String szStorePath)
     {
-        try
-        {
+        try {
             URL myURL = new URL(szURL);
             URLConnection conn = myURL.openConnection();
             conn.connect();
@@ -79,23 +71,19 @@ public class Utils
 
             return true;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             return false;
         }
     }
 
     // Check a file with checksum
-    public static boolean FileChecksum(String szFilePathName, String szChecksum)
-    {
+    public static boolean FileChecksum(String szFilePathName, String szChecksum) {
         long lChecksum = 0;
 
-        try
-        {
+        try {
             FileInputStream fis = new FileInputStream(szFilePathName);
             byte buf[] = new byte[1024];
-            do
-            {
+            do {
                 int numread = fis.read(buf);
                 if (numread == -1) break;
                 for (int idx = 0; idx < numread; idx++)
@@ -105,25 +93,20 @@ public class Utils
             String szNewChecksum = Long.toString(lChecksum);
             if (szChecksum.equals(szNewChecksum)) return true;
             else return false;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
     }
 
     // Read file list from path
-    public static void getFileNameList(File path, String fileExt, ArrayList<String> fileList)
-    {
-        if (path.isDirectory())
-        {
+    public static void getFileNameList(File path, String fileExt, ArrayList<String> fileList) {
+        if (path.isDirectory()) {
             File[] files = path.listFiles();
             if (null == files) return;
             for(int i = 0; i < files.length; i++)
                 getFileNameList(files[i], fileExt, fileList);
         }
-        else
-        {
+        else {
             String filePath = path.getAbsolutePath();
             String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
             if (fileName.toLowerCase().endsWith(fileExt))
@@ -134,14 +117,12 @@ public class Utils
     // Get profile name from a file
     public static String GetProfileName(String szProfileFileName)
     {
-        try
-        {
+        try {
             FileInputStream fisInput = new FileInputStream(szProfileFileName);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
             BufferedReader brInput = new BufferedReader(isrInput);
             String szProfileName = "";
-            while (true)
-            {
+            while (true) {
                 String szLine = brInput.readLine();
                 if (szLine == null) break;
                 if (szLine.startsWith("#")) continue;
@@ -159,18 +140,14 @@ public class Utils
             fisInput.close();
 
             return szProfileName;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return "";
         }
     }
 
     // Get profile name list
-    public static ArrayList<String> GetProfileList(String szProfileDir)
-    {
-        try
-        {
+    public static ArrayList<String> GetProfileList(String szProfileDir) {
+        try {
             File fProfileDirHandle = new File(szProfileDir);
             ArrayList<String> szProfileList = new ArrayList<String>();
             getFileNameList(fProfileDirHandle, ".prf", szProfileList);
@@ -184,18 +161,14 @@ public class Utils
             }
 
             return szProfileNameList;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return new ArrayList<String>();
         }
     }
 
     // Check whether profile has been exists
-    public static boolean CheckProfileExists(String szProfileName, String szProfileDir)
-    {
-        try
-        {
+    public static boolean CheckProfileExists(String szProfileName, String szProfileDir) {
+        try {
             File fProfileDirHandle = new File(szProfileDir);
             ArrayList<String> szProfileList = new ArrayList<String>();
             getFileNameList(fProfileDirHandle, ".prf", szProfileList);
@@ -213,9 +186,7 @@ public class Utils
             }
 
             return bFoundProfile;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -278,9 +249,7 @@ public class Utils
                 return true;
             }
             else return false;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -400,9 +369,7 @@ public class Utils
                 oswOutput.close();
                 fosOutput.close();
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return;
         }
     }
@@ -422,9 +389,7 @@ public class Utils
             mOutStream.writeBytes("exit\n");
             mOutStream.flush();
             mProcess.waitFor();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
         finally
@@ -433,9 +398,7 @@ public class Utils
             {
                 if (mOutStream != null) mOutStream.close();
                 if(mProcess != null) mProcess.destroy();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 return false;
             }
         }
@@ -460,9 +423,7 @@ public class Utils
             mOutStream.writeBytes("exit\n");
             mOutStream.flush();
             mProcess.waitFor();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
         finally
@@ -471,9 +432,7 @@ public class Utils
             {
                 if (mOutStream != null) mOutStream.close();
                 if(mProcess != null) mProcess.destroy();
-            }
-            catch (Exception e)
-            {
+        } catch (Exception e) {
                 return false;
             }
         }
@@ -525,9 +484,7 @@ public class Utils
                 Log.i("ViPER4Android_Utils", "Toolbox " + szName + " not found!");
                 return "";
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.i("ViPER4Android_Utils", "Error: " + e.getMessage());
             return "";
         }
@@ -664,8 +621,7 @@ public class Utils
     public static boolean ModifyFXConfig(String szInputFile, String szOutputFile)
     {
         Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + szInputFile + ", output = " + szOutputFile);
-        try
-        {
+        try {
             long lInputFileLength = GetFileLength(szInputFile);
 
             FileInputStream fisInput = new FileInputStream(szInputFile);
@@ -740,9 +696,7 @@ public class Utils
 
                 return true;
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.i("ViPER4Android_Utils", "Error: " + e.getMessage());
             return false;
         }
@@ -828,9 +782,7 @@ public class Utils
 
                 return true;
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.i("ViPER4Android_Utils", "Error: " + e.getMessage());
             return false;
         }
@@ -908,9 +860,7 @@ public class Utils
             myInput = null;
             myOutput.close();
             myOutput = null;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
 

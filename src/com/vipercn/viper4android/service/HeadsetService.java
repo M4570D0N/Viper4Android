@@ -20,6 +20,8 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.vipercn.viper4android.activity.ViPER4Android;
+
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -32,193 +34,10 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
-import com.vipercn.viper4android.activity.ViPER4Android;
-
 public class HeadsetService extends Service {
-
-    private class ResourceMutex {
-        private Semaphore mSignal = new Semaphore(1);
-
-        public boolean acquire() {
-            try {
-                mSignal.acquire();
-                return true;
-            } catch (InterruptedException e) {
-                return false;
-            }
-        }
-
-        public void release() {
-            mSignal.release();
-        }
-    }
-
-    private class V4ADSPModule {
-        private final UUID EFFECT_TYPE_NULL =
-                UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
-        public AudioEffect mInstance = null;
-
-        public V4ADSPModule(UUID uModuleID, int nPriority, int nAudioSession) {
-            try {
-                mInstance = AudioEffect.class.getConstructor(
-                        UUID.class, UUID.class, Integer.TYPE, Integer.TYPE).newInstance(
-                        EFFECT_TYPE_NULL, uModuleID, nPriority, nAudioSession);
-                Log.i("ViPER4Android", "Creating viper4android module, " + uModuleID.toString());
-            } catch (Exception e) {
-                 Log.i("ViPER4Android", e.getMessage());
-                mInstance = null;
-            }
-        }
-
-        public void release() {
-            Log.i("ViPER4Android", "Free viper4android module.");
-            if (mInstance != null)
-                mInstance.release();
-            mInstance = null;
-        }
-
-        private byte[] intToByteArray(int value) {
-            ByteBuffer converter = ByteBuffer.allocate(4);
-            converter.order(ByteOrder.nativeOrder());
-            converter.putInt(value);
-            return converter.array();
-        }
-
-        private int byteArrayToInt(byte[] valueBuf, int offset) {
-            ByteBuffer converter = ByteBuffer.wrap(valueBuf);
-            converter.order(ByteOrder.nativeOrder());
-            return converter.getInt(offset);
-        }
-
-        private byte[] concatArrays(byte[]... arrays) {
-            int len = 0;
-            for (byte[] a : arrays) {
-                len += a.length;
-            }
-            byte[] b = new byte[len];
-            int offs = 0;
-            for (byte[] a : arrays) {
-                System.arraycopy(a, 0, b, offs, a.length);
-                offs += a.length;
-            }
-            return b;
-        }
-
-        public void setParameter_px4_vx4x1(int param, int valueL) {
-            try {
-                byte[] p = intToByteArray(param);
-                byte[] v = intToByteArray(valueL);
-                setParameter_Native(p, v);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "setParameter_px4_vx4x1: " + e.getMessage());
-            }
-        }
-
-        public void setParameter_px4_vx4x2(int param, int valueL, int valueH) {
-            try {
-                byte[] p = intToByteArray(param);
-                byte[] vL = intToByteArray(valueL);
-                byte[] vH = intToByteArray(valueH);
-                byte[] v = concatArrays(vL, vH);
-                setParameter_Native(p, v);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "setParameter_px4_vx4x2: " + e.getMessage());
-            }
-        }
-
-        public void setParameter_px4_vx4x3(int param, int valueL, int valueH, int valueE) {
-            try {
-                byte[] p = intToByteArray(param);
-                byte[] vL = intToByteArray(valueL);
-                byte[] vH = intToByteArray(valueH);
-                byte[] vE = intToByteArray(valueE);
-                byte[] v = concatArrays(vL, vH, vE);
-                setParameter_Native(p, v);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "setParameter_px4_vx4x3: " + e.getMessage());
-            }
-        }
-
-        public void setParameter_px4_vx4x4(int param, int valueL, int valueH, int valueE, int valueR) {
-            try {
-                byte[] p = intToByteArray(param);
-                byte[] vL = intToByteArray(valueL);
-                byte[] vH = intToByteArray(valueH);
-                byte[] vE = intToByteArray(valueE);
-                byte[] vR = intToByteArray(valueR);
-                byte[] v = concatArrays(vL, vH, vE, vR);
-                setParameter_Native(p, v);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "setParameter_px4_vx4x4: " + e.getMessage());
-            }
-        }
-
-        public void setParameter_px4_vx1x256(int param, int dataLength, byte[] byteData) {
-            try {
-                byte[] p = intToByteArray(param);
-                byte[] vL = intToByteArray(dataLength);
-                byte[] v = concatArrays(vL, byteData);
-                if (v.length < 256)
-                {
-                    int zeroPad = 256 - v.length;
-                    byte[] zeroArray = new byte[zeroPad];
-                    v = concatArrays(v, zeroArray);
-                }
-                setParameter_Native(p, v);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "setParameter_px4_vx1x256: " + e.getMessage());
-            }
-        }
-
-        public void setParameter_px4_vxString(int param, String szData) {
-            int stringLen = szData.length();
-            byte[] stringBytes = szData.getBytes(Charset.forName("US-ASCII"));
-            setParameter_px4_vx1x256(param, stringLen, stringBytes);
-        }
-
-        public void setParameter_Native(byte[] parameter, byte[] value) {
-            if (mInstance == null) return;
-            try {
-                Method setParameter = AudioEffect.class.getMethod("setParameter", byte[].class, byte[].class);
-                setParameter.invoke(mInstance, parameter, value);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "setParameter_Native: " + e.getMessage());
-            }
-        }
-
-        public int getParameter_px4_vx4x1(int param) {
-            try {
-                byte[] p = intToByteArray(param);
-                byte[] v = new byte[4];
-                getParameter_Native(p, v);
-                int val = byteArrayToInt(v, 0);
-                return val;
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "getParameter_px4_vx4x1: " + e.getMessage());
-                return -1;
-            }
-        }
-
-        public void getParameter_Native(byte[] parameter, byte[] value) {
-            if (mInstance == null) return;
-            try {
-                Method getParameter = AudioEffect.class.getMethod("getParameter", byte[].class, byte[].class);
-                getParameter.invoke(mInstance, parameter, value);
-            } catch (Exception e) {
-                Log.i("ViPER4Android", "getParameter_Native: " + e.getMessage());
-            }
-        }
-    }
-
-    public class LocalBinder extends Binder {
-        public HeadsetService getService() {
-            return HeadsetService.this;
-        }
-    }
 
     public static final UUID ID_V4A_GENERAL_FX =
             UUID.fromString("41d3c987-e6cf-11e3-a88a-11aba5d5c51b");
-
     /* ViPER4Android Driver Status */
     public static final int PARAM_GET_DRIVER_VERSION = 32769;
     public static final int PARAM_GET_NEONENABLED = 32770;
@@ -229,18 +48,24 @@ public class HeadsetService extends Service {
     public static final int PARAM_GET_SAMPLINGRATE = 32775;
     public static final int PARAM_GET_CHANNELS = 32776;
     public static final int PARAM_GET_CONVUSABLE = 32777;
-    /*******************************/
+    /**
+     * ***************************
+     */
 
     /* ViPER4Android Driver Status Control */
     public static final int PARAM_SET_COMM_STATUS = 36865;
     public static final int PARAM_SET_UPDATE_STATUS = 36866;
-    /***************************************/
+    /**
+     * ***********************************
+     */
 
     /* ViPER4Android FX Types */
     public static final int V4A_FX_TYPE_NONE = 0;
     public static final int V4A_FX_TYPE_HEADPHONE = 1;
     public static final int V4A_FX_TYPE_SPEAKER = 2;
-    /**************************/
+    /**
+     * **********************
+     */
 
     /* ViPER4Android General FX Parameters */
     public static final int PARAM_FX_TYPE_SWITCH = 65537;
@@ -300,46 +125,12 @@ public class HeadsetService extends Service {
     public static final int PARAM_SPKFX_AGC_MAXSCALER = 65591;
     public static final int PARAM_SPKFX_OUTPUT_VOLUME = 65592;
     public static final int PARAM_SPKFX_LIMITER_THRESHOLD = 65593;
-    /***************************************/
+    /**
+     * ***********************************
+     */
 
     private final LocalBinder mBinder = new LocalBinder();
-    protected boolean mUseHeadset = false;
-    protected boolean mUseBluetooth = false;
-    protected boolean mUseUSB = false;
-    protected String mPreviousMode = "none";
-    private float[] mOverriddenEqualizerLevels;
-
-    private V4ADSPModule mGeneralFX = null;
-    private boolean mServicePrepared = false;
-    private boolean mDriverIsReady = false;
-
-    private Map<Integer, V4ADSPModule> mGeneralFXList = new HashMap<Integer, V4ADSPModule>();
-    private ResourceMutex mV4AMutex = new ResourceMutex();
-
     private final Timer tmDrvStatusCommTimer = new Timer();
-    private Handler hDrvStatusCommTimer = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            try {
-                if (mGeneralFX != null && mDriverIsReady) {
-                    if (mGeneralFX.mInstance != null)
-                        mGeneralFX.setParameter_px4_vx4x1(PARAM_SET_COMM_STATUS, 1);
-                }
-                super.handleMessage(msg);
-            } catch (Exception e) {
-                super.handleMessage(msg);
-            }
-        }
-    };
-    private TimerTask ttDrvStatusCommTimer = new TimerTask() {
-        @Override
-        public void run() {
-            Message message = new Message();
-            message.what = 1;
-            hDrvStatusCommTimer.sendMessage(message);
-        }
-    };
-
     private final BroadcastReceiver mAudioSessionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -347,9 +138,8 @@ public class HeadsetService extends Service {
 
             SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
             String szCompatibleMode = prefSettings.getString("viper4android.settings.compatiblemode", "global");
-            boolean mFXInLocalMode = false;
-            if (szCompatibleMode.equals("global")) mFXInLocalMode = false;
-            else mFXInLocalMode = true;
+            boolean mFXInLocalMode;
+            mFXInLocalMode = !szCompatibleMode.equals("global");
 
             String action = intent.getAction();
             int sessionId = intent.getIntExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
@@ -365,14 +155,12 @@ public class HeadsetService extends Service {
                     return;
                 }
                 if (mV4AMutex.acquire()) {
-                    if (!mGeneralFXList.containsKey(sessionId))
-                    {
+                    if (!mGeneralFXList.containsKey(sessionId)) {
                         Log.i("ViPER4Android", "Creating local V4ADSPModule ...");
                         mGeneralFXList.put(sessionId, new V4ADSPModule(ID_V4A_GENERAL_FX, 0x7FFF, sessionId));
                     }
                     mV4AMutex.release();
-                }
-                else Log.i("ViPER4Android", "Semaphore accquire failed.");
+                } else Log.i("ViPER4Android", "Semaphore accquire failed.");
             }
 
             if (action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
@@ -384,14 +172,12 @@ public class HeadsetService extends Service {
                             v4aRemove.release();
                     }
                     mV4AMutex.release();
-                }
-                else Log.i("ViPER4Android", "Semaphore accquire failed.");
+                } else Log.i("ViPER4Android", "Semaphore accquire failed.");
             }
 
             updateSystem();
         }
     };
-
     private final BroadcastReceiver mPreferenceUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -399,7 +185,6 @@ public class HeadsetService extends Service {
             updateSystem();
         }
     };
-
     private final BroadcastReceiver mShowNotifyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -408,12 +193,12 @@ public class HeadsetService extends Service {
                 ShowNotification(getString(getResources().getIdentifier("text_headset", "string", getApplicationInfo().packageName)));
             else if (mode.equalsIgnoreCase("bluetooth"))
                 ShowNotification(getString(getResources().getIdentifier("text_bluetooth", "string", getApplicationInfo().packageName)));
-            else ShowNotification(getString(getResources().getIdentifier("text_speaker", "string", getApplicationInfo().packageName)));
+            else
+                ShowNotification(getString(getResources().getIdentifier("text_speaker", "string", getApplicationInfo().packageName)));
 
             Log.i("ViPER4Android", "mShowNotifyReceiver::onReceive()");
         }
     };
-
     private final BroadcastReceiver mCancelNotifyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -421,15 +206,13 @@ public class HeadsetService extends Service {
             Log.i("ViPER4Android", "mCancelNotifyReceiver::onReceive()");
         }
     };
-
-    private final BroadcastReceiver mScreenOnReceiver = new BroadcastReceiver() {  
-        @Override  
+    private final BroadcastReceiver mScreenOnReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(final Context context, final Intent intent) {
             //updateSystem();
             Log.i("ViPER4Android", "mScreenOnReceiver::onReceive()");
         }
     };
-
     private final BroadcastReceiver mRoutingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
@@ -437,7 +220,7 @@ public class HeadsetService extends Service {
             final boolean prevUseHeadset = mUseHeadset;
             final boolean prevUseBluetooth = mUseBluetooth;
             final boolean prevUseUSB = mUseUSB;
-            final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+            final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
             if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 mUseHeadset = intent.getIntExtra("state", 0) == 1;
@@ -458,6 +241,38 @@ public class HeadsetService extends Service {
                     || prevUseUSB != mUseUSB) {
                 updateSystem();
             }
+        }
+    };
+    protected boolean mUseHeadset = false;
+    protected boolean mUseBluetooth = false;
+    protected boolean mUseUSB = false;
+    protected String mPreviousMode = "none";
+    private float[] mOverriddenEqualizerLevels;
+    private V4ADSPModule mGeneralFX = null;
+    private boolean mServicePrepared = false;
+    private boolean mDriverIsReady = false;
+    private Map<Integer, V4ADSPModule> mGeneralFXList = new HashMap<Integer, V4ADSPModule>();
+    private ResourceMutex mV4AMutex = new ResourceMutex();
+    private Handler hDrvStatusCommTimer = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            try {
+                if (mGeneralFX != null && mDriverIsReady) {
+                    if (mGeneralFX.mInstance != null)
+                        mGeneralFX.setParameter_px4_vx4x1(PARAM_SET_COMM_STATUS, 1);
+                }
+                super.handleMessage(msg);
+            } catch (Exception e) {
+                super.handleMessage(msg);
+            }
+        }
+    };
+    private TimerTask ttDrvStatusCommTimer = new TimerTask() {
+        @Override
+        public void run() {
+            Message message = new Message();
+            message.what = 1;
+            hDrvStatusCommTimer.sendMessage(message);
         }
     };
 
@@ -484,12 +299,12 @@ public class HeadsetService extends Service {
         PendingIntent contentItent = PendingIntent.getActivity(HeadsetService.this, 0, notificationIntent, 0);
         notify.setLatestEventInfo(HeadsetService.this, contentTitle, contentText, contentItent);
 
-        NotificationManager notificationManager = (NotificationManager)getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(android.content.Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0x1234, notify);
     }
 
     private void CancelNotification() {
-        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(0x1234);
     }
 
@@ -515,8 +330,7 @@ public class HeadsetService extends Service {
             else {
                 mDriverIsReady = true;
                 String szDriverVer = GetDriverVersion();
-                if (szDriverVer.equals("0.0.0.0")) mDriverIsReady = false;
-                else mDriverIsReady = true;
+                mDriverIsReady = !szDriverVer.equals("0.0.0.0");
             }
 
             if (Build.VERSION.SDK_INT < 18)
@@ -534,7 +348,6 @@ public class HeadsetService extends Service {
             final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
             intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
             intentFilter.addAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
-            intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
             registerReceiver(mRoutingReceiver, intentFilter);
 
             registerReceiver(mPreferenceUpdateReceiver,
@@ -600,7 +413,8 @@ public class HeadsetService extends Service {
     }
 
     public String getAudioOutputRouting() {
-        SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
+        SharedPreferences prefSettings = getSharedPreferences(
+                ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
         String szLockedEffect = prefSettings.getString("viper4android.settings.lock_effect", "none");
         if (szLockedEffect.equalsIgnoreCase("none")) {
             if (mUseHeadset) return "headset";
@@ -741,8 +555,7 @@ public class HeadsetService extends Service {
 
         String szCompatibleMode = prefSettings.getString("viper4android.settings.compatiblemode", "global");
         boolean mFXInLocalMode = false;
-        if (szCompatibleMode.equals("global")) mFXInLocalMode = false;
-        else mFXInLocalMode = true;
+        mFXInLocalMode = !szCompatibleMode.equals("global");
 
         Log.i("ViPER4Android", "<+++++++++++++++ Update global effect +++++++++++++++>");
         updateSystem_Global(preferences, nFXType, mFXInLocalMode);
@@ -803,8 +616,7 @@ public class HeadsetService extends Service {
     }
 
     protected void updateSystem_Local(SharedPreferences preferences, int nFXType, boolean mLocalFX) {
-        if ((mGeneralFX == null) || (mGeneralFX.mInstance == null) || (!mDriverIsReady))
-        {
+        if ((mGeneralFX == null) || (mGeneralFX.mInstance == null) || (!mDriverIsReady)) {
             Log.i("ViPER4Android", "updateSystem(): Effects is invalid!");
             return;
         }
@@ -828,7 +640,6 @@ public class HeadsetService extends Service {
                 } catch (Exception e) {
                     Log.i("ViPER4Android", String.format("Trouble trying to manage session %d, removing...", sessionId), e);
                     mGeneralFXList.remove(sessionId);
-                    continue;
                 }
             }
             mV4AMutex.release();
@@ -846,14 +657,13 @@ public class HeadsetService extends Service {
             /* FIR Equalizer */
             Log.i("ViPER4Android", "updateSystem(): Updating FIR Equalizer.");
             if (mOverriddenEqualizerLevels != null) {
-                for (int i = 0; i < mOverriddenEqualizerLevels.length; i ++)
-                    SetV4AEqualizerBandLevel(i, (int)Math.round(Float.valueOf(mOverriddenEqualizerLevels[i]) * 100), true, v4aModule);
-            }
-            else {
+                for (int i = 0; i < mOverriddenEqualizerLevels.length; i++)
+                    SetV4AEqualizerBandLevel(i, Math.round(Float.valueOf(mOverriddenEqualizerLevels[i]) * 100), true, v4aModule);
+            } else {
                 String[] levels = preferences.getString(
                         "viper4android.headphonefx.fireq.custom", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;").split(";");
-                for (short i = 0; i < levels.length; i ++)
-                    SetV4AEqualizerBandLevel(i, (int)Math.round(Float.valueOf(levels[i]) * 100), true, v4aModule);
+                for (short i = 0; i < levels.length; i++)
+                    SetV4AEqualizerBandLevel(i, Math.round(Float.valueOf(levels[i]) * 100), true, v4aModule);
             }
             if (preferences.getBoolean("viper4android.headphonefx.fireq.enable", false))
                 v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_FIREQ_PROCESS_ENABLED, 1);
@@ -869,7 +679,8 @@ public class HeadsetService extends Service {
 
             /* Colorful Music (ViPER's Headphone 360) */
             Log.i("ViPER4Android", "updateSystem(): Updating Field Surround (Colorful Music).");
-            String[] cmParameter = preferences.getString("viper4android.headphonefx.colorfulmusic.coeffs", "120;200").split(";");
+            String[] cmParameter = preferences.getString(
+                    "viper4android.headphonefx.colorfulmusic.coeffs", "120;200").split(";");
             if (cmParameter.length == 2) {
                 v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_COLM_WIDENING, Integer.valueOf(cmParameter[0]));
                 v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_COLM_DEPTH, Integer.valueOf(cmParameter[1]));
@@ -926,11 +737,11 @@ public class HeadsetService extends Service {
 
             /* Dynamic System */
             Log.i("ViPER4Android", "updateSystem(): Updating Dynamic System.");
-            String[] dsParameter = preferences.getString("viper4android.headphonefx.dynamicsystem.coeffs", "100;5600;40;40;50;50").split(";");
-            if (dsParameter.length == 6)
-            {
+            String[] dsParameter = preferences.getString(
+                    "viper4android.headphonefx.dynamicsystem.coeffs", "100;5600;40;40;50;50").split(";");
+            if (dsParameter.length == 6) {
                 v4aModule.setParameter_px4_vx4x2(PARAM_HPFX_DYNSYS_XCOEFFS, Integer.valueOf(dsParameter[0]),
-                         Integer.valueOf(dsParameter[1]));
+                        Integer.valueOf(dsParameter[1]));
                 v4aModule.setParameter_px4_vx4x2(PARAM_HPFX_DYNSYS_YCOEFFS, Integer.valueOf(dsParameter[2]),
                         Integer.valueOf(dsParameter[3]));
                 v4aModule.setParameter_px4_vx4x2(PARAM_HPFX_DYNSYS_SIDEGAIN, Integer.valueOf(dsParameter[4]),
@@ -995,13 +806,13 @@ public class HeadsetService extends Service {
             /* FIR Equalizer */
             Log.i("ViPER4Android", "updateSystem(): Updating FIR Equalizer.");
             if (mOverriddenEqualizerLevels != null) {
-                for (int i = 0; i < mOverriddenEqualizerLevels.length; i ++)
-                    SetV4AEqualizerBandLevel(i, (int)Math.round(Float.valueOf(mOverriddenEqualizerLevels[i]) * 100), false, v4aModule);
-            }
-            else {
-                String[] levels = preferences.getString("viper4android.headphonefx.fireq.custom", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;").split(";");
-                for (short i = 0; i < levels.length; i ++)
-                    SetV4AEqualizerBandLevel(i, (int)Math.round(Float.valueOf(levels[i]) * 100), false, v4aModule);
+                for (int i = 0; i < mOverriddenEqualizerLevels.length; i++)
+                    SetV4AEqualizerBandLevel(i, Math.round(Float.valueOf(mOverriddenEqualizerLevels[i]) * 100), false, v4aModule);
+            } else {
+                String[] levels = preferences.getString(
+                        "viper4android.headphonefx.fireq.custom", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;").split(";");
+                for (short i = 0; i < levels.length; i++)
+                    SetV4AEqualizerBandLevel(i, Math.round(Float.valueOf(levels[i]) * 100), false, v4aModule);
             }
             if (preferences.getBoolean("viper4android.headphonefx.fireq.enable", false))
                 v4aModule.setParameter_px4_vx4x1(PARAM_SPKFX_FIREQ_PROCESS_ENABLED, 1);
@@ -1025,7 +836,8 @@ public class HeadsetService extends Service {
 
             /* Convolver */
             Log.i("ViPER4Android", "updateSystem(): Updating Convolver.");
-            v4aModule.setParameter_px4_vxString(PARAM_SPKFX_CONV_UPDATEKERNEL, preferences.getString("viper4android.headphonefx.convolver.kernel", ""));
+            v4aModule.setParameter_px4_vxString(PARAM_SPKFX_CONV_UPDATEKERNEL, preferences.getString(
+                    "viper4android.headphonefx.convolver.kernel", ""));
             if (preferences.getBoolean("viper4android.headphonefx.convolver.enable", false))
                 v4aModule.setParameter_px4_vx4x1(PARAM_SPKFX_CONV_PROCESS_ENABLED, 1);
             else v4aModule.setParameter_px4_vx4x1(PARAM_SPKFX_CONV_PROCESS_ENABLED, 0);
@@ -1057,5 +869,184 @@ public class HeadsetService extends Service {
         /******************************************************************************************************/
 
         Log.i("ViPER4Android", "System updated.");
+    }
+
+    private class ResourceMutex {
+        private Semaphore mSignal = new Semaphore(1);
+
+        public boolean acquire() {
+            try {
+                mSignal.acquire();
+                return true;
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+
+        public void release() {
+            mSignal.release();
+        }
+    }
+
+    private class V4ADSPModule {
+        private final UUID EFFECT_TYPE_NULL =
+                UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
+        public AudioEffect mInstance = null;
+
+        public V4ADSPModule(UUID uModuleID, int nPriority, int nAudioSession) {
+            try {
+                mInstance = AudioEffect.class.getConstructor(
+                        UUID.class, UUID.class, Integer.TYPE, Integer.TYPE).newInstance(
+                        EFFECT_TYPE_NULL, uModuleID, nPriority, nAudioSession);
+                Log.i("ViPER4Android", "Creating viper4android module, " + uModuleID.toString());
+            } catch (Exception e) {
+                Log.i("ViPER4Android", e.getMessage());
+                mInstance = null;
+            }
+        }
+
+        public void release() {
+            Log.i("ViPER4Android", "Free viper4android module.");
+            if (mInstance != null)
+                mInstance.release();
+            mInstance = null;
+        }
+
+        private byte[] intToByteArray(int value) {
+            ByteBuffer converter = ByteBuffer.allocate(4);
+            converter.order(ByteOrder.nativeOrder());
+            converter.putInt(value);
+            return converter.array();
+        }
+
+        private int byteArrayToInt(byte[] valueBuf, int offset) {
+            ByteBuffer converter = ByteBuffer.wrap(valueBuf);
+            converter.order(ByteOrder.nativeOrder());
+            return converter.getInt(offset);
+        }
+
+        private byte[] concatArrays(byte[]... arrays) {
+            int len = 0;
+            for (byte[] a : arrays) {
+                len += a.length;
+            }
+            byte[] b = new byte[len];
+            int offs = 0;
+            for (byte[] a : arrays) {
+                System.arraycopy(a, 0, b, offs, a.length);
+                offs += a.length;
+            }
+            return b;
+        }
+
+        public void setParameter_px4_vx4x1(int param, int valueL) {
+            try {
+                byte[] p = intToByteArray(param);
+                byte[] v = intToByteArray(valueL);
+                setParameter_Native(p, v);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "setParameter_px4_vx4x1: " + e.getMessage());
+            }
+        }
+
+        public void setParameter_px4_vx4x2(int param, int valueL, int valueH) {
+            try {
+                byte[] p = intToByteArray(param);
+                byte[] vL = intToByteArray(valueL);
+                byte[] vH = intToByteArray(valueH);
+                byte[] v = concatArrays(vL, vH);
+                setParameter_Native(p, v);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "setParameter_px4_vx4x2: " + e.getMessage());
+            }
+        }
+
+        public void setParameter_px4_vx4x3(int param, int valueL, int valueH, int valueE) {
+            try {
+                byte[] p = intToByteArray(param);
+                byte[] vL = intToByteArray(valueL);
+                byte[] vH = intToByteArray(valueH);
+                byte[] vE = intToByteArray(valueE);
+                byte[] v = concatArrays(vL, vH, vE);
+                setParameter_Native(p, v);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "setParameter_px4_vx4x3: " + e.getMessage());
+            }
+        }
+
+        public void setParameter_px4_vx4x4(int param, int valueL, int valueH, int valueE, int valueR) {
+            try {
+                byte[] p = intToByteArray(param);
+                byte[] vL = intToByteArray(valueL);
+                byte[] vH = intToByteArray(valueH);
+                byte[] vE = intToByteArray(valueE);
+                byte[] vR = intToByteArray(valueR);
+                byte[] v = concatArrays(vL, vH, vE, vR);
+                setParameter_Native(p, v);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "setParameter_px4_vx4x4: " + e.getMessage());
+            }
+        }
+
+        public void setParameter_px4_vx1x256(int param, int dataLength, byte[] byteData) {
+            try {
+                byte[] p = intToByteArray(param);
+                byte[] vL = intToByteArray(dataLength);
+                byte[] v = concatArrays(vL, byteData);
+                if (v.length < 256) {
+                    int zeroPad = 256 - v.length;
+                    byte[] zeroArray = new byte[zeroPad];
+                    v = concatArrays(v, zeroArray);
+                }
+                setParameter_Native(p, v);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "setParameter_px4_vx1x256: " + e.getMessage());
+            }
+        }
+
+        public void setParameter_px4_vxString(int param, String szData) {
+            int stringLen = szData.length();
+            byte[] stringBytes = szData.getBytes(Charset.forName("US-ASCII"));
+            setParameter_px4_vx1x256(param, stringLen, stringBytes);
+        }
+
+        public void setParameter_Native(byte[] parameter, byte[] value) {
+            if (mInstance == null) return;
+            try {
+                Method setParameter = AudioEffect.class.getMethod("setParameter", byte[].class, byte[].class);
+                setParameter.invoke(mInstance, parameter, value);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "setParameter_Native: " + e.getMessage());
+            }
+        }
+
+        public int getParameter_px4_vx4x1(int param) {
+            try {
+                byte[] p = intToByteArray(param);
+                byte[] v = new byte[4];
+                getParameter_Native(p, v);
+                int val = byteArrayToInt(v, 0);
+                return val;
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "getParameter_px4_vx4x1: " + e.getMessage());
+                return -1;
+            }
+        }
+
+        public void getParameter_Native(byte[] parameter, byte[] value) {
+            if (mInstance == null) return;
+            try {
+                Method getParameter = AudioEffect.class.getMethod("getParameter", byte[].class, byte[].class);
+                getParameter.invoke(mInstance, parameter, value);
+            } catch (Exception e) {
+                Log.i("ViPER4Android", "getParameter_Native: " + e.getMessage());
+            }
+        }
+    }
+
+    public class LocalBinder extends Binder {
+        public HeadsetService getService() {
+            return HeadsetService.this;
+        }
     }
 }

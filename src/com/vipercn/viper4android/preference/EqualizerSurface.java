@@ -15,13 +15,9 @@ import android.util.AttributeSet;
 import android.view.SurfaceView;
 import android.view.View;
 
-import com.vipercn.viper4android.preference.Biquad;
-import com.vipercn.viper4android.preference.Complex;
 import com.vipercn.viper4android.R;
 
 public class EqualizerSurface extends SurfaceView {
-    private static double FreqTable[] = {27.34375f, 54.6875f, 109.375f, 218.75f, 437.5f, 875f, 1750f, 3500f, 7000f, 14000f};
-
     private static int MIN_FREQ = 10;
     private static int MAX_FREQ = 21000;
     private static int SAMPLING_RATE = 44100;
@@ -203,7 +199,7 @@ public class EqualizerSurface extends SurfaceView {
          */
         double gain = Math.pow(10, mLevels[0] / 20);
         for (int i = 0; i < biquads.length; i ++) {
-            double freq = FreqTable[i];
+            double freq = 15.625 * Math.pow(2, i);
             biquads[i].setHighShelf(freq * 2, SAMPLING_RATE, mLevels[i + 1] - mLevels[i], 1);
         }
 
@@ -276,7 +272,7 @@ public class EqualizerSurface extends SurfaceView {
         }
 
         for (int i = 0; i < mLevels.length; i ++) {
-            double freq = FreqTable[i];
+            double freq = 15.625 * Math.pow(2, i);
             float x = projectX(freq) * mWidth;
             float y = projectY(mLevels[i]) * mHeight;
             String frequencyText = String.format(freq < 1000 ? "%.0f" : "%.0fk",
@@ -321,7 +317,7 @@ public class EqualizerSurface extends SurfaceView {
         int idx = 0;
         float best = 1e9f;
         for (int i = 0; i < mLevels.length; i ++) {
-            double freq = FreqTable[i];
+            double freq = 15.625 * Math.pow(2, i);
             float cx = projectX(freq) * mWidth;
             float distance = Math.abs(cx - px);
 

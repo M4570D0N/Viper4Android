@@ -1,54 +1,94 @@
 package com.vipercn.viper4android.preference;
 
+/**
+ * Java support for complex numbers.
+ *
+ * @author alankila
+ */
+class Complex {
+    private final double mReal, mIm;
 
-class Complex
-{
-    private final double re, im;
-
-    protected Complex(double re, double im)
-    {
-        this.re = re;
-        this.im = im;
+    protected Complex(double real, double im) {
+        mReal = real;
+        mIm = im;
     }
 
-    protected double rho()
-    {
-        return Math.sqrt(re * re + im * im);
+    /**
+     * Length of complex number
+     *
+     * @return length
+     */
+    protected double rho() {
+        return Math.sqrt(mReal * mReal + mIm * mIm);
     }
 
-    protected double theta()
-    {
-        return Math.atan2(im, re);
+    /**
+     * Argument of complex number
+     *
+     * @return angle in radians
+     */
+    protected double theta() {
+        return Math.atan2(mIm, mReal);
     }
 
-    protected Complex con()
-    {
-        return new Complex(re, -im);
+    /**
+     * Complex conjugate
+     *
+     * @return conjugate
+     */
+    protected Complex con() {
+        return new Complex(mReal, -mIm);
     }
 
-    protected Complex add(Complex other)
-    {
-        return new Complex(re + other.re, im + other.im);
+    /**
+     * Complex addition
+     *
+     * @param other
+     * @return sum
+     */
+    protected Complex add(Complex other) {
+        return new Complex(mReal + other.mReal, mIm + other.mIm);
     }
 
-    protected Complex mul(Complex other)
-    {
-        return new Complex(re * other.re - im * other.im, re * other.im + im * other.re);
+    /**
+     * Complex multipply
+     *
+     * @param other
+     * @return multiplication result
+     */
+    protected Complex mul(Complex other) {
+        return new Complex(mReal * other.mReal - mIm * other.mIm,
+                mReal * other.mIm + mIm * other.mReal);
     }
 
-    protected Complex mul(double a)
-    {
-        return new Complex(re * a, im * a);
+    /**
+     * Complex multiply with real value
+     *
+     * @param a
+     * @return multiplication result
+     */
+    protected Complex mul(double a) {
+        return new Complex(mReal * a, mIm * a);
     }
 
-    protected Complex div(Complex other)
-    {
-        double lengthSquared = other.re * other.re + other.im * other.im;
+    /**
+     * Complex division
+     *
+     * @param other
+     * @return division result
+     */
+    protected Complex div(Complex other) {
+        double lengthSquared = other.mReal * other.mReal + other.mIm * other.mIm;
         return mul(other.con()).div(lengthSquared);
     }
 
-    protected Complex div(double a)
-    {
-        return new Complex(re / a, im / a);
+    /**
+     * Complex division with real value
+     *
+     * @param a
+     * @return division result
+     */
+    protected Complex div(double a) {
+        return new Complex(mReal / a, mIm / a);
     }
 }
