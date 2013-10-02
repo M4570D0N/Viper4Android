@@ -7,6 +7,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
+import com.stericson.RootTools.RootTools;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -21,9 +23,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
-
-import com.stericson.RootTools.*;
 
 
 public class Utils {
@@ -31,38 +32,36 @@ public class Utils {
 
     // Check if the specified file exists.
     public static boolean fileExists(String filename) {
-        boolean bExist = new File(filename).exists();
-        if (!bExist) {
+        boolean mExists = new File(filename).exists();
+        if (!mExists) {
             RootTools.useRoot = true;
-            bExist = RootTools.exists(filename);
+            mExists = RootTools.exists(filename);
         }
-        return bExist;
+        return mExists;
     }
 
     // Get a file length
-    public static long GetFileLength(String szFileName) {
+    public static long getFileLength(String mFileName) {
         try {
-            return new File(szFileName).length();
+            return new File(mFileName).length();
         } catch (Exception e) {
             return 0;
         }
     }
 
     // Download a file from internet
-    public static boolean DownloadFile(String szURL, String szFileName, String szStorePath)
-    {
+    public static boolean downloadFile(String mURL, String mFileName, String mStorePath) {
         try {
-            URL myURL = new URL(szURL);
-            URLConnection conn = myURL.openConnection();
-            conn.connect();
-            InputStream is = conn.getInputStream();
-            if (conn.getContentLength() <= 0) return false;
+            URL url = new URL(mURL);
+            URLConnection urlConnection = url.openConnection();
+            urlConnection.connect();
+            InputStream is = urlConnection.getInputStream();
+            if (urlConnection.getContentLength() <= 0) return false;
             if (is == null) return false;
-            FileOutputStream fos = new FileOutputStream(szStorePath + szFileName);
+            FileOutputStream fos = new FileOutputStream(mStorePath + mFileName);
 
             byte buf[] = new byte[1024];
-            do
-            {
+            do {
                 int numread = is.read(buf);
                 if (numread == -1) break;
                 fos.write(buf, 0, numread);
@@ -70,28 +69,27 @@ public class Utils {
             is.close();
 
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
 
     // Check a file with checksum
-    public static boolean FileChecksum(String szFilePathName, String szChecksum) {
+    public static boolean fileChecksum(String mFilePathName, String mChecksum) {
         long lChecksum = 0;
 
         try {
-            FileInputStream fis = new FileInputStream(szFilePathName);
+            FileInputStream fis = new FileInputStream(mFilePathName);
             byte buf[] = new byte[1024];
             do {
                 int numread = fis.read(buf);
                 if (numread == -1) break;
                 for (int idx = 0; idx < numread; idx++)
-                    lChecksum = lChecksum + (long)(buf[idx]);
+                    lChecksum = lChecksum + (long) (buf[idx]);
             } while (true);
             fis.close();
-            String szNewChecksum = Long.toString(lChecksum);
-            if (szChecksum.equals(szNewChecksum)) return true;
+            String mNewChecksum = Long.toString(lChecksum);
+            if (mChecksum.equals(mNewChecksum)) return true;
             else return false;
         } catch (Exception e) {
             return false;
@@ -103,10 +101,8 @@ public class Utils {
         if (path.isDirectory()) {
             File[] files = path.listFiles();
             if (null == files) return;
-            for(int i = 0; i < files.length; i++)
-                getFileNameList(files[i], fileExt, fileList);
-        }
-        else {
+            for (File file : files) getFileNameList(file, fileExt, fileList);
+        } else {
             String filePath = path.getAbsolutePath();
             String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
             if (fileName.toLowerCase().endsWith(fileExt))
@@ -115,23 +111,21 @@ public class Utils {
     }
 
     // Get profile name from a file
-    public static String GetProfileName(String szProfileFileName)
-    {
+    public static String getProfileName(String mProfileFileName) {
         try {
-            FileInputStream fisInput = new FileInputStream(szProfileFileName);
+            FileInputStream fisInput = new FileInputStream(mProfileFileName);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
             BufferedReader brInput = new BufferedReader(isrInput);
-            String szProfileName = "";
+            String mProfileName = "";
             while (true) {
-                String szLine = brInput.readLine();
-                if (szLine == null) break;
-                if (szLine.startsWith("#")) continue;
+                String mLine = brInput.readLine();
+                if (mLine == null) break;
+                if (mLine.startsWith("#")) continue;
 
-                String szChunks[] = szLine.split("=");
-                if (szChunks.length != 2) continue;
-                if (szChunks[0].trim().toLowerCase().equals("profile_name"))
-                {
-                    szProfileName = szChunks[1];
+                String mChunks[] = mLine.split("=");
+                if (mChunks.length != 2) continue;
+                if (mChunks[0].trim().toLowerCase().equals("profile_name")) {
+                    mProfileName = mChunks[1];
                     break;
                 }
             }
@@ -139,47 +133,44 @@ public class Utils {
             isrInput.close();
             fisInput.close();
 
-            return szProfileName;
+            return mProfileName;
         } catch (Exception e) {
             return "";
         }
     }
 
     // Get profile name list
-    public static ArrayList<String> GetProfileList(String szProfileDir) {
+    public static ArrayList<String> getProfileList(String mProfileDir) {
         try {
-            File fProfileDirHandle = new File(szProfileDir);
-            ArrayList<String> szProfileList = new ArrayList<String>();
-            getFileNameList(fProfileDirHandle, ".prf", szProfileList);
+            File mProfileDirHandle = new File(mProfileDir);
+            ArrayList<String> mProfileList = new ArrayList<String>();
+            getFileNameList(mProfileDirHandle, ".prf", mProfileList);
 
-            ArrayList<String> szProfileNameList = new ArrayList<String>();
-            for (int idx = 0; idx < szProfileList.size(); idx++)
-            {
-                String szFileName = szProfileDir + szProfileList.get(idx);
-                String szName = GetProfileName(szFileName);
-                szProfileNameList.add(szName.trim());
+            ArrayList<String> mProfileNameList = new ArrayList<String>();
+            for (String mProfList : mProfileList) {
+                String mFileName = mProfileDir + mProfList;
+                String mName = getProfileName(mFileName);
+                mProfileNameList.add(mName.trim());
             }
 
-            return szProfileNameList;
+            return mProfileNameList;
         } catch (Exception e) {
             return new ArrayList<String>();
         }
     }
 
     // Check whether profile has been exists
-    public static boolean CheckProfileExists(String szProfileName, String szProfileDir) {
+    public static boolean checkProfileExists(String mProfileName, String mProfileDir) {
         try {
-            File fProfileDirHandle = new File(szProfileDir);
-            ArrayList<String> szProfileList = new ArrayList<String>();
-            getFileNameList(fProfileDirHandle, ".prf", szProfileList);
+            File mProfileDirHandle = new File(mProfileDir);
+            ArrayList<String> mProfileList = new ArrayList<String>();
+            getFileNameList(mProfileDirHandle, ".prf", mProfileList);
 
             boolean bFoundProfile = false;
-            for (int idx = 0; idx < szProfileList.size(); idx++)
-            {
-                String szFileName = szProfileDir + szProfileList.get(idx);
-                String szName = GetProfileName(szFileName);
-                if (szProfileName.trim().toUpperCase().equals(szName.trim().toUpperCase()))
-                {
+            for (String profileList : mProfileList) {
+                String mFileName = mProfileDir + profileList;
+                String mName = getProfileName(mFileName);
+                if (mProfileName.trim().toUpperCase().equals(mName.trim().toUpperCase())) {
                     bFoundProfile = true;
                     break;
                 }
@@ -192,54 +183,44 @@ public class Utils {
     }
 
     // Load profile from file
-    public static boolean LoadProfile(String szProfileName, String szProfileDir, String szPreferenceName, Context ctx)
-    {
-        try
-        {
-            File fProfileDirHandle = new File(szProfileDir);
-            ArrayList<String> szProfileFileList = new ArrayList<String>();
-            getFileNameList(fProfileDirHandle, ".prf", szProfileFileList);
-            String szProfileFileName = "";
-            for (int idx = 0; idx < szProfileFileList.size(); idx++)
-            {
-                String szFileName = szProfileDir + szProfileFileList.get(idx);
-                String szName = GetProfileName(szFileName);
-                if (szProfileName.trim().toUpperCase().equals(szName.trim().toUpperCase()))
-                {
-                    szProfileFileName = szFileName;
+    public static boolean loadProfile(String mProfileName, String mProfileDir, String mPreferenceName, Context ctx) {
+        try {
+            File mProfileDirHandle = new File(mProfileDir);
+            ArrayList<String> mProfileFileList = new ArrayList<String>();
+            getFileNameList(mProfileDirHandle, ".prf", mProfileFileList);
+            String mProfileFileName = "";
+            for (String profileFileList : mProfileFileList) {
+                String mFileName = mProfileDir + profileFileList;
+                String mName = getProfileName(mFileName);
+                if (mProfileName.trim().toUpperCase().equals(mName.trim().toUpperCase())) {
+                    mProfileFileName = mFileName;
                     break;
                 }
             }
-            if (szProfileFileName.equals("")) return false;
+            if (mProfileFileName.equals("")) return false;
 
-            SharedPreferences preferences = ctx.getSharedPreferences(szPreferenceName, Context.MODE_PRIVATE);
-            if (preferences != null)
-            {
-                FileInputStream fisInput = new FileInputStream(szProfileFileName);
+            SharedPreferences prefs = ctx.getSharedPreferences(mPreferenceName, Context.MODE_PRIVATE);
+            if (prefs != null) {
+                FileInputStream fisInput = new FileInputStream(mProfileFileName);
                 InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
                 BufferedReader brInput = new BufferedReader(isrInput);
-                Editor e = preferences.edit();
-                while (true)
-                {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    if (szLine.startsWith("#")) continue;
+                Editor e = prefs.edit();
+                while (true) {
+                    String mLine = brInput.readLine();
+                    if (mLine == null) break;
+                    if (mLine.startsWith("#")) continue;
 
-                    String szChunks[] = szLine.split("=");
-                    if (szChunks.length != 3) continue;
-                    if (szChunks[1].trim().toLowerCase().equals("boolean"))
-                    {
-                        String szParameter = szChunks[0];
-                        boolean bValue = Boolean.valueOf(szChunks[2]);
-                        e.putBoolean(szParameter, bValue);
-                    }
-                    else if (szChunks[1].trim().toLowerCase().equals("string"))
-                    {
-                        String szParameter = szChunks[0];
-                        String szValue = szChunks[2];
-                        e.putString(szParameter, szValue);
-                    }
-                    else continue;
+                    String mChunks[] = mLine.split("=");
+                    if (mChunks.length != 3) continue;
+                    if (mChunks[1].trim().toLowerCase().equals("boolean")) {
+                        String mParameter = mChunks[0];
+                        boolean bValue = Boolean.valueOf(mChunks[2]);
+                        e.putBoolean(mParameter, bValue);
+                    } else if (mChunks[1].trim().toLowerCase().equals("string")) {
+                        String mParameter = mChunks[0];
+                        String mValue = mChunks[2];
+                        e.putString(mParameter, mValue);
+                    } else continue;
                 }
                 e.commit();
                 brInput.close();
@@ -247,122 +228,119 @@ public class Utils {
                 fisInput.close();
 
                 return true;
-            }
-            else return false;
+            } else return false;
         } catch (Exception e) {
             return false;
         }
     }
 
     // Save profile to file
-    public static void SaveProfile(String szProfileName, String szProfileDir, String szPreferenceName, Context ctx)
-    {
-        try
-        {
-            SharedPreferences preferences = ctx.getSharedPreferences(szPreferenceName, Context.MODE_PRIVATE);
-            if (preferences != null)
-            {
-                String szOutFileName = szProfileDir + szProfileName + ".prf";
-                if (fileExists(szOutFileName)) new File(szOutFileName).delete();
+    public static void saveProfile(String mProfileName, String mProfileDir, String mPreferenceName, Context ctx) {
+        try {
+            SharedPreferences prefs = ctx.getSharedPreferences(mPreferenceName, Context.MODE_PRIVATE);
+            if (prefs != null) {
+                String mOutFileName = mProfileDir + mProfileName + ".prf";
+                if (fileExists(mOutFileName)) new File(mOutFileName).delete();
 
-                FileOutputStream fosOutput = new FileOutputStream(szOutFileName);
+                FileOutputStream fosOutput = new FileOutputStream(mOutFileName);
                 OutputStreamWriter oswOutput = new OutputStreamWriter(fosOutput, "UTF-8");
                 BufferedWriter bwOutput = new BufferedWriter(oswOutput);
 
                 SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd   hh:mm:ss");
-                String szDate = sDateFormat.format(new java.util.Date());
+                String mDate = sDateFormat.format(new Date());
 
                 bwOutput.write("# ViPER4Android audio effect profile !\n");
-                bwOutput.write("# Created " + szDate + "\n\n");
-                bwOutput.write("profile_name=" + szProfileName + "\n\n");
+                bwOutput.write("# Created " + mDate + "\n\n");
+                bwOutput.write("profile_name=" + mProfileName + "\n\n");
 
-                String szValue = "";
+                String mValue;
+                mValue = "";
 
                 // boolean values
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.enable", false));
-                bwOutput.write("viper4android.headphonefx.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.speakerfx.enable", false));
-                bwOutput.write("viper4android.speakerfx.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.playbackgain.enable", false));
-                bwOutput.write("viper4android.headphonefx.playbackgain.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.fireq.enable", false));
-                bwOutput.write("viper4android.headphonefx.fireq.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.convolver.enable", false));
-                bwOutput.write("viper4android.headphonefx.convolver.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.colorfulmusic.enable", false));
-                bwOutput.write("viper4android.headphonefx.colorfulmusic.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.diffsurr.enable", false));
-                bwOutput.write("viper4android.headphonefx.diffsurr.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.vhs.enable", false));
-                bwOutput.write("viper4android.headphonefx.vhs.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.reverb.enable", false));
-                bwOutput.write("viper4android.headphonefx.reverb.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.dynamicsystem.enable", false));
-                bwOutput.write("viper4android.headphonefx.dynamicsystem.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.dynamicsystem.tube", false));
-                bwOutput.write("viper4android.headphonefx.dynamicsystem.tube=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.fidelity.bass.enable", false));
-                bwOutput.write("viper4android.headphonefx.fidelity.bass.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.fidelity.clarity.enable", false));
-                bwOutput.write("viper4android.headphonefx.fidelity.clarity.enable=boolean=" + szValue + "\n");
-                szValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.cure.enable", false));
-                bwOutput.write("viper4android.headphonefx.cure.enable=boolean=" + szValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.enable", false));
+                bwOutput.write("viper4android.headphonefx.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.speakerfx.enable", false));
+                bwOutput.write("viper4android.speakerfx.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.playbackgain.enable", false));
+                bwOutput.write("viper4android.headphonefx.playbackgain.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.fireq.enable", false));
+                bwOutput.write("viper4android.headphonefx.fireq.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.convolver.enable", false));
+                bwOutput.write("viper4android.headphonefx.convolver.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.colorfulmusic.enable", false));
+                bwOutput.write("viper4android.headphonefx.colorfulmusic.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.diffsurr.enable", false));
+                bwOutput.write("viper4android.headphonefx.diffsurr.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.vhs.enable", false));
+                bwOutput.write("viper4android.headphonefx.vhs.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.reverb.enable", false));
+                bwOutput.write("viper4android.headphonefx.reverb.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.dynamicsystem.enable", false));
+                bwOutput.write("viper4android.headphonefx.dynamicsystem.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.dynamicsystem.tube", false));
+                bwOutput.write("viper4android.headphonefx.dynamicsystem.tube=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.fidelity.bass.enable", false));
+                bwOutput.write("viper4android.headphonefx.fidelity.bass.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.fidelity.clarity.enable", false));
+                bwOutput.write("viper4android.headphonefx.fidelity.clarity.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(prefs.getBoolean("viper4android.headphonefx.cure.enable", false));
+                bwOutput.write("viper4android.headphonefx.cure.enable=boolean=" + mValue + "\n");
 
                 // string values
-                szValue = preferences.getString("viper4android.headphonefx.playbackgain.ratio", "50");
-                bwOutput.write("viper4android.headphonefx.playbackgain.ratio=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.playbackgain.maxscaler", "400");
-                bwOutput.write("viper4android.headphonefx.playbackgain.maxscaler=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.playbackgain.volume", "80");
-                bwOutput.write("viper4android.headphonefx.playbackgain.volume=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fireq", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;");
-                bwOutput.write("viper4android.headphonefx.fireq=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fireq.custom", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;");
-                bwOutput.write("viper4android.headphonefx.fireq.custom=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.convolver.kernel", "");
-                bwOutput.write("viper4android.headphonefx.convolver.kernel=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.colorfulmusic.coeffs", "120;200");
-                bwOutput.write("viper4android.headphonefx.colorfulmusic.coeffs=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.colorfulmusic.midimage", "150");
-                bwOutput.write("viper4android.headphonefx.colorfulmusic.midimage=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.diffsurr.delay", "500");
-                bwOutput.write("viper4android.headphonefx.diffsurr.delay=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.vhs.qual", "0");
-                bwOutput.write("viper4android.headphonefx.vhs.qual=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.reverb.roomsize", "0");
-                bwOutput.write("viper4android.headphonefx.reverb.roomsize=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.reverb.roomwidth", "0");
-                bwOutput.write("viper4android.headphonefx.reverb.roomwidth=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.reverb.damp", "0");
-                bwOutput.write("viper4android.headphonefx.reverb.damp=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.reverb.wet", "0");
-                bwOutput.write("viper4android.headphonefx.reverb.wet=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.reverb.dry", "50");
-                bwOutput.write("viper4android.headphonefx.reverb.dry=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.dynamicsystem.coeffs", "100;5600;40;80;50;50");
-                bwOutput.write("viper4android.headphonefx.dynamicsystem.coeffs=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.dynamicsystem.bass", "0");
-                bwOutput.write("viper4android.headphonefx.dynamicsystem.bass=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fidelity.bass.mode", "0");
-                bwOutput.write("viper4android.headphonefx.fidelity.bass.mode=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fidelity.bass.freq", "40");
-                bwOutput.write("viper4android.headphonefx.fidelity.bass.freq=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fidelity.bass.gain", "50");
-                bwOutput.write("viper4android.headphonefx.fidelity.bass.gain=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fidelity.clarity.mode", "0");
-                bwOutput.write("viper4android.headphonefx.fidelity.clarity.mode=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.fidelity.clarity.gain", "50");
-                bwOutput.write("viper4android.headphonefx.fidelity.clarity.gain=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.cure.crossfeed", "0");
-                bwOutput.write("viper4android.headphonefx.cure.crossfeed=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.outvol", "100");
-                bwOutput.write("viper4android.headphonefx.outvol=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.channelpan", "0");
-                bwOutput.write("viper4android.headphonefx.channelpan=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.headphonefx.limiter", "100");
-                bwOutput.write("viper4android.headphonefx.limiter=string=" + szValue + "\n");
-                szValue = preferences.getString("viper4android.speakerfx.limiter", "100");
-                bwOutput.write("viper4android.speakerfx.limiter=string=" + szValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.playbackgain.ratio", "50");
+                bwOutput.write("viper4android.headphonefx.playbackgain.ratio=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.playbackgain.maxscaler", "400");
+                bwOutput.write("viper4android.headphonefx.playbackgain.maxscaler=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.playbackgain.volume", "80");
+                bwOutput.write("viper4android.headphonefx.playbackgain.volume=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fireq", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;");
+                bwOutput.write("viper4android.headphonefx.fireq=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fireq.custom", "0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0;");
+                bwOutput.write("viper4android.headphonefx.fireq.custom=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.convolver.kernel", "");
+                bwOutput.write("viper4android.headphonefx.convolver.kernel=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.colorfulmusic.coeffs", "120;200");
+                bwOutput.write("viper4android.headphonefx.colorfulmusic.coeffs=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.colorfulmusic.midimage", "150");
+                bwOutput.write("viper4android.headphonefx.colorfulmusic.midimage=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.diffsurr.delay", "500");
+                bwOutput.write("viper4android.headphonefx.diffsurr.delay=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.vhs.qual", "0");
+                bwOutput.write("viper4android.headphonefx.vhs.qual=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.reverb.roomsize", "0");
+                bwOutput.write("viper4android.headphonefx.reverb.roomsize=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.reverb.roomwidth", "0");
+                bwOutput.write("viper4android.headphonefx.reverb.roomwidth=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.reverb.damp", "0");
+                bwOutput.write("viper4android.headphonefx.reverb.damp=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.reverb.wet", "0");
+                bwOutput.write("viper4android.headphonefx.reverb.wet=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.reverb.dry", "50");
+                bwOutput.write("viper4android.headphonefx.reverb.dry=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.dynamicsystem.coeffs", "100;5600;40;80;50;50");
+                bwOutput.write("viper4android.headphonefx.dynamicsystem.coeffs=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.dynamicsystem.bass", "0");
+                bwOutput.write("viper4android.headphonefx.dynamicsystem.bass=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fidelity.bass.mode", "0");
+                bwOutput.write("viper4android.headphonefx.fidelity.bass.mode=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fidelity.bass.freq", "40");
+                bwOutput.write("viper4android.headphonefx.fidelity.bass.freq=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fidelity.bass.gain", "50");
+                bwOutput.write("viper4android.headphonefx.fidelity.bass.gain=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fidelity.clarity.mode", "0");
+                bwOutput.write("viper4android.headphonefx.fidelity.clarity.mode=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.fidelity.clarity.gain", "50");
+                bwOutput.write("viper4android.headphonefx.fidelity.clarity.gain=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.cure.crossfeed", "0");
+                bwOutput.write("viper4android.headphonefx.cure.crossfeed=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.outvol", "100");
+                bwOutput.write("viper4android.headphonefx.outvol=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.channelpan", "0");
+                bwOutput.write("viper4android.headphonefx.channelpan=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.headphonefx.limiter", "100");
+                bwOutput.write("viper4android.headphonefx.limiter=string=" + mValue + "\n");
+                mValue = prefs.getString("viper4android.speakerfx.limiter", "100");
+                bwOutput.write("viper4android.speakerfx.limiter=string=" + mValue + "\n");
 
                 bwOutput.flush();
                 bwOutput.close();
@@ -375,15 +353,13 @@ public class Utils {
     }
 
     // Run root command
-    public static boolean runRootCommand(String szCommand)
-    {
+    public static boolean runRootCommand(String mCommand) {
         Process mProcess = null;
         DataOutputStream mOutStream = null;
-        try
-        {
-            mProcess = Runtime.getRuntime().exec("su"); 
+        try {
+            mProcess = Runtime.getRuntime().exec("su");
             mOutStream = new DataOutputStream(mProcess.getOutputStream());
-            mOutStream.writeBytes(szCommand + "\n");
+            mOutStream.writeBytes(mCommand + "\n");
             mOutStream.flush();
             Thread.sleep(100);
             mOutStream.writeBytes("exit\n");
@@ -391,13 +367,10 @@ public class Utils {
             mProcess.waitFor();
         } catch (Exception e) {
             return false;
-        }
-        finally
-        {
-            try
-            {
+        } finally {
+            try {
                 if (mOutStream != null) mOutStream.close();
-                if(mProcess != null) mProcess.destroy();
+                if (mProcess != null) mProcess.destroy();
             } catch (Exception e) {
                 return false;
             }
@@ -406,17 +379,14 @@ public class Utils {
     }
 
     // Run root commands
-    public static boolean runRootCommand(String[] szCommand, int nSleepTime)
-    {
+    public static boolean runRootCommand(String[] mCommand, int nSleepTime) {
         Process mProcess = null;
         DataOutputStream mOutStream = null;
-        try
-        {
-            mProcess = Runtime.getRuntime().exec("su"); 
+        try {
+            mProcess = Runtime.getRuntime().exec("su");
             mOutStream = new DataOutputStream(mProcess.getOutputStream());
-            for (int i = 0; i < szCommand.length; i++)
-            {
-                mOutStream.writeBytes(szCommand[i] + "\n");
+            for (String command : mCommand) {
+                mOutStream.writeBytes(command + "\n");
                 mOutStream.flush();
                 Thread.sleep(nSleepTime);
             }
@@ -425,14 +395,11 @@ public class Utils {
             mProcess.waitFor();
         } catch (Exception e) {
             return false;
-        }
-        finally
-        {
-            try
-            {
+        } finally {
+            try {
                 if (mOutStream != null) mOutStream.close();
-                if(mProcess != null) mProcess.destroy();
-        } catch (Exception e) {
+                if (mProcess != null) mProcess.destroy();
+            } catch (Exception e) {
                 return false;
             }
         }
@@ -440,8 +407,7 @@ public class Utils {
     }
 
     // Acquire root permission
-    public static boolean AcquireRoot()
-    {
+    public static boolean acquireRoot() {
         RootTools.useRoot = true;
         if (!RootTools.isRootAvailable()) return false;
         if (!RootTools.isAccessGiven()) return false;
@@ -449,39 +415,26 @@ public class Utils {
     }
 
     // Find toolbox
-    public static String GetToolbox(String szName)
-    {
-        try
-        {
-            Log.i("ViPER4Android_Utils", "Searching toolbox " + szName + " ...");
-            if (fileExists("/system/bin/" + szName))
-            {
-                Log.i("ViPER4Android_Utils", "Found /system/bin/" + szName);
-                return "/system/bin/" + szName;
-            }
-            else if (fileExists("/system/xbin/" + szName))
-            {
-                Log.i("ViPER4Android_Utils", "Found /system/xbin/" + szName);
-                return "/system/xbin/" + szName;
-            }
-            else if (fileExists("/bin/" + szName))
-            {
-                Log.i("ViPER4Android_Utils", "Found /bin/" + szName);
-                return "/bin/" + szName;
-            }
-            else if (fileExists("/xbin/" + szName))
-            {
-                Log.i("ViPER4Android_Utils", "Found /xbin/" + szName);
-                return "/xbin/" + szName;
-            }
-            else if (fileExists("/sbin/" + szName))
-            {
-                Log.i("ViPER4Android_Utils", "Found /sbin/" + szName);
-                return "/sbin/" + szName;
-            }
-            else
-            {
-                Log.i("ViPER4Android_Utils", "Toolbox " + szName + " not found!");
+    public static String getToolbox(String mName) {
+        try {
+            Log.i("ViPER4Android_Utils", "Searching toolbox " + mName + " ...");
+            if (fileExists("/system/bin/" + mName)) {
+                Log.i("ViPER4Android_Utils", "Found /system/bin/" + mName);
+                return "/system/bin/" + mName;
+            } else if (fileExists("/system/xbin/" + mName)) {
+                Log.i("ViPER4Android_Utils", "Found /system/xbin/" + mName);
+                return "/system/xbin/" + mName;
+            } else if (fileExists("/bin/" + mName)) {
+                Log.i("ViPER4Android_Utils", "Found /bin/" + mName);
+                return "/bin/" + mName;
+            } else if (fileExists("/xbin/" + mName)) {
+                Log.i("ViPER4Android_Utils", "Found /xbin/" + mName);
+                return "/xbin/" + mName;
+            } else if (fileExists("/sbin/" + mName)) {
+                Log.i("ViPER4Android_Utils", "Found /sbin/" + mName);
+                return "/sbin/" + mName;
+            } else {
+                Log.i("ViPER4Android_Utils", "Toolbox " + mName + " not found!");
                 return "";
             }
         } catch (Exception e) {
@@ -491,168 +444,153 @@ public class Utils {
     }
 
     // Perform toolbox test
-    public static boolean PerformToolboxTest(String szToolbox, boolean bUseCopyCmd)
-    {
-        String szToolboxPath = GetToolbox(szToolbox);
-        if (szToolboxPath == null) return false;
-        if (szToolboxPath.equals("")) return false;
+    public static boolean performToolboxTest(String mToolbox, boolean bUseCopyCmd) {
+        String mToolboxPath = getToolbox(mToolbox);
+        if (mToolboxPath == null) return false;
+        if (mToolboxPath.equals("")) return false;
 
-        Log.i("ViPER4Android_Utils", "Performing toolbox test, toolbox = " + szToolboxPath);
+        Log.i("ViPER4Android_Utils", "Performing toolbox test, toolbox = " + mToolboxPath);
 
         Random rndMachine = new Random();
-        String szTestFilename = "test_" + rndMachine.nextInt(65536) + ".rnd";
-        String szSysTestFilename = "/system/" + szTestFilename;
-        String szDataTestFilename = "/data/" + szTestFilename;
+        String mTestFilename = "test_" + rndMachine.nextInt(65536) + ".rnd";
+        String mSysTestFilename = "/system/" + mTestFilename;
+        String mDataTestFilename = "/data/" + mTestFilename;
 
-        String szCommandList[] = new String[7];
-        szCommandList[0] = szToolboxPath + " mount -o remount,rw /system /system";
-        szCommandList[1] = szToolboxPath + " echo test > " + szSysTestFilename;
-        szCommandList[2] = szToolboxPath + " sync";
+        String mCommandList[] = new String[7];
+        mCommandList[0] = mToolboxPath + " mount -o remount,rw /system /system";
+        mCommandList[1] = mToolboxPath + " echo test > " + mSysTestFilename;
+        mCommandList[2] = mToolboxPath + " sync";
 
-        if (bUseCopyCmd) szCommandList[3] = szToolboxPath + " cp " + szSysTestFilename + " " + szDataTestFilename;
-        else szCommandList[3] = szToolboxPath + " dd if=" + szSysTestFilename + " of=" + szDataTestFilename;
+        if (bUseCopyCmd)
+            mCommandList[3] = mToolboxPath + " cp " + mSysTestFilename + " " + mDataTestFilename;
+        else
+            mCommandList[3] = mToolboxPath + " dd if=" + mSysTestFilename + " of=" + mDataTestFilename;
 
-        szCommandList[4] = szToolboxPath + " rm " + szSysTestFilename;
-        szCommandList[5] = szToolboxPath + " sync";
-        szCommandList[6] = szToolboxPath + " mount -o remount,ro /system /system";
-        runRootCommand(szCommandList, 200);
+        mCommandList[4] = mToolboxPath + " rm " + mSysTestFilename;
+        mCommandList[5] = mToolboxPath + " sync";
+        mCommandList[6] = mToolboxPath + " mount -o remount,ro /system /system";
+        runRootCommand(mCommandList, 200);
 
-        if (fileExists(szSysTestFilename))
-        {
-            Log.i("ViPER4Android_Utils", "Toolbox \"" + szToolboxPath + "\" test failed, remove function failure.");
+        if (fileExists(mSysTestFilename)) {
+            Log.i("ViPER4Android_Utils", "Toolbox \"" + mToolboxPath + "\" test failed, remove function failure.");
             return false;
         }
-        if (!fileExists(szDataTestFilename))
-        {
-            Log.i("ViPER4Android_Utils", "Toolbox \"" + szToolboxPath + "\" test failed, mount or echo or cp function failure.");
+        if (!fileExists(mDataTestFilename)) {
+            Log.i("ViPER4Android_Utils", "Toolbox \"" + mToolboxPath + "\" test failed, mount or echo or cp function failure.");
             return false;
         }
 
-        runRootCommand(szToolboxPath + " rm " + szDataTestFilename);
-        Log.i("ViPER4Android_Utils", "Toolbox \"" + szToolboxPath + "\" test succeed.");
+        runRootCommand(mToolboxPath + " rm " + mDataTestFilename);
+        Log.i("ViPER4Android_Utils", "Toolbox \"" + mToolboxPath + "\" test succeed.");
 
         return true;
     }
 
     // Get toolbox pathname in preference
-    public static String GetSavedToolbox(String szPreferenceName, Context ctx)
-    {
-        SharedPreferences preferences = ctx.getSharedPreferences(szPreferenceName, Context.MODE_PRIVATE);
+    public static String getSavedToolbox(String mPreferenceName, Context ctx) {
+        SharedPreferences preferences = ctx.getSharedPreferences(mPreferenceName, Context.MODE_PRIVATE);
         if (preferences == null) return "";
-        String szToolbox = preferences.getString("viper4android.settings.toolbox", "none");
-        if (szToolbox == null) return "";
-        if (szToolbox.equals("")) return "";
-        if (szToolbox.equals("none")) return "";
-        return szToolbox;
+        String mToolbox = preferences.getString("viper4android.settings.toolbox", "none");
+        if (mToolbox == null) return "";
+        if (mToolbox.equals("")) return "";
+        if (mToolbox.equals("none")) return "";
+        return mToolbox;
     }
 
     // Make a copy command line
-    public static String MakeCopyCmdLine(String szPreferenceName, Context ctx, String szSrcFile, String szDstFile)
-    {
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return "";
+    public static String makeCopyCmdLine(String mPreferenceName, Context ctx, String mSrcFile, String mDstFile) {
+        String mToolbox = getSavedToolbox(mPreferenceName, ctx);
+        if (mToolbox.equals("")) return "";
 
-        SharedPreferences preferences = ctx.getSharedPreferences(szPreferenceName, Context.MODE_PRIVATE);
+        SharedPreferences preferences = ctx.getSharedPreferences(mPreferenceName, Context.MODE_PRIVATE);
         if (preferences == null) return "";
-        String szCopy = preferences.getString("viper4android.settings.copycmd", "dd");
-        if (szCopy == null) return "";
-        if (szCopy.equals("")) return "";
+        String mCopy = preferences.getString("viper4android.settings.copycmd", "dd");
+        if (mCopy == null) return "";
+        if (mCopy.equals("")) return "";
 
-        if (szCopy.equalsIgnoreCase("dd"))
-        {
-            return szToolbox + " dd if=" + szSrcFile + " of=" + szDstFile;
-        }
-        else if (szCopy.equalsIgnoreCase("cp"))
-        {
-            return szToolbox + " cp " + szSrcFile + " " + szDstFile;
-        }
-        else return "";
+        if (mCopy.equalsIgnoreCase("dd")) {
+            return mToolbox + " dd if=" + mSrcFile + " of=" + mDstFile;
+        } else if (mCopy.equalsIgnoreCase("cp")) {
+            return mToolbox + " cp " + mSrcFile + " " + mDstFile;
+        } else return "";
     }
 
     // Create a signal in /data/
-    public static boolean CreateSignal(String szSignal, String szPreferenceName, Context ctx)
-    {
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return false;
+    public static boolean createSignal(String mSignal, String mPreferenceName, Context ctx) {
+        String mToolbox = getSavedToolbox(mPreferenceName, ctx);
+        if (mToolbox.equals("")) return false;
 
-        String szTouch  = szToolbox + " touch";
-        String szChmod  = szToolbox + " chmod";
-        String szSync   = szToolbox + " sync";
+        String mTouch = mToolbox + " touch";
+        String mChmod = mToolbox + " chmod";
+        String mSync = mToolbox + " sync";
 
-        String szDestFile = "/data/" + szSignal;
-        String szCommand[] = new String[3];
-        szCommand[0] = szTouch + " " + szDestFile;
-        szCommand[1] = szChmod + " 777 " + szDestFile;
-        szCommand[2] = szSync;
-        runRootCommand(szCommand, 100);
+        String mDestFile = "/data/" + mSignal;
+        String mCommand[] = new String[3];
+        mCommand[0] = mTouch + " " + mDestFile;
+        mCommand[1] = mChmod + " 777 " + mDestFile;
+        mCommand[2] = mSync;
+        runRootCommand(mCommand, 100);
 
-        return fileExists(szDestFile);
+        return fileExists(mDestFile);
     }
 
     // Delete a singal in /data/
-    public static boolean DeleteSignal(String szSignal, String szPreferenceName, Context ctx)
-    {
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return false;
+    public static boolean deleteSignal(String mSignal, String mPreferenceName, Context ctx) {
+        String mToolbox = getSavedToolbox(mPreferenceName, ctx);
+        if (mToolbox.equals("")) return false;
 
-        String szRemove = szToolbox + " rm";
-        String szSync   = szToolbox + " sync";
+        String mRemove = mToolbox + " rm";
+        String mSync = mToolbox + " sync";
 
-        String szDestFile = "/data/" + szSignal;
-        if (!fileExists(szDestFile)) return true;
+        String mDestFile = "/data/" + mSignal;
+        if (!fileExists(mDestFile)) return true;
 
-        String szCommand[] = new String[2];
-        szCommand[0] = szRemove + " " + szDestFile;
-        szCommand[1] = szSync;
-        runRootCommand(szCommand, 100);
+        String mCommand[] = new String[2];
+        mCommand[0] = mRemove + " " + mDestFile;
+        mCommand[1] = mSync;
+        runRootCommand(mCommand, 100);
 
         if (fileExists(szDestFile)) return false;
         return true;
     }
 
     // Check whether a signal is existed
-    public static boolean CheckSignal(String szSignal)
-    {
-        String szDestFile = "/data/" + szSignal;
-        return fileExists(szDestFile);
+    public static boolean checkSignal(String mSignal) {
+        String mDestFile = "/data/" + mSignal;
+        return fileExists(mDestFile);
     }
 
     // Modify audio_effects.conf
-    public static boolean ModifyFXConfig(String szInputFile, String szOutputFile)
-    {
-        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + szInputFile + ", output = " + szOutputFile);
+    public static boolean modifyFXConfig(String mInputFile, String mOutputFile) {
+        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + mInputFile + ", output = " + mOutputFile);
         try {
-            long lInputFileLength = GetFileLength(szInputFile);
+            long lInputFileLength = getFileLength(mInputFile);
 
-            FileInputStream fisInput = new FileInputStream(szInputFile);
-            FileOutputStream fosOutput = new FileOutputStream(szOutputFile);
+            FileInputStream fisInput = new FileInputStream(mInputFile);
+            FileOutputStream fosOutput = new FileOutputStream(mOutputFile);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "ASCII");
             OutputStreamWriter oswOutput = new OutputStreamWriter(fosOutput, "ASCII");
             BufferedReader brInput = new BufferedReader(isrInput);
             BufferedWriter bwOutput = new BufferedWriter(oswOutput);
 
             boolean bConfigModified = false;
-            brInput.mark((int)lInputFileLength);
-            do
-            {
-                String szLine = brInput.readLine();
-                if (szLine == null) break;
-                if (szLine.contains("41d3c987-e6cf-11e3-a88a-11aba5d5c51b"))
-                {
-                    Log.i("ViPER4Android_Utils", "Source file has been modified, line = " + szLine);
+            brInput.mark((int) lInputFileLength);
+            do {
+                String mLine = brInput.readLine();
+                if (mLine == null) break;
+                if (mLine.contains("41d3c987-e6cf-11e3-a88a-11aba5d5c51b")) {
+                    Log.i("ViPER4Android_Utils", "Source file has been modified, line = " + mLine);
                     bConfigModified = true;
                     break;
                 }
             } while (true);
 
-            if (bConfigModified)
-            {
+            if (bConfigModified) {
                 brInput.reset();
-                do
-                {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    bwOutput.write(szLine + "\n");
+                do {
+                    String mLine = brInput.readLine();
+                    if (mLine == null) break;
+                    bwOutput.write(mLine + "\n");
                 } while (true);
                 bwOutput.flush();
 
@@ -662,116 +600,23 @@ public class Utils {
                 oswOutput.close();
 
                 return true;
-            }
-            else
-            {
+            } else {
                 brInput.reset();
-                do
-                {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    if (szLine.trim().equals("libraries {"))
-                    {
-                        bwOutput.write(szLine + "\n");
+                do {
+                    String mLine = brInput.readLine();
+                    if (mLine == null) break;
+                    if (mLine.trim().equals("libraries {")) {
+                        bwOutput.write(mLine + "\n");
                         bwOutput.write("  v4a_fx {\n");
                         bwOutput.write("    path /system/lib/soundfx/libv4a_fx_ics.so\n");
                         bwOutput.write("  }\n");
-                    }
-                    else if (szLine.trim().equals("effects {"))
-                    {
-                        bwOutput.write(szLine + "\n");
+                    } else if (mLine.trim().equals("effects {")) {
+                        bwOutput.write(mLine + "\n");
                         bwOutput.write("  v4a_standard_fx {\n");
                         bwOutput.write("    library v4a_fx\n");
                         bwOutput.write("    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n");
                         bwOutput.write("  }\n");
-                    }
-                    else bwOutput.write(szLine + "\n");
-                } while (true);
-                bwOutput.flush();
-
-                brInput.close();
-                isrInput.close();
-                bwOutput.close();
-                oswOutput.close();
-
-                return true;
-            }
-        } catch (Exception e) {
-            Log.i("ViPER4Android_Utils", "Error: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // Modify audio_effects.conf
-    public static boolean ModifyXHiFiConfig(String szInputFile, String szOutputFile)
-    {
-        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + szInputFile + ", output = " + szOutputFile);
-        try
-        {
-            long lInputFileLength = GetFileLength(szInputFile);
-
-            FileInputStream fisInput = new FileInputStream(szInputFile);
-            FileOutputStream fosOutput = new FileOutputStream(szOutputFile);
-            InputStreamReader isrInput = new InputStreamReader(fisInput, "ASCII");
-            OutputStreamWriter oswOutput = new OutputStreamWriter(fosOutput, "ASCII");
-            BufferedReader brInput = new BufferedReader(isrInput);
-            BufferedWriter bwOutput = new BufferedWriter(oswOutput);
-
-            boolean bConfigModified = false;
-            brInput.mark((int)lInputFileLength);
-            do
-            {
-                String szLine = brInput.readLine();
-                if (szLine == null) break;
-                if (szLine.contains("d92c3a90-3e26-11e2-a25f-0800200c9a66"))
-                {
-                    Log.i("ViPER4Android_Utils", "Source file has been modified, line = " + szLine);
-                    bConfigModified = true;
-                    break;
-                }
-            } while (true);
-
-            if (bConfigModified)
-            {
-                brInput.reset();
-                do
-                {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    bwOutput.write(szLine + "\n");
-                } while (true);
-                bwOutput.flush();
-
-                brInput.close();
-                isrInput.close();
-                bwOutput.close();
-                oswOutput.close();
-
-                return true;
-            }
-            else
-            {
-                brInput.reset();
-                do
-                {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    if (szLine.trim().equals("libraries {"))
-                    {
-                        bwOutput.write(szLine + "\n");
-                        bwOutput.write("  v4a_xhifi {\n");
-                        bwOutput.write("    path /system/lib/soundfx/libv4a_xhifi_ics.so\n");
-                        bwOutput.write("  }\n");
-                    }
-                    else if (szLine.trim().equals("effects {"))
-                    {
-                        bwOutput.write(szLine + "\n");
-                        bwOutput.write("  v4a_standard_xhifi {\n");
-                        bwOutput.write("    library v4a_xhifi\n");
-                        bwOutput.write("    uuid d92c3a90-3e26-11e2-a25f-0800200c9a66\n");
-                        bwOutput.write("  }\n");
-                    }
-                    else bwOutput.write(szLine + "\n");
+                    } else bwOutput.write(mLine + "\n");
                 } while (true);
                 bwOutput.flush();
 
@@ -789,68 +634,49 @@ public class Utils {
     }
 
     // Uninstall ViPER4Android FX driver
-    public static void UninstallDrv_FX(String szPreferenceName, Context ctx)
-    {
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return;
+    public static void uninstallDrv_FX(String mPreferenceName, Context ctx) {
+        String mToolbox = getSavedToolbox(mPreferenceName, ctx);
+        if (mToolbox.equals("")) return;
 
-        String szMount  = szToolbox + " mount";
-        String szRemove = szToolbox + " rm";
-        String szSync   = szToolbox + " sync";
+        String mMount = mToolbox + " mount";
+        String mRemove = mToolbox + " rm";
+        String mSync = mToolbox + " sync";
 
-        String szCmdLine[] = new String[4];
-        szCmdLine[0] = szMount + " -o remount,rw /system /system";
-        szCmdLine[1] = szRemove + " /system/lib/soundfx/libv4a_fx_ics.so";
-        szCmdLine[2] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-        szCmdLine[3] = szMount + " -o remount,ro /system /system";
-        runRootCommand(szCmdLine, 200);
-    }
-
-    // Uninstall ViPER4Android XHiFi driver
-    public static void UninstallDrv_XHiFi(String szPreferenceName, Context ctx)
-    {
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return;
-
-        String szMount  = szToolbox + " mount";
-        String szRemove = szToolbox + " rm";
-        String szSync   = szToolbox + " sync";
-
-        String szCmdLine[] = new String[4];
-        szCmdLine[0] = szMount + " -o remount,rw /system /system";
-        szCmdLine[1] = szRemove + " /system/lib/soundfx/libv4a_xhifi_ics.so";
-        szCmdLine[2] = szSync;
-        szCmdLine[3] = szMount + " -o remount,ro /system /system";
-        runRootCommand(szCmdLine, 200);
+        String mCmdLine[] = new String[4];
+        mCmdLine[0] = mMount + " -o remount,rw /system /system";
+        mCmdLine[1] = mRemove + " /system/lib/soundfx/libv4a_fx_ics.so";
+        mCmdLine[2] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+        mCmdLine[3] = mMount + " -o remount,ro /system /system";
+        runRootCommand(mCmdLine, 200);
     }
 
     // Get application data path
-    private static String GetBasePath(Context ctx)
-    {
+    private static String getBasePath(Context ctx) {
         Context cont = ctx.getApplicationContext();
-        String szBasePath = cont.getFilesDir().toString();
+        String mBasePath = null;
+        if (cont != null) {
+            mBasePath = cont.getFilesDir().toString();
+        }
         if (!cont.getFilesDir().exists())
             if (!cont.getFilesDir().mkdir()) return "";
-        return szBasePath;
+        return mBasePath;
     }
 
     // Copy assets to local
-    private static boolean CopyAssetsToLocal(Context ctx, String szSourceName, String szDstName)
-    {
-        String szBasePath = GetBasePath(ctx);
-        if (szBasePath == "") return false;
-        szDstName = szBasePath + "/" + szDstName;
+    private static boolean copyAssetsToLocal(Context ctx, String mSourceName, String mDstName) {
+        String mBasePath = getBasePath(ctx);
+        if (mBasePath.equals("")) return false;
+        mDstName = mBasePath + "/" + mDstName;
 
         InputStream myInput = null;
         OutputStream myOutput = null;
-        String outFileName = szDstName;
-        try
-        {
-            File hfOutput = new File(szDstName);
+        String outFileName = mDstName;
+        try {
+            File hfOutput = new File(mDstName);
             if (hfOutput.exists()) hfOutput.delete();
 
             myOutput = new FileOutputStream(outFileName);
-            myInput = ctx.getAssets().open(szSourceName);
+            myInput = ctx.getAssets().open(mSourceName);
             byte[] tBuffer = new byte[1024];
             int nLength = 0;
             while ((nLength = myInput.read(tBuffer)) > 0)
@@ -868,275 +694,130 @@ public class Utils {
     }
 
     // Generate a command line to copy a file
-    public static String MakeCopyCmdLine(String szDD, String szCopy, String szSource, String szDest)
-    {
-        if (szCopy.equals(""))
-            return szDD + " if=" + szSource + " of=" + szDest;
-        else return szCopy + " " + szSource + " " + szDest;
+    public static String makeCopyCmdLine(String mDD, String mCopy, String mSource, String mDest) {
+        if (mCopy.equals(""))
+            return mDD + " if=" + mSource + " of=" + mDest;
+        else return mCopy + " " + mSource + " " + mDest;
     }
 
     // Install ViPER4Android FX driver
-    public static boolean InstallDrv_FX(String szPreferenceName, Context ctx, String szDriverName)
-    {
+    public static boolean installDrv_FX(String mPreferenceName, Context ctx, String mDriverName) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return false;
 
         // Copy driver assets to local
-        if (!CopyAssetsToLocal(ctx, szDriverName, "libv4a_fx_ics.so"))
+        if (!copyAssetsToLocal(ctx, mDriverName, "libv4a_fx_ics.so"))
             return false;
 
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return false;
+        String mToolbox = getSavedToolbox(mPreferenceName, ctx);
+        if (mToolbox.equals("")) return false;
 
         // Prepare commands
-        String szMount  = szToolbox + " mount";
-        String szRemove = szToolbox + " rm";
-        String szChmod  = szToolbox + " chmod";
-        String szSync   = szToolbox + " sync";
+        String mMount = mToolbox + " mount";
+        String mRemove = mToolbox + " rm";
+        String mChmod = mToolbox + " chmod";
+        String mSync = mToolbox + " sync";
 
         // Generate temp config file path, thanks to 'ste71m'
-        String szExternalStoragePathName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        if (Build.VERSION.SDK_INT >= 18)
-        {
-            if (szExternalStoragePathName.endsWith("/emulated/0"))
-                szExternalStoragePathName = szExternalStoragePathName.replace("/emulated/0", "/emulated/legacy");
+        String mExternalStoragePathName = Environment.getExternalStorageDirectory().getAbsolutePath();
+        if (Build.VERSION.SDK_INT >= 18) {
+            if (mExternalStoragePathName.endsWith("/emulated/0"))
+                mExternalStoragePathName = mExternalStoragePathName.replace("/emulated/0", "/emulated/legacy");
         }
-        String szSystemConf = szExternalStoragePathName + "/v4a_audio_system.conf";
-        String szVendorConf = szExternalStoragePathName + "/v4a_audio_vendor.conf";
+        String mSystemConf = mExternalStoragePathName + "/v4a_audio_system.conf";
+        String mVendorConf = mExternalStoragePathName + "/v4a_audio_vendor.conf";
 
         // Check vendor directory
-        boolean bExistsVendor = false;
+        boolean vendorExists = false;
         if (fileExists("/system/vendor/etc/audio_effects.conf"))
-            bExistsVendor = true;
+            vendorExists = true;
 
         // Copy configuration to external storage
-        if (bExistsVendor)
-        {
-            String szCopyConfToSD[] = new String[3];
-            szCopyConfToSD[0] = MakeCopyCmdLine(szPreferenceName, ctx, "/system/etc/audio_effects.conf", szSystemConf);
-            szCopyConfToSD[1] = MakeCopyCmdLine(szPreferenceName, ctx, "/system/vendor/etc/audio_effects.conf", szVendorConf);
-            szCopyConfToSD[2] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            runRootCommand(szCopyConfToSD, 100);
-        }
-        else
-        {
-            String szCopyConfToSD[] = new String[2];
-            szCopyConfToSD[0] = MakeCopyCmdLine(szPreferenceName, ctx, "/system/etc/audio_effects.conf", szSystemConf);
-            szCopyConfToSD[1] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            runRootCommand(szCopyConfToSD, 100);
+        if (vendorExists) {
+            String mCopyConfToSD[] = new String[3];
+            mCopyConfToSD[0] = makeCopyCmdLine(mPreferenceName, ctx, "/system/etc/audio_effects.conf", mSystemConf);
+            mCopyConfToSD[1] = makeCopyCmdLine(mPreferenceName, ctx, "/system/vendor/etc/audio_effects.conf", mVendorConf);
+            mCopyConfToSD[2] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            runRootCommand(mCopyConfToSD, 100);
+        } else {
+            String mCopyConfToSD[] = new String[2];
+            mCopyConfToSD[0] = makeCopyCmdLine(mPreferenceName, ctx, "/system/etc/audio_effects.conf", mSystemConf);
+            mCopyConfToSD[1] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            runRootCommand(mCopyConfToSD, 100);
         }
 
         // Modifing configuration
-        boolean bModifyResult = true;
-        bModifyResult &= ModifyFXConfig(szSystemConf, szSystemConf + ".out");
-        if (bExistsVendor)
-            bModifyResult &= ModifyFXConfig(szVendorConf, szVendorConf + ".out");
-        if (!bModifyResult)
-        {
-            if (bExistsVendor)
-            {
-                String szRemoveTmpFiles[] = new String[5];
-                szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-                szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-                szRemoveTmpFiles[2] = szRemove + " " + szVendorConf;
-                szRemoveTmpFiles[3] = szRemove + " " + szVendorConf + ".out";
-                szRemoveTmpFiles[4] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-                runRootCommand(szRemoveTmpFiles, 100);
-            }
-            else
-            {
-                String szRemoveTmpFiles[] = new String[3];
-                szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-                szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-                szRemoveTmpFiles[2] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-                runRootCommand(szRemoveTmpFiles, 100);
+        boolean modifyResult = true;
+        modifyResult &= modifyFXConfig(mSystemConf, mSystemConf + ".out");
+        if (vendorExists)
+            modifyResult &= modifyFXConfig(mVendorConf, mVendorConf + ".out");
+        if (!modifyResult) {
+            if (vendorExists) {
+                String mRemoveTmpFiles[] = new String[5];
+                mRemoveTmpFiles[0] = mRemove + " " + mSystemConf;
+                mRemoveTmpFiles[1] = mRemove + " " + mSystemConf + ".out";
+                mRemoveTmpFiles[2] = mRemove + " " + mVendorConf;
+                mRemoveTmpFiles[3] = mRemove + " " + mVendorConf + ".out";
+                mRemoveTmpFiles[4] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+                runRootCommand(mRemoveTmpFiles, 100);
+            } else {
+                String mRemoveTmpFiles[] = new String[3];
+                mRemoveTmpFiles[0] = mRemove + " " + mSystemConf;
+                mRemoveTmpFiles[1] = mRemove + " " + mSystemConf + ".out";
+                mRemoveTmpFiles[2] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+                runRootCommand(mRemoveTmpFiles, 100);
             }
             return false;
         }
 
         // Copy back to system
-        if (bExistsVendor)
-        {
-            String szBaseDrvPathName = GetBasePath(ctx) + "/" + "libv4a_fx_ics.so";
-            String szCopyToSystem[] = new String[10];
-            szCopyToSystem[0] = szMount + " -o remount,rw /system /system";
-            szCopyToSystem[1] = MakeCopyCmdLine(szPreferenceName, ctx, szSystemConf + ".out", "/system/etc/audio_effects.conf");
-            szCopyToSystem[2] = MakeCopyCmdLine(szPreferenceName, ctx, szVendorConf + ".out", "/system/vendor/etc/audio_effects.conf");
-            szCopyToSystem[3] = MakeCopyCmdLine(szPreferenceName, ctx, szBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so");
-            szCopyToSystem[4] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            szCopyToSystem[5] = szChmod + " 644 /system/etc/audio_effects.conf";
-            szCopyToSystem[6] = szChmod + " 644 /system/vendor/etc/audio_effects.conf";
-            szCopyToSystem[7] = szChmod + " 644 /system/lib/soundfx/libv4a_fx_ics.so";
-            szCopyToSystem[8] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            szCopyToSystem[9] = szMount + " -o remount,ro /system /system";
-            runRootCommand(szCopyToSystem, 200);
-        }
-        else
-        {
-            String szBaseDrvPathName = GetBasePath(ctx) + "/" + "libv4a_fx_ics.so";
-            String szCopyToSystem[] = new String[8];
-            szCopyToSystem[0] = szMount + " -o remount,rw /system /system";
-            szCopyToSystem[1] = MakeCopyCmdLine(szPreferenceName, ctx, szSystemConf + ".out", "/system/etc/audio_effects.conf");
-            szCopyToSystem[2] = MakeCopyCmdLine(szPreferenceName, ctx, szBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so");
-            szCopyToSystem[3] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            szCopyToSystem[4] = szChmod + " 644 /system/etc/audio_effects.conf";
-            szCopyToSystem[5] = szChmod + " 644 /system/lib/soundfx/libv4a_fx_ics.so";
-            szCopyToSystem[6] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            szCopyToSystem[7] = szMount + " -o remount,ro /system /system";
-            runRootCommand(szCopyToSystem, 200);
+        if (vendorExists) {
+            String mBaseDrvPathName = getBasePath(ctx) + "/" + "libv4a_fx_ics.so";
+            String mCopyToSystem[] = new String[10];
+            mCopyToSystem[0] = mMount + " -o remount,rw /system /system";
+            mCopyToSystem[1] = makeCopyCmdLine(mPreferenceName, ctx, mSystemConf + ".out", "/system/etc/audio_effects.conf");
+            mCopyToSystem[2] = makeCopyCmdLine(mPreferenceName, ctx, mVendorConf + ".out", "/system/vendor/etc/audio_effects.conf");
+            mCopyToSystem[3] = makeCopyCmdLine(mPreferenceName, ctx, mBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so");
+            mCopyToSystem[4] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            mCopyToSystem[5] = mChmod + " 644 /system/etc/audio_effects.conf";
+            mCopyToSystem[6] = mChmod + " 644 /system/vendor/etc/audio_effects.conf";
+            mCopyToSystem[7] = mChmod + " 644 /system/lib/soundfx/libv4a_fx_ics.so";
+            mCopyToSystem[8] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            mCopyToSystem[9] = mMount + " -o remount,ro /system /system";
+            runRootCommand(mCopyToSystem, 200);
+        } else {
+            String mBaseDrvPathName = getBasePath(ctx) + "/" + "libv4a_fx_ics.so";
+            String mCopyToSystem[] = new String[8];
+            mCopyToSystem[0] = mMount + " -o remount,rw /system /system";
+            mCopyToSystem[1] = makeCopyCmdLine(mPreferenceName, ctx, mSystemConf + ".out", "/system/etc/audio_effects.conf");
+            mCopyToSystem[2] = makeCopyCmdLine(mPreferenceName, ctx, mBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so");
+            mCopyToSystem[3] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            mCopyToSystem[4] = mChmod + " 644 /system/etc/audio_effects.conf";
+            mCopyToSystem[5] = mChmod + " 644 /system/lib/soundfx/libv4a_fx_ics.so";
+            mCopyToSystem[6] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            mCopyToSystem[7] = mMount + " -o remount,ro /system /system";
+            runRootCommand(mCopyToSystem, 200);
         }
 
         // Delete temp file
-        if (bExistsVendor)
-        {
-            String szRemoveTmpFiles[] = new String[5];
-            szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-            szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-            szRemoveTmpFiles[2] = szRemove + " " + szVendorConf;
-            szRemoveTmpFiles[3] = szRemove + " " + szVendorConf + ".out";
-            szRemoveTmpFiles[4] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            runRootCommand(szRemoveTmpFiles, 100);
-        }
-        else
-        {
-            String szRemoveTmpFiles[] = new String[3];
-            szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-            szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-            szRemoveTmpFiles[2] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-            runRootCommand(szRemoveTmpFiles, 100);
+        if (vendorExists) {
+            String mRemoveTmpFiles[] = new String[5];
+            mRemoveTmpFiles[0] = mRemove + " " + mSystemConf;
+            mRemoveTmpFiles[1] = mRemove + " " + mSystemConf + ".out";
+            mRemoveTmpFiles[2] = mRemove + " " + mVendorConf;
+            mRemoveTmpFiles[3] = mRemove + " " + mVendorConf + ".out";
+            mRemoveTmpFiles[4] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            runRootCommand(mRemoveTmpFiles, 100);
+        } else {
+            String mRemoveTmpFiles[] = new String[3];
+            mRemoveTmpFiles[0] = mRemove + " " + mSystemConf;
+            mRemoveTmpFiles[1] = mRemove + " " + mSystemConf + ".out";
+            mRemoveTmpFiles[2] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+            runRootCommand(mRemoveTmpFiles, 100);
         }
 
         // Check installation
         if (!fileExists("/system/lib/soundfx/libv4a_fx_ics.so"))
-            return false;
-        return true;
-    }
-
-    // Install ViPER4Android XHiFi driver
-    public static boolean InstallDrv_XHiFi(String szPreferenceName, Context ctx, String szDriverName)
-    {
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-            return false;
-
-        // Copy driver assets to local
-        if (!CopyAssetsToLocal(ctx, szDriverName, "libv4a_xhifi_ics.so"))
-            return false;
-
-        String szToolbox = GetSavedToolbox(szPreferenceName, ctx);
-        if (szToolbox.equals("")) return false;
-
-        // Prepare commands
-        String szMount  = szToolbox + " mount";
-        String szRemove = szToolbox + " rm";
-        String szChmod  = szToolbox + " chmod";
-        String szSync   = szToolbox + " sync";
-
-        String szSystemConf = Environment.getExternalStorageDirectory() + "/v4a_audio_system.conf";
-        String szVendorConf = Environment.getExternalStorageDirectory() + "/v4a_audio_vendor.conf";
-
-        boolean bExistsVendor = false;
-        if (fileExists("/system/vendor/etc/audio_effects.conf"))
-            bExistsVendor = true;
-
-        // Copy configuration to external storage
-        if (bExistsVendor)
-        {
-            String szCopyConfToSD[] = new String[3];
-            szCopyConfToSD[0] = MakeCopyCmdLine(szPreferenceName, ctx, "/system/etc/audio_effects.conf", szSystemConf);
-            szCopyConfToSD[1] = MakeCopyCmdLine(szPreferenceName, ctx, "/system/vendor/etc/audio_effects.conf", szVendorConf);
-            szCopyConfToSD[2] = szSync;
-            runRootCommand(szCopyConfToSD, 100);
-        }
-        else
-        {
-            String szCopyConfToSD[] = new String[2];
-            szCopyConfToSD[0] = MakeCopyCmdLine(szPreferenceName, ctx, "/system/etc/audio_effects.conf", szSystemConf);
-            szCopyConfToSD[1] = szSync;
-            runRootCommand(szCopyConfToSD, 100);
-        }
-
-        // Modifing configuration
-        boolean bModifyResult = true;
-        bModifyResult &= ModifyXHiFiConfig(szSystemConf, szSystemConf + ".out");
-        if (bExistsVendor)
-            bModifyResult &= ModifyXHiFiConfig(szVendorConf, szVendorConf + ".out");
-        if (!bModifyResult)
-        {
-            if (bExistsVendor)
-            {
-                String szRemoveTmpFiles[] = new String[5];
-                szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-                szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-                szRemoveTmpFiles[2] = szRemove + " " + szVendorConf;
-                szRemoveTmpFiles[3] = szRemove + " " + szVendorConf + ".out";
-                szRemoveTmpFiles[4] = szSync;
-                runRootCommand(szRemoveTmpFiles, 100);
-            }
-            else
-            {
-                String szRemoveTmpFiles[] = new String[3];
-                szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-                szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-                szRemoveTmpFiles[2] = szSync;
-                runRootCommand(szRemoveTmpFiles, 100);
-            }
-            return false;
-        }
-
-        // Copy back to system
-        if (bExistsVendor)
-        {
-            String szBaseDrvPathName = GetBasePath(ctx) + "/" + "libv4a_xhifi_ics.so";
-            String szCopyToSystem[] = new String[10];
-            szCopyToSystem[0] = szMount + " -o remount,rw /system /system";
-            szCopyToSystem[1] = MakeCopyCmdLine(szPreferenceName, ctx, szSystemConf + ".out", "/system/etc/audio_effects.conf");
-            szCopyToSystem[2] = MakeCopyCmdLine(szPreferenceName, ctx, szVendorConf + ".out", "/system/vendor/etc/audio_effects.conf");
-            szCopyToSystem[3] = MakeCopyCmdLine(szPreferenceName, ctx, szBaseDrvPathName, "/system/lib/soundfx/libv4a_xhifi_ics.so");
-            szCopyToSystem[4] = szSync;
-            szCopyToSystem[5] = szChmod + " 644 /system/etc/audio_effects.conf";
-            szCopyToSystem[6] = szChmod + " 644 /system/vendor/etc/audio_effects.conf";
-            szCopyToSystem[7] = szChmod + " 644 /system/lib/soundfx/libv4a_xhifi_ics.so";
-            szCopyToSystem[8] = szSync;
-            szCopyToSystem[9] = szMount + " -o remount,ro /system /system";
-            runRootCommand(szCopyToSystem, 200);
-        }
-        else
-        {
-            String szBaseDrvPathName = GetBasePath(ctx) + "/" + "libv4a_xhifi_ics.so";
-            String szCopyToSystem[] = new String[8];
-            szCopyToSystem[0] = szMount + " -o remount,rw /system /system";
-            szCopyToSystem[1] = MakeCopyCmdLine(szPreferenceName, ctx, szSystemConf + ".out", "/system/etc/audio_effects.conf");
-            szCopyToSystem[2] = MakeCopyCmdLine(szPreferenceName, ctx, szBaseDrvPathName, "/system/lib/soundfx/libv4a_xhifi_ics.so");
-            szCopyToSystem[3] = szSync;
-            szCopyToSystem[4] = szChmod + " 644 /system/etc/audio_effects.conf";
-            szCopyToSystem[5] = szChmod + " 644 /system/lib/soundfx/libv4a_xhifi_ics.so";
-            szCopyToSystem[6] = szSync;
-            szCopyToSystem[7] = szMount + " -o remount,ro /system /system";
-            runRootCommand(szCopyToSystem, 200);
-        }
-
-        // Delete temp file
-        if (bExistsVendor)
-        {
-            String szRemoveTmpFiles[] = new String[5];
-            szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-            szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-            szRemoveTmpFiles[2] = szRemove + " " + szVendorConf;
-            szRemoveTmpFiles[3] = szRemove + " " + szVendorConf + ".out";
-            szRemoveTmpFiles[4] = szSync;
-            runRootCommand(szRemoveTmpFiles, 100);
-        }
-        else
-        {
-            String szRemoveTmpFiles[] = new String[3];
-            szRemoveTmpFiles[0] = szRemove + " " + szSystemConf;
-            szRemoveTmpFiles[1] = szRemove + " " + szSystemConf + ".out";
-            szRemoveTmpFiles[2] = szSync;
-            runRootCommand(szRemoveTmpFiles, 100);
-        }
-
-        // Check installation
-        if (!fileExists("/system/lib/soundfx/libv4a_xhifi_ics.so"))
             return false;
         return true;
     }

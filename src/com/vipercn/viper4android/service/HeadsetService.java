@@ -136,7 +136,8 @@ public class HeadsetService extends Service {
         public void onReceive(Context context, Intent intent) {
             Log.i("ViPER4Android", "mAudioSessionReceiver::onReceive()");
 
-            SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
+            SharedPreferences prefSettings = getSharedPreferences(
+                    ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
             String szCompatibleMode = prefSettings.getString("viper4android.settings.compatiblemode", "global");
             boolean mFXInLocalMode;
             mFXInLocalMode = !szCompatibleMode.equals("global");
@@ -529,7 +530,8 @@ public class HeadsetService extends Service {
 
     protected void updateSystem() {
         String mode = getAudioOutputRouting();
-        SharedPreferences preferences = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + "." + mode, 0);
+        SharedPreferences preferences = getSharedPreferences(
+                ViPER4Android.SHARED_PREFERENCES_BASENAME + "." + mode, 0);
         Log.i("ViPER4Android", "Begin system update(" + mode + ")");
 
         int nFXType = V4A_FX_TYPE_NONE;

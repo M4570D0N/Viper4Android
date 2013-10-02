@@ -71,48 +71,42 @@ public final class MainDSPScreen extends PreferenceFragment {
                 }
             }
 
-            if ("PREF_KEY_KERNEL_CONVOLVER".equals(key))
-            {
-                if (mParentContext != null)
-                {
-                    String szSrcIRFile = prefs.getString(key, "");
-                    if (szSrcIRFile != "")
-                    {
-                        szSrcIRFile = "\"" + szSrcIRFile + "\"";
+            if ("PREF_KEY_KERNEL_CONVOLVER".equals(key)) {
+                if (mParentContext != null) {
+                    String mSrcIRFile = prefs.getString(key, "");
+                    if (mSrcIRFile != "") {
+                        mSrcIRFile = "\"" + mSrcIRFile + "\"";
 
-                        Log.i("ViPER4Android", "IR sample = " + szSrcIRFile);
+                        Log.i("ViPER4Android", "IR sample = " + mSrcIRFile);
                         int iAndroidVersion = Build.VERSION.SDK_INT;
                         Log.i("ViPER4Android", "System version: " + iAndroidVersion);
 
-                        String szDstFile = "/data/v4a_conv.irs";
-                        Log.i("ViPER4Android", "Copy ir sample to " + szDstFile);
+                        String mDstFile = "/data/v4a_conv.irs";
+                        Log.i("ViPER4Android", "Copy ir sample to " + mDstFile);
 
-                        String szToolbox = Utils.GetSavedToolbox(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", mParentContext);
-                        if (!szToolbox.equals(""))
+                        String mToolbox = Utils.getSavedToolbox(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", mParentContext);
+                        if (!mToolbox.equals(""))
                         {
-                            String szCopy   = Utils.MakeCopyCmdLine(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", mParentContext, szSrcIRFile, szDstFile);
-                            String szChmod  = szToolbox + " chmod";
-                            String szSync   = szToolbox + " sync";
-                            String szCmdLine[] = new String[3];
-                            szCmdLine[0] = szCopy;
-                            szCmdLine[1] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-                            szCmdLine[2] = szChmod + " 777 " + szDstFile;
-                            Utils.runRootCommand(szCmdLine, 100);
+                            String mCopy   = Utils.makeCopyCmdLine(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", mParentContext, mSrcIRFile, mDstFile);
+                            String mChmod  = mToolbox + " chmod";
+                            String mSync   = mToolbox + " sync";
+                            String mCmdLine[] = new String[3];
+                            mCmdLine[0] = mCopy;
+                            mCmdLine[1] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+                            mCmdLine[2] = mChmod + " 777 " + mDstFile;
+                            Utils.runRootCommand(mCmdLine, 100);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         Log.i("ViPER4Android", "Remove /data/v4a_conv.irs");
-                        String szDstFile = "/data/v4a_conv.irs";
-                        String szToolbox = Utils.GetSavedToolbox(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", mParentContext);
-                        if (!szToolbox.equals(""))
-                        {
-                            String szRemove = szToolbox + " rm";
-                            String szSync   = szToolbox + " sync";
-                            String szCmdLine[] = new String[2];
-                            szCmdLine[0] = szRemove + " " + szDstFile;
-                            szCmdLine[1] = szSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
-                            Utils.runRootCommand(szCmdLine, 100);
+                        String mDstFile = "/data/v4a_conv.irs";
+                        String mToolbox = Utils.getSavedToolbox(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", mParentContext);
+                        if (!mToolbox.equals("")) {
+                            String mRemove = mToolbox + " rm";
+                            String mSync   = mToolbox + " sync";
+                            String mCmdLine[] = new String[2];
+                            mCmdLine[0] = mRemove + " " + mDstFile;
+                            mCmdLine[1] = mSync;  /* FIXME: do i need a 'sync' to flush io buffer ? */
+                            Utils.runRootCommand(mCmdLine, 100);
                         }
                     }
                 }
@@ -133,9 +127,7 @@ public final class MainDSPScreen extends PreferenceFragment {
         try {
             int xmlId = R.xml.class.getField(config + "_preferences").getInt(null);
             addPreferencesFromResource(xmlId);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

@@ -72,8 +72,8 @@ public final class ViPER4Android extends FragmentActivity {
         return szBasePath;
     }
 
-    private boolean IsFileExisted(String szFilePath) {
-        return Utils.fileExists(szFilePath);
+    private boolean IsFileExisted(String mFilePath) {
+        return Utils.fileExists(mFilePath);
     }
 
     private boolean CheckFirstRun() {
@@ -280,7 +280,7 @@ public final class ViPER4Android extends FragmentActivity {
                                             if (Build.VERSION.SDK_INT >= 18)
                                                 V4ALIB = V4ALIB + ".jb";
                                             else V4ALIB = V4ALIB + ".ics";
-                                            if (Utils.InstallDrv_FX(V4ASettingsPreference, mActivityContext, V4ALIB)) {
+                                            if (Utils.installDrv_FX(V4ASettingsPreference, mActivityContext, V4ALIB)) {
                                                 AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                                                 mResult.setTitle("ViPER4Android");
                                                 mResult.setMessage(getResources().getString(R.string.text_drvinst_ok));
@@ -324,7 +324,7 @@ public final class ViPER4Android extends FragmentActivity {
         mKillAllThread = false;
 
         Log.i("ViPER4Android", "Acquire root permission ...");
-        if (!Utils.AcquireRoot()) {
+        if (!Utils.acquireRoot()) {
             AlertDialog.Builder mResult = new AlertDialog.Builder(this);
             mResult.setTitle("ViPER4Android");
             mResult.setMessage(getResources().getString(R.string.text_su_missing));
@@ -341,8 +341,8 @@ public final class ViPER4Android extends FragmentActivity {
         String szFunctionalToolbox = prefSettings.getString("viper4android.settings.toolbox", "none");
         if (szFunctionalToolbox.equals("none") || szFunctionalToolbox.equals("")) {
             Log.i("ViPER4Android", "Proceed toolbox ...");
-            boolean bToolboxFunctional = Utils.PerformToolboxTest("toolbox", false);
-            String szFunctionalToolboxPathname = Utils.GetToolbox("toolbox");
+            boolean bToolboxFunctional = Utils.performToolboxTest("toolbox", false);
+            String szFunctionalToolboxPathname = Utils.getToolbox("toolbox");
             if (szFunctionalToolboxPathname == null) bToolboxFunctional = false;
             else {
                 if (szFunctionalToolboxPathname.equals(""))
@@ -355,8 +355,8 @@ public final class ViPER4Android extends FragmentActivity {
                 e.putString("viper4android.settings.copycmd", "dd");
                 e.commit();
             } else {
-                bToolboxFunctional = Utils.PerformToolboxTest("busybox", true);
-                szFunctionalToolboxPathname = Utils.GetToolbox("busybox");
+                bToolboxFunctional = Utils.performToolboxTest("busybox", true);
+                szFunctionalToolboxPathname = Utils.getToolbox("busybox");
                 if (szFunctionalToolboxPathname == null) bToolboxFunctional = false;
                 else {
                     if (szFunctionalToolboxPathname.equals(""))
@@ -528,7 +528,7 @@ public final class ViPER4Android extends FragmentActivity {
         else Log.i("ViPER4Android", "show_notify = false, menu unchecked.");
         Log.i("ViPER4Android", "lock_effect = " + szLockedEffect);
 
-        if (Utils.CheckSignal("v4a_safemode.sig")) {
+        if (Utils.checkSignal("v4a_safemode.sig")) {
             MenuItem drvMode = menu.findItem(R.id.modeswitch);
             String szModeTitle = getResources().getString(R.string.text_closesafemode);
             drvMode.setTitle(szModeTitle);
@@ -715,7 +715,7 @@ public final class ViPER4Android extends FragmentActivity {
                 if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
                     return true;
                 String szProfilePath = Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/";
-                mProfileList = Utils.GetProfileList(szProfilePath);
+                mProfileList = Utils.getProfileList(mProfilePath);
                 if (mProfileList.size() <= 0) return true;
 
                 String arrayProfileList[] = new String[mProfileList.size()];
@@ -742,7 +742,7 @@ public final class ViPER4Android extends FragmentActivity {
                                     arrayProfileList[nPrfIdx] = mProfileList.get(nPrfIdx);
 
                                 String szProfileName = arrayProfileList[which];
-                                if (Utils.LoadProfile(szProfileName, szProfilePath, szPreferenceName[nIndex], mActivityContext)) {
+                                if (Utils.loadProfile(mProfileName, mProfilePath, mPreferenceName[nIndex], mActivityContext)) {
                                     AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                                     mResult.setTitle("ViPER4Android");
                                     mResult.setMessage(getResources().getString(R.string.text_profileload_ok));
@@ -821,7 +821,7 @@ public final class ViPER4Android extends FragmentActivity {
                                     }
 
                                     szSaveProfileNameGlobal = szProfileName;
-                                    if (Utils.CheckProfileExists(szProfileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/")) {
+                                    if (Utils.checkProfileExists(mProfileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/")) {
                                         AlertDialog.Builder mConfirm = new AlertDialog.Builder(mActivityContext);
                                         mConfirm.setTitle("ViPER4Android");
                                         mConfirm.setMessage(getResources().getString(R.string.text_profilesaved_overwrite));
@@ -836,7 +836,7 @@ public final class ViPER4Android extends FragmentActivity {
                                                 int nIndex = mCurrentPage;
                                                 if (nIndex < 0) nIndex = 0;
                                                 if (nIndex > 2) nIndex = 2;
-                                                Utils.SaveProfile(szSaveProfileNameGlobal, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", szPreferenceName[nIndex], mActivityContext);
+                                                Utils.saveProfile(mSaveProfileNameGlobal, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", mPreferenceName[nIndex], mActivityContext);
                                                 Toast.makeText(mActivityContext, mActivityContext.getResources().getString(R.string.text_profilesaved_ok), Toast.LENGTH_LONG).show();
                                             }
                                         });
@@ -847,14 +847,14 @@ public final class ViPER4Android extends FragmentActivity {
                                     }
 
                                     Log.i("ViPER4Android", "Save effect profile, current page = " + mCurrentPage);
-                                    String szPreferenceName[] = new String[3];
-                                    szPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
-                                    szPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
-                                    szPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";
+                                    String mPreferenceName[] = new String[3];
+                                    mPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
+                                    mPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
+                                    mPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";
                                     int nIndex = mCurrentPage;
                                     if (nIndex < 0) nIndex = 0;
                                     if (nIndex > 2) nIndex = 2;
-                                    Utils.SaveProfile(szProfileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", szPreferenceName[nIndex], mActivityContext);
+                                    Utils.saveProfile(mProfileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", mPreferenceName[nIndex], mActivityContext);
                                     Toast.makeText(mActivityContext, getResources().getString(R.string.text_profilesaved_ok), Toast.LENGTH_LONG).show();
                                 }
                                 dismiss();
@@ -887,7 +887,7 @@ public final class ViPER4Android extends FragmentActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             // Uninstall driver
-                            Utils.UninstallDrv_FX(V4ASettingsPreference, mActivityContext);
+                            Utils.uninstallDrv_FX(V4ASettingsPreference, mActivityContext);
 
                             AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                             mResult.setTitle("ViPER4Android");
@@ -909,7 +909,7 @@ public final class ViPER4Android extends FragmentActivity {
                                     String V4ALIB = szV4A_CPU[which];
                                     if (Build.VERSION.SDK_INT >= 18) V4ALIB = V4ALIB + ".jb";
                                     else V4ALIB = V4ALIB + ".ics";
-                                    if (Utils.InstallDrv_FX(V4ASettingsPreference, mActivityContext, V4ALIB)) {
+                                    if (Utils.installDrv_FX(V4ASettingsPreference, mActivityContext, V4ALIB)) {
                                         AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                                         mResult.setTitle("ViPER4Android");
                                         mResult.setMessage(getResources().getString(R.string.text_drvinst_ok));
@@ -938,7 +938,7 @@ public final class ViPER4Android extends FragmentActivity {
             case R.id.modeswitch: {
                 String szMenuText = item.getTitle().toString();
                 if (getResources().getString(R.string.text_opensafemode).equals(szMenuText)) {
-                    if (Utils.CreateSignal("v4a_safemode.sig", V4ASettingsPreference, mActivityContext)) {
+                    if (Utils.createSignal("v4a_safemode.sig", V4ASettingsPreference, mActivityContext)) {
                         AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                         mResult.setTitle("ViPER4Android");
                         mResult.setMessage(getResources().getString(R.string.text_modeswitchok));
@@ -952,7 +952,7 @@ public final class ViPER4Android extends FragmentActivity {
                         mResult.show();
                     }
                 } else if (getResources().getString(R.string.text_closesafemode).equals(szMenuText)) {
-                    if (Utils.DeleteSignal("v4a_safemode.sig", V4ASettingsPreference, mActivityContext)) {
+                    if (Utils.deleteSignal("v4a_safemode.sig", V4ASettingsPreference, mActivityContext)) {
                         AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                         mResult.setTitle("ViPER4Android");
                         mResult.setMessage(getResources().getString(R.string.text_modeswitchok));
