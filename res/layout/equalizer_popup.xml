@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="300dp">
 
-    <com.vipercn.viper4android.preference.EqualizerSurface
+    <com.vipercn.viper4android_v2.preference.EqualizerSurface
         android:id="@+id/FrequencyResponse"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

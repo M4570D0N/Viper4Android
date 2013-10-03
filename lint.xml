@@ -5,4 +5,8 @@
 
     <issue id="LintError" severity="ignore" />
 
+<<<<<<< HEAD
 </lint>
+=======
+</lint>
+>>>>>>> upstream
