@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
 public class ViPER4AndroidService extends Service {
+
     private class ResourceMutex {
         private Semaphore mSignal = new Semaphore(1);
 
@@ -61,11 +62,11 @@ public class ViPER4AndroidService extends Service {
                 UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
         public AudioEffect mInstance = null;
 
-        public V4ADSPModule(UUID uModuleID, int nAudioSession) {
+        public V4ADSPModule(UUID uModuleID, int mAudioSession) {
             try {
                 mInstance = AudioEffect.class.getConstructor(
                         UUID.class, UUID.class, Integer.TYPE, Integer.TYPE).newInstance(
-                        EFFECT_TYPE_NULL, uModuleID, 0, nAudioSession);
+                        EFFECT_TYPE_NULL, uModuleID, 0, mAudioSession);
                 Log.i("ViPER4Android", "Creating viper4android module, " + uModuleID.toString());
             } catch (Exception e) {
                 Log.i("ViPER4Android", e.getMessage());

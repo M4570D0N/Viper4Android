@@ -1,14 +1,11 @@
 package com.vipercn.viper4android_v2.activity;
 
 import android.app.ActionBar;
-import android.app.ActionBar.Tab;
-import android.app.ActionBar.TabListener;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +16,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -325,51 +324,15 @@ public final class ViPER4Android extends FragmentActivity {
         pagerAdapter = new MyAdapter(getFragmentManager(), this);
         actionBar = getActionBar();
         viewPager = (ViewPager) findViewById(R.id.viewPager);
+        pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
 
         // Setup action bar
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(true);
-        for (String entry : pagerAdapter.getEntries()) {
-            ActionBar.Tab tab = actionBar.newTab();
-            tab.setTabListener(new TabListener() {
-                @Override
-                public void onTabReselected(Tab tab, FragmentTransaction ft) {
-                }
-
-                @Override
-                public void onTabSelected(Tab tab, FragmentTransaction ft) {
-                    viewPager.setCurrentItem(tab.getPosition());
-                }
-
-                @Override
-                public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-                }
-            });
-            try {
-                int stringId = R.string.class.getField(entry + "_title").getInt(null);
-                tab.setText(getString(stringId));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            actionBar.addTab(tab);
-        }
 
         // Setup effect setting page
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageSelected(int idx) {
-                actionBar.selectTab(actionBar.getTabAt(idx));
-            }
-
-            @Override
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int arg0) {
-            }
-        });
+        pagerTabStrip.setDrawFullUnderline(true);
+        pagerTabStrip.setTabIndicatorColor(getResources().getColor(android.R.color.holo_blue_light));
 
         // Show changelog
         if (checkFirstRun()) {
@@ -456,7 +419,6 @@ public final class ViPER4Android extends FragmentActivity {
                 for (int i = 0; i < entries.length; i++) {
                     if (routing.equals(entries[i])) {
                         viewPager.setCurrentItem(i);
-                        actionBar.selectTab(actionBar.getTabAt(i));
                         break;
                     }
                 }
@@ -1008,17 +970,33 @@ public final class ViPER4Android extends FragmentActivity {
 }
 
 class MyAdapter extends FragmentPagerAdapter {
+    private final ArrayList<String> tmpEntries;
+    private final ArrayList<String> tmpTitles;
     private final String[] entries;
+    private final String[] titles;
 
     public MyAdapter(FragmentManager fm, Context context) {
         super(fm);
 
+        Resources res = context.getResources();
         ArrayList<String> tmpEntries = new ArrayList<String>();
         tmpEntries.add("headset");
         tmpEntries.add("speaker");
         tmpEntries.add("bluetooth");
+        tmpEntries.add("usb");
+
+        tmpTitles = new ArrayList<String>();
+        tmpTitles.add(res.getString(R.string.headset_title).toUpperCase());
+        tmpTitles.add(res.getString(R.string.speaker_title).toUpperCase());
+        tmpTitles.add(res.getString(R.string.bluetooth_title).toUpperCase());
+        tmpTitles.add(res.getString(R.string.usb_title).toUpperCase());
 
         entries = (String[]) tmpEntries.toArray(new String[tmpEntries.size()]);
+        titles = (String[]) tmpTitles.toArray(new String[tmpTitles.size()]);
+        }
+    @Override
+    public CharSequence getPageTitle(int position) {
+    return titles[position]
     }
 
     public String[] getEntries() {

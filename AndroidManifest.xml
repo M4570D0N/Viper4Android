@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
-          package="com.vipercn.viper4android_v2"
-          android:versionCode="2301"
-          android:versionName="2.3.0.1"
-          android:installLocation="auto">
+        package="com.vipercn.viper4android_v2" android:versionCode="2301"
+        android:versionName="2.3.0.1" android:installLocation="auto">
 
     <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="18"/>
+        android:minSdkVersion="16" android:targetSdkVersion="18"/>
 
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"></uses-permission>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
@@ -18,16 +14,9 @@
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER"></uses-permission>
 
 
-    <application
-        android:icon="@drawable/icon"
-        android:label="@string/app_name"
-        android:persistent="true"
-        android:allowBackup="true">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:allowBackup="true">
         <activity
-            android:label="@string/app_name"
-            android:name=".activity.ViPER4Android"
-            android:configChanges="orientation"
-            android:screenOrientation="nosensor">
+            android:label="@string/app_name" android:name=".activity.ViPER4Android" android:theme="@style/AppTheme" android:configChanges="orientation" android:screenOrientation="nosensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -38,10 +27,7 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:exported="false"
-            android:enabled="true"
-            android:name=".service.ViPER4AndroidService">
+        <service android:exported="false" android:enabled="true" android:name=".service.ViPER4AndroidService">
         </service>
 
         <receiver android:name=".receiver.BootCompletedReceiver">
