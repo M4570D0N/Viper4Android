@@ -160,7 +160,7 @@ public final class ViPER4Android extends FragmentActivity {
 
         if (mAudioServiceInstance != null) {
             try {
-                if (!mAudioServiceInstance.GetServicePrepared()) {
+                if (!mAudioServiceInstance.getServicePrepared()) {
                     Log.i("ViPER4Android", "Service not prepared");
                     return false;
                 }
@@ -177,7 +177,7 @@ public final class ViPER4Android extends FragmentActivity {
             try {
                 packageInfo = packageMgr.getPackageInfo(getPackageName(), 0);
                 mApkVer = packageInfo.versionName;
-                String mDrvVer = mAudioServiceInstance.GetDriverVersion();
+                String mDrvVer = mAudioServiceInstance.getDriverVersion();
 
                 Log.i("ViPER4Android", "Proceeding drvier check");
                 if (!mApkVer.equalsIgnoreCase(mDrvVer)) {
@@ -248,6 +248,7 @@ public final class ViPER4Android extends FragmentActivity {
     protected MyAdapter pagerAdapter;
     protected ActionBar actionBar;
     protected ViewPager viewPager;
+    protected PagerTabStrip pagerTabStrip;
 
     private ArrayList<String> mProfileList = new ArrayList<String>();
     private boolean mKillAllThread = false;
@@ -486,7 +487,7 @@ public final class ViPER4Android extends FragmentActivity {
             String menuTitle = getResources().getString(R.string.text_install);
             drvInstItem.setTitle(menuTitle);
         } else {
-            boolean bDriverIsReady = mAudioServiceInstance.GetDriverIsReady();
+            boolean bDriverIsReady = mAudioServiceInstance.getDriverIsReady();
             if (bDriverIsReady) {
                 MenuItem drvInstItem = menu.findItem(R.id.drvinst);
                 String menuTitle = getResources().getString(R.string.text_uninstall);
@@ -563,17 +564,17 @@ public final class ViPER4Android extends FragmentActivity {
                             tv.setText(R.string.text_service_error);
                             return v;
                         } else {
-                            mAudioServiceInstance.StartStatusUpdating();
+                            mAudioServiceInstance.startStatusUpdating();
                             try {
                                 Thread.sleep(500);
                             } catch (InterruptedException e) {
-                                mAudioServiceInstance.StopStatusUpdating();
+                                mAudioServiceInstance.stopStatusUpdating();
                                 View view = inflater.inflate(R.layout.drvstatus, null);
                                 TextView textView = (TextView) view.findViewById(R.id.drv_status);
                                 textView.setText(R.string.text_service_error);
                                 return view;
                             }
-                            mAudioServiceInstance.StopStatusUpdating();
+                            mAudioServiceInstance.stopStatusUpdating();
 
                             String mDrvNEONEnabled = getResources().getString(R.string.text_yes);
                             if (!mAudioServiceInstance.getDriverNEON())
@@ -597,7 +598,7 @@ public final class ViPER4Android extends FragmentActivity {
                             String mDrvStatus = "";
                             mDrvStatus = getResources().getString(R.string.text_drv_status_view);
                             mDrvStatus = String.format(mDrvStatus,
-                                    mAudioServiceInstance.GetDriverVersion(), mDrvNEONEnabled,
+                                    mAudioServiceInstance.getDriverVersion(), mDrvNEONEnabled,
                                     mDrvEnabled, mDrvUsable, mDrvProcess,
                                     mDrvEffType,
                                     mAudioServiceInstance.getDriverSamplingRate(),
@@ -979,7 +980,7 @@ class MyAdapter extends FragmentPagerAdapter {
         super(fm);
 
         Resources res = context.getResources();
-        ArrayList<String> tmpEntries = new ArrayList<String>();
+        tmpEntries = new ArrayList<String>();
         tmpEntries.add("headset");
         tmpEntries.add("speaker");
         tmpEntries.add("bluetooth");
@@ -996,7 +997,7 @@ class MyAdapter extends FragmentPagerAdapter {
         }
     @Override
     public CharSequence getPageTitle(int position) {
-    return titles[position]
+    return titles[position];
     }
 
     public String[] getEntries() {
