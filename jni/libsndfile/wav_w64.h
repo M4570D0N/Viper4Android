@@ -1,19 +1,19 @@
 /*
-** Copyright (C) 1999-2011 Erik de Castro Lopo <erikd@mega-nerd.com>
-**
-** This program is free software; you can redistribute it and/or modify
-** it under the terms of the GNU Lesser General Public License as published by
-** the Free Software Foundation; either version 2.1 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this program; if not, write to the Free Software
-** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+* Copyright (C) 1999-2011 Erik de Castro Lopo <erikd@mega-nerd.com>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU Lesser General Public License as published by
+* the Free Software Foundation; either version 2.1 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 /* This file contains definitions commong to WAV and W64 files. */
@@ -23,11 +23,10 @@
 #define WAV_W64_H_INCLUDED
 
 /*------------------------------------------------------------------------------
-** List of known WAV format tags
+* List of known WAV format tags
 */
 
-enum
-{
+enum {
   /* keep sorted for wav_w64_format_str() */
     WAVE_FORMAT_UNKNOWN                 = 0x0000,       /* Microsoft Corporation */
     WAVE_FORMAT_PCM                     = 0x0001,       /* Microsoft PCM format */
@@ -148,148 +147,158 @@ enum
     WAVE_FORMAT_IPP_ITU_G_723_1            = 0x7230,        /* Intel Performance Primitives g723 codec. */
 
     WAVE_FORMAT_EXTENSIBLE                 = 0xFFFE
-} ;
+};
 
 typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-} MIN_WAV_FMT ;
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+}
+MIN_WAV_FMT;
 
 typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-    unsigned short    extrabytes ;
-    unsigned short    dummy ;
-} WAV_FMT_SIZE20 ;
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+    unsigned short    extrabytes;
+    unsigned short    dummy;
+}
+WAV_FMT_SIZE20;
 
 typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-    unsigned short    extrabytes ;
-    unsigned short    samplesperblock ;
-    unsigned short    numcoeffs ;
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+    unsigned short    extrabytes;
+    unsigned short    samplesperblock;
+    unsigned short    numcoeffs;
     struct {
-        short coeff1 ;
-        short coeff2 ;
-    } coeffs [7] ;
-} MS_ADPCM_WAV_FMT ;
+        short coeff1;
+        short coeff2;
+    }
+    coeffs [7];
+}
+MS_ADPCM_WAV_FMT;
 
 typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-    unsigned short    extrabytes ;
-    unsigned short    samplesperblock ;
-} IMA_ADPCM_WAV_FMT ;
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+    unsigned short    extrabytes;
+    unsigned short    samplesperblock;
+}
+IMA_ADPCM_WAV_FMT;
 
 typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-    unsigned short    extrabytes ;
-    unsigned short    auxblocksize ;
-} G72x_ADPCM_WAV_FMT ;
-
-
-typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-    unsigned short    extrabytes ;
-    unsigned short    samplesperblock ;
-} GSM610_WAV_FMT ;
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+    unsigned short    extrabytes;
+    unsigned short    auxblocksize;
+}
+G72x_ADPCM_WAV_FMT;
 
 typedef struct {
-    unsigned int    esf_field1 ;
-    unsigned short    esf_field2 ;
-    unsigned short    esf_field3 ;
-    char            esf_field4 [8] ;
-} EXT_SUBFORMAT ;
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+    unsigned short    extrabytes;
+    unsigned short    samplesperblock;
+}
+GSM610_WAV_FMT;
 
 typedef struct {
-    unsigned short    format ;
-    unsigned short    channels ;
-    unsigned int    samplerate ;
-    unsigned int    bytespersec ;
-    unsigned short    blockalign ;
-    unsigned short    bitwidth ;
-    unsigned short    extrabytes ;
-    unsigned short    validbits ;
-    unsigned int    channelmask ;
-    EXT_SUBFORMAT    esf ;
-} EXTENSIBLE_WAV_FMT ;
+    unsigned int    esf_field1;
+    unsigned short    esf_field2;
+    unsigned short    esf_field3;
+    char            esf_field4 [8];
+}
+EXT_SUBFORMAT;
+
+typedef struct {
+    unsigned short    format;
+    unsigned short    channels;
+    unsigned int    samplerate;
+    unsigned int    bytespersec;
+    unsigned short    blockalign;
+    unsigned short    bitwidth;
+    unsigned short    extrabytes;
+    unsigned short    validbits;
+    unsigned int    channelmask;
+    EXT_SUBFORMAT    esf;
+}
+EXTENSIBLE_WAV_FMT;
 
 typedef union {
-    unsigned short        format ;
-    MIN_WAV_FMT            min ;
-    IMA_ADPCM_WAV_FMT    ima ;
-    MS_ADPCM_WAV_FMT    msadpcm ;
-    G72x_ADPCM_WAV_FMT    g72x ;
-    EXTENSIBLE_WAV_FMT    ext ;
-    GSM610_WAV_FMT        gsm610 ;
-    WAV_FMT_SIZE20        size20 ;
-    char                padding [512] ;
-} WAV_FMT ;
+    unsigned short        format;
+    MIN_WAV_FMT            min;
+    IMA_ADPCM_WAV_FMT    ima;
+    MS_ADPCM_WAV_FMT    msadpcm;
+    G72x_ADPCM_WAV_FMT    g72x;
+    EXTENSIBLE_WAV_FMT    ext;
+    GSM610_WAV_FMT        gsm610;
+    WAV_FMT_SIZE20        size20;
+    char                padding [512];
+}
+WAV_FMT;
 
 typedef struct {
-    int frames ;
-} FACT_CHUNK ;
+    int frames;
+}
+FACT_CHUNK;
 
 typedef struct {
     /* For ambisonic commands */
-    int wavex_ambisonic ;
-    unsigned wavex_channelmask ;
+    int wavex_ambisonic;
+    unsigned wavex_channelmask;
 
     /* Set to true when 'fmt ' chunk is ambiguous.*/
-    int fmt_is_broken ;
-    WAV_FMT wav_fmt ;
-} WAV_PRIVATE ;
+    int fmt_is_broken;
+    WAV_FMT wav_fmt;
+}
+WAV_PRIVATE;
 
 #define     WAV_W64_GSM610_BLOCKSIZE  65
 #define     WAV_W64_GSM610_SAMPLES    320
 
 /*------------------------------------------------------------------------------------
-** Functions defined in wav_ms_adpcm.c
+* Functions defined in wav_ms_adpcm.c
 */
 
 #define MSADPCM_ADAPT_COEFF_COUNT 7
 
-void msadpcm_write_adapt_coeffs (SF_PRIVATE *psf) ;
+void msadpcm_write_adapt_coeffs (SF_PRIVATE *psf);
 
 /*------------------------------------------------------------------------------------
-** Functions defined in wav_w64.c
+* Functions defined in wav_w64.c
 */
 
-int wav_w64_srate2blocksize (int srate_chan_product) ;
-char const* wav_w64_format_str (int k) ;
-int wav_w64_read_fmt_chunk (SF_PRIVATE *psf, int fmtsize) ;
-void wavex_write_guid (SF_PRIVATE *psf, const EXT_SUBFORMAT * subformat) ;
-void wav_w64_analyze (SF_PRIVATE *psf) ;
-int wavex_gen_channel_mask (const int *chan_map, int channels) ;
+int wav_w64_srate2blocksize (int srate_chan_product);
+char const* wav_w64_format_str (int k);
+int wav_w64_read_fmt_chunk (SF_PRIVATE *psf, int fmtsize);
+void wavex_write_guid (SF_PRIVATE *psf, const EXT_SUBFORMAT * subformat);
+void wav_w64_analyze (SF_PRIVATE *psf);
+int wavex_gen_channel_mask (const int *chan_map, int channels);
 
-int wav_read_bext_chunk (SF_PRIVATE *psf, unsigned int chunksize) ;
-int wav_write_bext_chunk (SF_PRIVATE *psf) ;
+int wav_read_bext_chunk (SF_PRIVATE *psf, unsigned int chunksize);
+int wav_write_bext_chunk (SF_PRIVATE *psf);
 
 #endif
-

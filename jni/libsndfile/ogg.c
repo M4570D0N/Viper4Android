@@ -34,8 +34,6 @@
 #include "sfendian.h"
 #include "common.h"
 
-int
-ogg_open (SF_PRIVATE *psf)
-{
-	return SFE_UNIMPLEMENTED ;
+int ogg_open (SF_PRIVATE *psf) {
+    return SFE_UNIMPLEMENTED ;
 } /* ogg_open */

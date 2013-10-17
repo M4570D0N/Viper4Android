@@ -35,7 +35,7 @@ public class Utils {
 
         // Lets read /proc/cpuinfo in java
         private boolean readCPUInfo() {
-            String szCPUInfoFile = "/proc/cpuinfo";
+            String mCPUInfoFile = "/proc/cpuinfo";
             FileReader frCPUInfoReader = null;
             BufferedReader brReader = null;
 
@@ -44,20 +44,20 @@ public class Utils {
 
             // Find "Features" line, extract neon and vfp
             try {
-                frCPUInfoReader = new FileReader(szCPUInfoFile);
+                frCPUInfoReader = new FileReader(mCPUInfoFile);
                 brReader = new BufferedReader(frCPUInfoReader);
                 while (true) {
-                    String szLine = brReader.readLine();
-                    if (szLine == null) break;
-                    szLine = szLine.trim();
-                    if (szLine.startsWith("Features")) {
-                        Log.i("ViPER4Android_Utils", "CpuInfo[java] = <" + szLine + ">");
-                        StringTokenizer stBlock = new StringTokenizer(szLine);
+                    String mLine = brReader.readLine();
+                    if (mLine == null) break;
+                    mLine = mLine.trim();
+                    if (mLine.startsWith("Features")) {
+                        Log.i("ViPER4Android_Utils", "CpuInfo[java] = <" + mLine + ">");
+                        StringTokenizer stBlock = new StringTokenizer(mLine);
                         while (stBlock.hasMoreElements()) {
-                            String szFeature = stBlock.nextToken();
-                            if (szFeature != null) {
-                                if (szFeature.equalsIgnoreCase("neon")) m_bCPUHasNEON = true;
-                                else if (szFeature.equalsIgnoreCase("vfp")) m_bCPUHasVFP = true;
+                            String mFeature = stBlock.nextToken();
+                            if (mFeature != null) {
+                                if (mFeature.equalsIgnoreCase("neon")) m_bCPUHasNEON = true;
+                                else if (mFeature.equalsIgnoreCase("vfp")) m_bCPUHasVFP = true;
                             }
                             continue;
                         }
@@ -106,35 +106,35 @@ public class Utils {
 
     // Check if the specified file exists.
     public static boolean fileExists(String filename) {
-        boolean bExist = new File(filename).exists();
-        if (!bExist) {
+        boolean mExist = new File(filename).exists();
+        if (!mExist) {
             RootTools.useRoot = true;
-            bExist = RootTools.exists(filename);
+            mExist = RootTools.exists(filename);
         }
-        return bExist;
+        return mExist;
     }
 
     // Get a file length
-    public static long getFileLength(String szFileName) {
+    public static long getFileLength(String mFileName) {
         try {
-            return new File(szFileName).length();
+            return new File(mFileName).length();
         } catch (Exception e) {
             return 0;
         }
     }
 
     // Download a file from internet
-    public static boolean downloadFile(String szURL, String szFileName, String szStorePath) {
+    public static boolean downloadFile(String mURL, String mFileName, String mStorePath) {
         try {
-            URL myURL = new URL(szURL);
-            URLConnection conn = myURL.openConnection();
+            URL url = new URL(mURL);
+            URLConnection conn = url.openConnection();
             conn.connect();
             InputStream is = conn.getInputStream();
             if (conn.getContentLength() <= 0) return false;
             if (is == null) return false;
-            FileOutputStream fos = new FileOutputStream(szStorePath + szFileName);
+            FileOutputStream fos = new FileOutputStream(mStorePath + mFileName);
 
-            byte buf[] = new byte[1024];
+            byte[] buf = new byte[1024];
             do {
                 int numread = is.read(buf);
                 if (numread == -1) break;
@@ -149,21 +149,21 @@ public class Utils {
     }
 
     // Check a file with checksum
-    public static boolean fileChecksum(String szFilePathName, String szChecksum) {
-        long lChecksum = 0;
+    public static boolean fileChecksum(String mFilePathName, String mCheckSum) {
+        long checkSum = 0;
 
         try {
-            FileInputStream fis = new FileInputStream(szFilePathName);
-            byte buf[] = new byte[1024];
+            FileInputStream fis = new FileInputStream(mFilePathName);
+            byte[] buf = new byte[1024];
             do {
                 int numread = fis.read(buf);
                 if (numread == -1) break;
                 for (int idx = 0; idx < numread; idx++)
-                    lChecksum = lChecksum + (long) (buf[idx]);
+                    checkSum = checkSum + (long) buf[idx];
             } while (true);
             fis.close();
-            String szNewChecksum = Long.toString(lChecksum);
-            if (szChecksum.equals(szNewChecksum)) return true;
+            String mNewChecksum = Long.toString(checkSum);
+            if (mCheckSum.equals(mNewChecksum)) return true;
             else return false;
         } catch (Exception e) {
             return false;
@@ -185,21 +185,21 @@ public class Utils {
     }
 
     // Get profile name from a file
-    public static String getProfileName(String szProfileFileName) {
+    public static String getProfileName(String mProfileFileName) {
         try {
-            FileInputStream fisInput = new FileInputStream(szProfileFileName);
+            FileInputStream fisInput = new FileInputStream(mProfileFileName);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
             BufferedReader brInput = new BufferedReader(isrInput);
-            String szProfileName = "";
+            String mProfileName = "";
             while (true) {
-                String szLine = brInput.readLine();
-                if (szLine == null) break;
-                if (szLine.startsWith("#")) continue;
+                String mLine = brInput.readLine();
+                if (mLine == null) break;
+                if (mLine.startsWith("#")) continue;
 
-                String szChunks[] = szLine.split("=");
-                if (szChunks.length != 2) continue;
-                if (szChunks[0].trim().equalsIgnoreCase("profile_name")) {
-                    szProfileName = szChunks[1];
+                String[] mChunks = mLine.split("=");
+                if (mChunks.length != 2) continue;
+                if (mChunks[0].trim().equalsIgnoreCase("profile_name")) {
+                    mProfileName = mChunks[1];
                     break;
                 }
             }
@@ -207,7 +207,7 @@ public class Utils {
             isrInput.close();
             fisInput.close();
 
-            return szProfileName;
+            return mProfileName;
         } catch (Exception e) {
             return "";
         }
@@ -280,20 +280,20 @@ public class Utils {
                 BufferedReader brInput = new BufferedReader(isrInput);
                 Editor e = preferences.edit();
                 while (true) {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    if (szLine.startsWith("#")) continue;
+                    String mLine = brInput.readLine();
+                    if (mLine == null) break;
+                    if (mLine.startsWith("#")) continue;
 
-                    String szChunks[] = szLine.split("=");
-                    if (szChunks.length != 3) continue;
-                    if (szChunks[1].trim().equalsIgnoreCase("boolean")) {
-                        String szParameter = szChunks[0];
-                        boolean bValue = Boolean.valueOf(szChunks[2]);
-                        e.putBoolean(szParameter, bValue);
-                    } else if (szChunks[1].trim().equalsIgnoreCase("string")) {
-                        String szParameter = szChunks[0];
-                        String szValue = szChunks[2];
-                        e.putString(szParameter, szValue);
+                    String[] mChunks = mLine.split("=");
+                    if (mChunks.length != 3) continue;
+                    if (mChunks[1].trim().equalsIgnoreCase("boolean")) {
+                        String mParameter = mChunks[0];
+                        boolean mValue = Boolean.valueOf(mChunks[2]);
+                        e.putBoolean(mParameter, mValue);
+                    } else if (mChunks[1].trim().equalsIgnoreCase("string")) {
+                        String mParameter = mChunks[0];
+                        String mValue = mChunks[2];
+                        e.putString(mParameter, mValue);
                     } else {
                     }
                 }
@@ -310,23 +310,23 @@ public class Utils {
     }
 
     // Save profile to file
-    public static void saveProfile(String szProfileName, String szProfileDir, String szPreferenceName, Context ctx) {
+    public static void saveProfile(String mProfileName, String mProfileDir, String mPreferenceName, Context ctx) {
         try {
-            SharedPreferences preferences = ctx.getSharedPreferences(szPreferenceName, Context.MODE_PRIVATE);
+            SharedPreferences preferences = ctx.getSharedPreferences(mPreferenceName, Context.MODE_PRIVATE);
             if (preferences != null) {
-                String szOutFileName = szProfileDir + szProfileName + ".prf";
-                if (fileExists(szOutFileName)) new File(szOutFileName).delete();
+                String mOutFileName = mProfileDir + mProfileName + ".prf";
+                if (fileExists(mOutFileName)) new File(mOutFileName).delete();
 
-                FileOutputStream fosOutput = new FileOutputStream(szOutFileName);
+                FileOutputStream fosOutput = new FileOutputStream(mOutFileName);
                 OutputStreamWriter oswOutput = new OutputStreamWriter(fosOutput, "UTF-8");
                 BufferedWriter mOutput = new BufferedWriter(oswOutput);
 
                 SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd   hh:mm:ss", Locale.US);
-                String szDate = sDateFormat.format(new java.util.Date());
+                String mDate = sDateFormat.format(new java.util.Date());
 
                 mOutput.write("# ViPER4Android audio effect profile !\n");
-                mOutput.write("# Created " + szDate + "\n\n");
-                mOutput.write("profile_name=" + szProfileName + "\n\n");
+                mOutput.write("# Created " + mDate + "\n\n");
+                mOutput.write("profile_name=" + mProfileName + "\n\n");
 
                 String mValue = "";
 
@@ -426,14 +426,14 @@ public class Utils {
     }
 
     // Modify audio_effects.conf
-    public static boolean modifyFXConfig(String szInputFile, String szOutputFile) {
-        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + szInputFile + ", output = " + szOutputFile);
+    public static boolean modifyFXConfig(String mInputFile, String mOutputFile) {
+        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + mInputFile + ", output = " + mOutputFile);
         try {
-            long lInputFileLength = getFileLength(szInputFile);
+            long lInputFileLength = getFileLength(mInputFile);
 
             // Create reading and writing stuff
-            FileInputStream fisInput = new FileInputStream(szInputFile);
-            FileOutputStream fosOutput = new FileOutputStream(szOutputFile);
+            FileInputStream fisInput = new FileInputStream(mInputFile);
+            FileOutputStream fosOutput = new FileOutputStream(mOutputFile);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "ASCII");
             OutputStreamWriter oswOutput = new OutputStreamWriter(fosOutput, "ASCII");
             BufferedReader brInput = new BufferedReader(isrInput);
@@ -443,12 +443,12 @@ public class Utils {
             boolean bConfigModified = false;
             brInput.mark((int) lInputFileLength);
             do {
-                String szLine = brInput.readLine();
-                if (szLine == null) break;
-                if (szLine.startsWith("#")) continue;
+                String mLine = brInput.readLine();
+                if (mLine == null) break;
+                if (mLine.startsWith("#")) continue;
                 /* This is v4a effect uuid */
-                if (szLine.toLowerCase(Locale.US).contains("41d3c987-e6cf-11e3-a88a-11aba5d5c51b")) {
-                    Log.i("ViPER4Android_Utils", "Source file has been modified, line = " + szLine);
+                if (mLine.toLowerCase(Locale.US).contains("41d3c987-e6cf-11e3-a88a-11aba5d5c51b")) {
+                    Log.i("ViPER4Android_Utils", "Source file has been modified, line = " + mLine);
                     bConfigModified = true;
                     break;
                 }
@@ -460,9 +460,9 @@ public class Utils {
                 // Already modified, just copy
                 brInput.reset();
                 do {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    bwOutput.write(szLine + "\n");
+                    String mLine = brInput.readLine();
+                    if (mLine == null) break;
+                    bwOutput.write(mLine + "\n");
                 } while (true);
                 bwOutput.flush();
 
@@ -478,24 +478,24 @@ public class Utils {
                 // Lets append v4a library and effect to configuration
                 brInput.reset();
                 do {
-                    String szLine = brInput.readLine();
-                    if (szLine == null) break;
-                    if (szLine.trim().equalsIgnoreCase("libraries {") && !bLibraryAppend) {
+                    String mLine = brInput.readLine();
+                    if (mLine == null) break;
+                    if (mLine.trim().equalsIgnoreCase("libraries {") && !bLibraryAppend) {
                         // Append library
-                        bwOutput.write(szLine + "\n");
+                        bwOutput.write(mLine + "\n");
                         bwOutput.write("  v4a_fx {\n");
                         bwOutput.write("    path /system/lib/soundfx/libv4a_fx_ics.so\n");
                         bwOutput.write("  }\n");
                         bLibraryAppend = true;
-                    } else if (szLine.trim().equalsIgnoreCase("effects {") && !bEffectAppend) {
+                    } else if (mLine.trim().equalsIgnoreCase("effects {") && !bEffectAppend) {
                         // Append effect
-                        bwOutput.write(szLine + "\n");
+                        bwOutput.write(mLine + "\n");
                         bwOutput.write("  v4a_standard_fx {\n");
                         bwOutput.write("    library v4a_fx\n");
                         bwOutput.write("    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n");
                         bwOutput.write("  }\n");
                         bEffectAppend = true;
-                    } else bwOutput.write(szLine + "\n");
+                    } else bwOutput.write(mLine + "\n");
                 } while (true);
                 bwOutput.flush();
 
@@ -525,7 +525,7 @@ public class Utils {
     }
 
     // Copy assets to local
-    public static boolean copyAssetsToLocal(Context ctx, String szSourceName, String mDstName) {
+    public static boolean copyAssetsToLocal(Context ctx, String mSourceName, String mDstName) {
         String mBasePath = getBasePath(ctx);
         if (mBasePath.equals("")) return false;
         mDstName = mBasePath + "/" + mDstName;
@@ -538,7 +538,7 @@ public class Utils {
             if (hfOutput.exists()) hfOutput.delete();
 
             myOutput = new FileOutputStream(outFileName);
-            myInput = ctx.getAssets().open(szSourceName);
+            myInput = ctx.getAssets().open(mSourceName);
             byte[] tBuffer = new byte[4096];  /* 4K page size */
             int mLength = 0;
             while ((mLength = myInput.read(tBuffer)) > 0)
@@ -566,12 +566,12 @@ public class Utils {
         // When done, a root shell was opened
 
         // Then delete the driver
-        String szDriverPathName = "/system/lib/soundfx/libv4a_fx_ics.so";
+        String mDriverPathName = "/system/lib/soundfx/libv4a_fx_ics.so";
         try {
             RootTools.useRoot = true;
-            if (RootTools.exists(szDriverPathName)) {
+            if (RootTools.exists(mDriverPathName)) {
                 RootTools rtTools = new RootTools();
-                rtTools.deleteFileOrDirectory(szDriverPathName, true);
+                rtTools.deleteFileOrDirectory(mDriverPathName, true);
                 // Close all shells
                 RootTools.closeAllShells();
             }
@@ -581,13 +581,13 @@ public class Utils {
     }
 
     // Install ViPER4Android FX driver
-    public static boolean installDrv_FX(Context ctx, String szDriverName) {
+    public static boolean installDrv_FX(Context ctx, String mDriverName) {
         // Make sure we can use external storage for temp directory
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return false;
 
         // Copy driver assets to local
-        if (!copyAssetsToLocal(ctx, szDriverName, "libv4a_fx_ics.so"))
+        if (!copyAssetsToLocal(ctx, mDriverName, "libv4a_fx_ics.so"))
             return false;
 
         // Lets acquire root first :)
@@ -670,11 +670,11 @@ public class Utils {
         boolean operationSuccess = true;
         try {
             if (vendorExists) {
-                String szBaseDrvPathName = getBasePath(ctx) + "/" + "libv4a_fx_ics.so";
+                String mBaseDrvPathName = getBasePath(ctx) + "/" + "libv4a_fx_ics.so";
                 // Copy files
                 operationSuccess &= RootTools.remount("/system", "RW");
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(szBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so", false, false);
+                    operationSuccess &= RootTools.copyFile(mBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so", false, false);
                 if (operationSuccess)
                     operationSuccess &= RootTools.copyFile(mSystemConf + ".out", "/system/etc/audio_effects.conf", false, false);
                 if (operationSuccess)
@@ -687,11 +687,11 @@ public class Utils {
                 RootTools.getShell(true).add(ccSetPermission).waitForFinish();
                 RootTools.remount("/system", "RO");
             } else {
-                String szBaseDrvPathName = getBasePath(ctx) + "/" + "libv4a_fx_ics.so";
+                String mBaseDrvPathName = getBasePath(ctx) + "/" + "libv4a_fx_ics.so";
                 // Copy files
                 operationSuccess &= RootTools.remount("/system", "RW");
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(szBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so", false, false);
+                    operationSuccess &= RootTools.copyFile(mBaseDrvPathName, "/system/lib/soundfx/libv4a_fx_ics.so", false, false);
                 if (operationSuccess)
                     operationSuccess &= RootTools.copyFile(mSystemConf + ".out", "/system/etc/audio_effects.conf", false, false);
                 // Modify permission

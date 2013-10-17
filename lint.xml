@@ -4,9 +4,4 @@
     <issue id="UsesMinSdkAttributes" severity="ignore" />
 
     <issue id="LintError" severity="ignore" />
-
-<<<<<<< HEAD
 </lint>
-=======
-</lint>
->>>>>>> upstream

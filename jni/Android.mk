@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := \
     WavReader.cpp \
     Hash.cpp \
     V4AJniInterface.cpp \
-    # terminator
+# terminator
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/libsndfile
 

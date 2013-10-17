@@ -1,33 +1,33 @@
 /*
-** Copyright (C) 2005-2011 Erik de Castro Lopo <erikd@mega-nerd.com>
-**
-** This program is free software; you can redistribute it and/or modify
-** it under the terms of the GNU Lesser General Public License as published by
-** the Free Software Foundation; either version 2.1 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU Lesser General Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this program; if not, write to the Free Software
-** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
+ ** Copyright (C) 2005-2011 Erik de Castro Lopo <erikd@mega-nerd.com>
+ **
+ ** This program is free software; you can redistribute it and/or modify
+ ** it under the terms of the GNU Lesser General Public License as published by
+ ** the Free Software Foundation; either version 2.1 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU Lesser General Public License for more details.
+ **
+ ** You should have received a copy of the GNU Lesser General Public License
+ ** along with this program; if not, write to the Free Software
+ ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 /*
-**	Autoconf leaves many config parameters undefined.
-**	Here we change then from being undefined to defining them to 0.
-**	This allows things like:
-**
-**		#if HAVE_CONFIG_PARAM
-**
-**	and
-**
-**		if (HAVE_CONFIG_PARAM)
-**			do_something () ;
-*/
+ ** Autoconf leaves many config parameters undefined.
+ ** Here we change then from being undefined to defining them to 0.
+ ** This allows things like:
+ **
+ ** #if HAVE_CONFIG_PARAM
+ **
+ **	and
+ **
+ ** if (HAVE_CONFIG_PARAM)
+ **    do_something () ;
+ */
 
 #ifndef SFCONFIG_H
 #define SFCONFIG_H
@@ -46,7 +46,7 @@
 #endif
 
 #ifndef HAVE_DECL_S_IRGRP
-#define	HAVE_DECL_S_IRGRP 0
+#define HAVE_DECL_S_IRGRP 0
 #endif
 
 #ifndef HAVE_ENDIAN_H
@@ -106,8 +106,7 @@
 #endif
 
 #ifndef HAVE_WAITPID
-#define	HAVE_WAITPID 0
+#define HAVE_WAITPID 0
 #endif
 
 #endif
-

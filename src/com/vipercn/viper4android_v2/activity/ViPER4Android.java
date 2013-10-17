@@ -52,9 +52,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -273,8 +275,8 @@ public final class ViPER4Android extends FragmentActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             // Install/Update driver
-                            String szDriverFileName = determineCPUWithDriver();
-                            if (Utils.installDrv_FX(ctxInstance, szDriverFileName)) {
+                            String mDriverFileName = determineCPUWithDriver();
+                            if (Utils.installDrv_FX(ctxInstance, mDriverFileName)) {
                                 AlertDialog.Builder mResult = new AlertDialog.Builder(ctxInstance);
                                 mResult.setTitle("ViPER4Android");
                                 mResult.setMessage(ctxInstance.getResources().getString(R.string.text_drvinst_ok));
@@ -503,7 +505,7 @@ public final class ViPER4Android extends FragmentActivity {
     }
 
     // For convenient parameter passing, we use global variable
-    private String szSaveProfileNameGlobal = "";
+    private String mSaveProfileNameGlobal = "";
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -654,7 +656,7 @@ public final class ViPER4Android extends FragmentActivity {
                 String mProfilePath = Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/";
                 mProfileList = Utils.getProfileList(mProfilePath);
                 if (mProfileList.size() <= 0) return true;
-                String arrayProfileList[] = new String[mProfileList.size()];
+                String[] arrayProfileList = new String[mProfileList.size()];
                 for (int mPrfIdx = 0; mPrfIdx < mProfileList.size(); mPrfIdx++)
                     arrayProfileList[mPrfIdx] = mProfileList.get(mPrfIdx);
 
@@ -669,7 +671,7 @@ public final class ViPER4Android extends FragmentActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 String mProfilePath = Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/";
                                 Log.i("ViPER4Android", "Load effect profile, current page = " + mCurrentPage);
-                                String mPreferenceName[] = new String[3];
+                                String[] mPreferenceName = new String[3];
                                 mPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
                                 mPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
                                 mPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";
@@ -680,11 +682,11 @@ public final class ViPER4Android extends FragmentActivity {
                                 if (index > 2) index = 2;
 
                                 // Now load the profile please
-                                String arrayProfileList[] = new String[mProfileList.size()];
+                                String[] arrayProfileList = new String[mProfileList.size()];
                                 for (int mPrfIdx = 0; mPrfIdx < mProfileList.size(); mPrfIdx++)
                                     arrayProfileList[mPrfIdx] = mProfileList.get(mPrfIdx);
-                                String mProfileName = arrayProfileList[which];
-                                if (Utils.loadProfile(mProfileName, mProfilePath, mPreferenceName[index], mActivityContext)) {
+                                String profileName = arrayProfileList[which];
+                                if (Utils.loadProfile(profileName, mProfilePath, mPreferenceName[index], mActivityContext)) {
                                     AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
                                     mResult.setTitle("ViPER4Android");
                                     mResult.setMessage(getResources().getString(R.string.text_profileload_ok));
@@ -746,30 +748,30 @@ public final class ViPER4Android extends FragmentActivity {
                                 }
                                 /***********************/
 
-                                String mProfileName = editProfileName.getText().toString().trim();
-                                if (mProfileName == null)
+                                String profileName = editProfileName.getText().toString().trim();
+                                if (profileName == null)
                                     Toast.makeText(mActivityContext,
                                             getResources().getString(R.string.text_profilesaved_err), Toast.LENGTH_LONG).show();
-                                else if (mProfileName.equals(""))
+                                else if (profileName.equals(""))
                                     Toast.makeText(mActivityContext,
                                             getResources().getString(R.string.text_profilesaved_err), Toast.LENGTH_LONG).show();
                                 else {
                                     // Deal with the directory
                                     String mProfilePath = Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/";
-                                    File mProfileDir = new File(mProfilePath);
-                                    if (!mProfileDir.exists()) {
-                                        mProfileDir.mkdirs();
-                                        mProfileDir.mkdir();
+                                    File profileDir = new File(mProfilePath);
+                                    if (!profileDir.exists()) {
+                                        profileDir.mkdirs();
+                                        profileDir.mkdir();
                                     }
-                                    mProfileDir = new File(mProfilePath);
-                                    if (!mProfileDir.exists()) {
+                                    profileDir = new File(mProfilePath);
+                                    if (!profileDir.exists()) {
                                         Toast.makeText(mActivityContext, getResources().getString(R.string.text_rwsd_error), Toast.LENGTH_LONG).show();
                                         dismiss();
                                         return;
                                     }
 
-                                    szSaveProfileNameGlobal = mProfileName;
-                                    if (Utils.checkProfileExists(mProfileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/")) {
+                                    mSaveProfileNameGlobal = profileName;
+                                    if (Utils.checkProfileExists(profileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/")) {
                                         // Name already exist, overwritten ?
                                         AlertDialog.Builder mConfirm = new AlertDialog.Builder(mActivityContext);
                                         mConfirm.setTitle("ViPER4Android");
@@ -778,14 +780,15 @@ public final class ViPER4Android extends FragmentActivity {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                                 Log.i("ViPER4Android", "Save effect profile, current page = " + nCurrentPage);
-                                                String szPreferenceName[] = new String[3];
-                                                szPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
-                                                szPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
-                                                szPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";
+                                                String[] mPreferenceName = new String[3];
+                                                mPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
+                                                mPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
+                                                mPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";
+                                                mPreferenceName[3] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".usb";
                                                 int nIndex = nCurrentPage;
                                                 if (nIndex < 0) nIndex = 0;
-                                                if (nIndex > 2) nIndex = 2;
-                                                Utils.saveProfile(szSaveProfileNameGlobal, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", szPreferenceName[nIndex], mActivityContext);
+                                                if (nIndex > 3) nIndex = 3;
+                                                Utils.saveProfile(mSaveProfileNameGlobal, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", mPreferenceName[nIndex], mActivityContext);
                                                 Toast.makeText(mActivityContext, mActivityContext.getResources().getString(R.string.text_profilesaved_ok), Toast.LENGTH_LONG).show();
                                             }
                                         });
@@ -797,14 +800,15 @@ public final class ViPER4Android extends FragmentActivity {
 
                                     // Save the profile please
                                     Log.i("ViPER4Android", "Save effect profile, current page = " + nCurrentPage);
-                                    String mPreferenceName[] = new String[3];
+                                    String[] mPreferenceName = new String[3];
                                     mPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
                                     mPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
                                     mPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";
+                                    mPreferenceName[3] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".usb";
                                     int index = nCurrentPage;
                                     if (index < 0) index = 0;
-                                    if (index > 2) index = 2;
-                                    Utils.saveProfile(mProfileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", mPreferenceName[index], mActivityContext);
+                                    if (index > 3) index = 3;
+                                    Utils.saveProfile(profileName, Environment.getExternalStorageDirectory() + "/ViPER4Android/Profile/", mPreferenceName[index], mActivityContext);
                                     Toast.makeText(mActivityContext, getResources().getString(R.string.text_profilesaved_ok), Toast.LENGTH_LONG).show();
                                 }
                                 dismiss();
@@ -916,28 +920,30 @@ public final class ViPER4Android extends FragmentActivity {
             }
 
             case R.id.lockeffect: {
-                String szLockedEffect = prefSettings.getString("viper4android.settings.lock_effect", "none");
+                String mLockedEffect = prefSettings.getString("viper4android.settings.lock_effect", "none");
                 int nLockIndex = -1;
-                if (szLockedEffect.equalsIgnoreCase("none")) nLockIndex = 0;
-                else if (szLockedEffect.equalsIgnoreCase("headset")) nLockIndex = 1;
-                else if (szLockedEffect.equalsIgnoreCase("speaker")) nLockIndex = 2;
-                else if (szLockedEffect.equalsIgnoreCase("bluetooth")) nLockIndex = 3;
-                else nLockIndex = 4;
+                if (mLockedEffect.equalsIgnoreCase("none")) nLockIndex = 0;
+                else if (mLockedEffect.equalsIgnoreCase("headset")) nLockIndex = 1;
+                else if (mLockedEffect.equalsIgnoreCase("speaker")) nLockIndex = 2;
+                else if (mLockedEffect.equalsIgnoreCase("bluetooth")) nLockIndex = 3;
+                else if (mLockedEffect.equalsIgnoreCase("usb")) nLockIndex = 4;
+                else nLockIndex = 5;
 
-                String[] szModeList =
-                        {
-                                getResources().getString(R.string.text_disabled),
-                                getResources().getString(R.string.text_headset),
-                                getResources().getString(R.string.text_speaker),
-                                getResources().getString(R.string.text_bluetooth)
-                        };
+                String[] mModeList = {
+                    getResources().getString(R.string.text_disabled),
+                    getResources().getString(R.string.text_headset),
+                    getResources().getString(R.string.text_speaker),
+                    getResources().getString(R.string.text_bluetooth),
+                    getResources().getString(R.string.text_usb)
+                };
 
                 Dialog selectDialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.text_lockeffect)
                         .setIcon(R.drawable.icon)
-                        .setSingleChoiceItems(szModeList, nLockIndex, new DialogInterface.OnClickListener() {
+                        .setSingleChoiceItems(mModeList, nLockIndex, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
+                                SharedPreferences prefSettings = getSharedPreferences(
+                                                ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
                                 Editor edit = prefSettings.edit();
                                 switch (which) {
                                     case 0:
@@ -951,6 +957,9 @@ public final class ViPER4Android extends FragmentActivity {
                                         break;
                                     case 3:
                                         edit.putString("viper4android.settings.lock_effect", "bluetooth");
+                                        break;
+                                    case 4:
+                                        edit.putString("viper4android.settings.lock_effect", "usb");
                                         break;
                                 }
                                 edit.commit();

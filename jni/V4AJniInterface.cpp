@@ -20,10 +20,10 @@ JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterfa
     uint64_t uiCPUFeatures = android_getCpuFeatures();
     if ((uiCPUFeatures & ANDROID_CPU_ARM_FEATURE_ARMv7) == 0) {
         if ((uiCPUFeatures & ANDROID_CPU_ARM_FEATURE_VFPv2) == 0) return (jint)0;
-        return (jint)1;
+            return (jint)1;
     } else {
         if ((uiCPUFeatures & ANDROID_CPU_ARM_FEATURE_VFPv3) == 0) return (jint)0;
-        return (jint)1;
+            return (jint)1;
     }
 }
 
@@ -143,7 +143,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniI
 }
 
 extern uint32_t HashCRC32(uint8_t *ucpBuffer, uint32_t uiBufferSize);
-JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_HashImpulseResponse (
+JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_hashImpulseResponse (
     JNIEnv *env, jclass cls, jbyteArray jbaBuffer, jint nBufferSize) {
     /* return: [0] = Valid, [2] = Hash Code */
 
