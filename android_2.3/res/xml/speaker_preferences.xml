@@ -46,6 +46,12 @@
 			android:defaultValue="50" android:dialogTitle="@string/pref_effect_title" android:entries="@array/reverb_percent" android:entryValues="@array/reverb_percent_values" android:title="@string/pref_reverb_dry" android:key="viper4android.headphonefx.reverb.dry"/>
 	</PreferenceCategory>
 
+	<PreferenceCategory android:title="@string/pref_spk_opt_title">
+		<CheckBoxPreference android:key="viper4android.speakerfx.spkopt.enable"
+			android:summaryOn="@string/pref_spk_opt_summary_on" android:summaryOff="@string/pref_spk_opt_summary_off"
+			android:disableDependentsState="false" android:title="@string/pref_dsp_enable"></CheckBoxPreference>
+	</PreferenceCategory>
+
 	<PreferenceCategory android:title="@string/pref_xloud_title">
 		<CheckBoxPreference android:key="viper4android.headphonefx.playbackgain.enable"
 			android:summaryOn="@string/pref_xloud_summary_on" android:summaryOff="@string/pref_xloud_summary_off"
