@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <assert.h>
-
 #include "gsm610_priv.h"
 
 #define saturate(x) \

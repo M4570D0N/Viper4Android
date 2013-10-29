@@ -16,19 +16,19 @@ import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.stericson.RootTools.execution.CommandCapture;
 
 public class StaticEnvironment {
-    private static boolean m_bEnvironmentInited = false;
+    private static boolean m_mEnvironmentInited = false;
 
-    private static boolean m_bVBoXPrepared = false;
-    private static String m_szVBoXPath = "";
+    private static boolean m_mVBoXPrepared = false;
+    private static String m_mVBoXPath = "";
 
-    private static String m_szExternalStoragePath = "";
-    private static String m_szV4AESRoot = "";
-    private static String m_szV4AESKernel = "";
-    private static String m_szV4AESProfile = "";
+    private static String m_mExternalStoragePath = "";
+    private static String m_mV4AESRoot = "";
+    private static String m_mV4AESKernel = "";
+    private static String m_mV4AESProfile = "";
 
-    private static boolean m_bDriverInited = false;
-    private static boolean m_bDriverIsOK = false;
-    private static String m_szDriverVersion = "";
+    private static boolean m_mDriverInited = false;
+    private static boolean m_mDriverIsOK = false;
+    private static String m_mDriverVersion = "";
 
     private static boolean installVBox(Context ctx) {
         Log.i("ViPER4Android", "Installing vbox ...");
@@ -75,11 +75,11 @@ public class StaticEnvironment {
                 mResult = ShellCommand.sendShellCommand("toolbox cat "
                         + vBoxPath + " > /data/vbox", 0.5f);
                 Log.i("ViPER4Android",
-                        "Command return = " + ShellCommand.setLastReturnValue());
+                        "Command return = " + ShellCommand.getLastReturnValue());
                 mResult &= ShellCommand.sendShellCommand(
                         "toolbox chmod 777 /data/vbox", 0.5f);
                 Log.i("ViPER4Android",
-                        "Command return = " + ShellCommand.setLastReturnValue());
+                        "Command return = " + ShellCommand.getLastReturnValue());
                 /* I think the best way to check whether vbox was installed is
                  * execute it and check the exit value
                  */
@@ -88,7 +88,7 @@ public class StaticEnvironment {
                  * can wait infinite here
                  */
                 mResult &= ShellCommand.sendShellCommand("/data/vbox", 1.0f);
-                int vBoxExitValue = ShellCommand.setLastReturnValue();
+                int vBoxExitValue = ShellCommand.getLastReturnValue();
                 /* If the shell failed to execute vbox, the return value will never equal 0 */
                 if (mResult && (vBoxExitValue == 0)) {
                     Log.i("ViPER4Android", "Good, vbox installed");
@@ -160,31 +160,31 @@ public class StaticEnvironment {
         Log.i("ViPER4Android", "Checking vbox");
         if (ShellCommand.executeWithoutShell("/data/vbox", null) == 0) {
             Log.i("ViPER4Android", "Good, vbox is ok");
-            m_bVBoXPrepared = true;
-            m_szVBoXPath = "/data/vbox";
+            m_mVBoXPrepared = true;
+            m_mVBoXPath = "/data/vbox";
             return;
         }
 
         // Install vbox
         if (installVBox(ctx)) {
             ShellCommand.closeShell();
-            m_bVBoXPrepared = true;
-            m_szVBoXPath = "/data/vbox";
+            m_mVBoXPrepared = true;
+            m_mVBoXPath = "/data/vbox";
             return;
         }
         ShellCommand.closeShell();
-        m_bVBoXPrepared = false;
-        m_szVBoXPath = "";
+        m_mVBoXPrepared = false;
+        m_mVBoXPath = "";
     }
 
-    private static boolean checkWritable(String szFileName) {
+    private static boolean checkWritable(String mFileName) {
         try {
-            byte[] baBlank = new byte[16];
-            FileOutputStream fosOutput = new FileOutputStream(szFileName);
-            fosOutput.write(baBlank);
+            byte[] mBlank = new byte[16];
+            FileOutputStream fosOutput = new FileOutputStream(mFileName);
+            fosOutput.write(mBlank);
             fosOutput.flush();
             fosOutput.close();
-            new File(szFileName).delete();
+            new File(mFileName).delete();
             return true;
         } catch (FileNotFoundException e) {
             Log.i("ViPER4Android",
@@ -211,13 +211,13 @@ public class StaticEnvironment {
                             .replace("/emulated/0", "/emulated/legacy");
             }
             if (mExternalStoragePathName.endsWith("/")) {
-                m_szExternalStoragePath = mExternalStoragePathName;
+                m_mExternalStoragePath = mExternalStoragePathName;
             } else {
-                m_szExternalStoragePath = mExternalStoragePathName + "/";
+                m_mExternalStoragePath = mExternalStoragePathName + "/";
             }
-            m_szV4AESRoot = m_szExternalStoragePath + "ViPER4Android/";
-            m_szV4AESKernel = m_szV4AESRoot + "Kernel/";
-            m_szV4AESProfile = m_szV4AESRoot + "Profile/";
+            m_mV4AESRoot = m_mExternalStoragePath + "ViPER4Android/";
+            m_mV4AESKernel = m_mV4AESRoot + "Kernel/";
+            m_mV4AESProfile = m_mV4AESRoot + "Profile/";
         } else {
             boolean pathFromSDKIsWorking = false;
             boolean pathFromLegacyIsWorking = false;
@@ -255,88 +255,88 @@ public class StaticEnvironment {
                 mExternalStoragePathName = mExternalStoragePathName.replace(
                         "/emulated/0", "/emulated/legacy");
                 if (mExternalStoragePathName.endsWith("/"))
-                    m_szExternalStoragePath = mExternalStoragePathName;
+                    m_mExternalStoragePath = mExternalStoragePathName;
                 else
-                    m_szExternalStoragePath = mExternalStoragePathName + "/";
-                m_szV4AESRoot = m_szExternalStoragePath + "ViPER4Android/";
-                m_szV4AESKernel = m_szV4AESRoot + "Kernel/";
-                m_szV4AESProfile = m_szV4AESRoot + "Profile/";
+                    m_mExternalStoragePath = mExternalStoragePathName + "/";
+                m_mV4AESRoot = m_mExternalStoragePath + "ViPER4Android/";
+                m_mV4AESKernel = m_mV4AESRoot + "Kernel/";
+                m_mV4AESProfile = m_mV4AESRoot + "Profile/";
                 Log.i("ViPER4Android", "External storage path = "
-                        + m_szExternalStoragePath);
+                        + m_mExternalStoragePath);
                 Log.i("ViPER4Android", "ViPER4Android root path = "
-                        + m_szV4AESRoot);
+                        + m_mV4AESRoot);
                 Log.i("ViPER4Android", "ViPER4Android kernel path = "
-                        + m_szV4AESKernel);
+                        + m_mV4AESKernel);
                 Log.i("ViPER4Android", "ViPER4Android profile path = "
-                        + m_szV4AESProfile);
+                        + m_mV4AESProfile);
                 return;
             }
             if (pathFromSDKIsWorking) {
                 if (mExternalStoragePathName.endsWith("/"))
-                    m_szExternalStoragePath = mExternalStoragePathName;
+                    m_mExternalStoragePath = mExternalStoragePathName;
                 else
-                    m_szExternalStoragePath = mExternalStoragePathName + "/";
-                m_szV4AESRoot = m_szExternalStoragePath + "ViPER4Android/";
-                m_szV4AESKernel = m_szV4AESRoot + "Kernel/";
-                m_szV4AESProfile = m_szV4AESRoot + "Profile/";
+                    m_mExternalStoragePath = mExternalStoragePathName + "/";
+                m_mV4AESRoot = m_mExternalStoragePath + "ViPER4Android/";
+                m_mV4AESKernel = m_mV4AESRoot + "Kernel/";
+                m_mV4AESProfile = m_mV4AESRoot + "Profile/";
                 Log.i("ViPER4Android", "External storage path = "
-                        + m_szExternalStoragePath);
+                        + m_mExternalStoragePath);
                 Log.i("ViPER4Android", "ViPER4Android root path = "
-                        + m_szV4AESRoot);
+                        + m_mV4AESRoot);
                 Log.i("ViPER4Android", "ViPER4Android kernel path = "
-                        + m_szV4AESKernel);
+                        + m_mV4AESKernel);
                 Log.i("ViPER4Android", "ViPER4Android profile path = "
-                        + m_szV4AESProfile);
+                        + m_mV4AESProfile);
                 return;
             }
 
             Log.i("ViPER4Android",
                     "Really terrible thing, external storage detection failed, v4a may malfunctioned");
             if (mExternalStoragePathName.endsWith("/"))
-                m_szExternalStoragePath = mExternalStoragePathName;
+                m_mExternalStoragePath = mExternalStoragePathName;
             else
-                m_szExternalStoragePath = mExternalStoragePathName + "/";
-            m_szV4AESRoot = m_szExternalStoragePath + "ViPER4Android/";
-            m_szV4AESKernel = m_szV4AESRoot + "Kernel/";
-            m_szV4AESProfile = m_szV4AESRoot + "Profile/";
+                m_mExternalStoragePath = mExternalStoragePathName + "/";
+            m_mV4AESRoot = m_mExternalStoragePath + "ViPER4Android/";
+            m_mV4AESKernel = m_mV4AESRoot + "Kernel/";
+            m_mV4AESProfile = m_mV4AESRoot + "Profile/";
         }
     }
 
     public static boolean isEnvironmentInited() {
-        return m_bEnvironmentInited;
+        return m_mEnvironmentInited;
     }
 
     public static void initEnvironment(Context ctx) {
-        if (m_bEnvironmentInited)
+        if (m_mEnvironmentInited)
             return;
         proceedVBox(ctx);
         proceedExternalStoragePath();
-        m_bEnvironmentInited = true;
+        m_mEnvironmentInited = true;
     }
 
     public static boolean getVBoxUsable() {
-        return m_bVBoXPrepared;
+        return m_mVBoXPrepared;
     }
 
     public static String getVBoxExecutablePath() {
-        return m_szVBoXPath;
+        return m_mVBoXPath;
     }
 
     public static String getESPath() {
-        return m_szExternalStoragePath;
+        return m_mExternalStoragePath;
     }
 
     public static String getV4ARootPath() {
         
-        return m_szV4AESRoot;
+        return m_mV4AESRoot;
     }
 
     public static String getV4AKernelPath() {
-        return m_szV4AESKernel;
+        return m_mV4AESKernel;
     }
 
     public static String getV4AProfilePath() {
-        return m_szV4AESProfile;
+        return m_mV4AESProfile;
     }
 
     /**********
@@ -346,36 +346,36 @@ public class StaticEnvironment {
     public static void setDriverStatus(boolean mDriverIsOK,
             String mDriverVersion) {
         Log.i("ViPER4Android", "Got driver status");
-        Log.i("ViPER4Android", "Static old = [" + m_bDriverIsOK + ", "
-                + m_szDriverVersion + "]");
+        Log.i("ViPER4Android", "Static old = [" + m_mDriverIsOK + ", "
+                + m_mDriverVersion + "]");
         Log.i("ViPER4Android", "Static new = [" + mDriverIsOK + ", "
                 + mDriverVersion + "]");
-        Log.i("ViPER4Android", "Current status = " + m_bDriverInited);
-        if (m_bDriverInited) {
-            if (!m_bDriverIsOK && mDriverIsOK)
-                m_bDriverIsOK = true;
-            if (m_szDriverVersion.equals("")
-                    || m_szDriverVersion.equals("0.0.0.0"))
-                m_szDriverVersion = mDriverVersion;
+        Log.i("ViPER4Android", "Current status = " + m_mDriverInited);
+        if (m_mDriverInited) {
+            if (!m_mDriverIsOK && mDriverIsOK)
+                m_mDriverIsOK = true;
+            if (m_mDriverVersion.equals("")
+                    || m_mDriverVersion.equals("0.0.0.0"))
+                m_mDriverVersion = mDriverVersion;
             return;
         }
-        m_bDriverIsOK = mDriverIsOK;
-        m_szDriverVersion = mDriverVersion;
-        m_bDriverInited = true;
+        m_mDriverIsOK = mDriverIsOK;
+        m_mDriverVersion = mDriverVersion;
+        m_mDriverInited = true;
     }
 
     public static boolean driverInited() {
-        return m_bDriverInited;
+        return m_mDriverInited;
     }
 
     public static boolean driverIsUsable() {
-        return m_bDriverIsOK;
+        return m_mDriverIsOK;
     }
 
     public static String driverVersion() {
-        if (m_szDriverVersion.equals(""))
+        if (m_mDriverVersion.equals(""))
             return "0.0.0.0";
-        return m_szDriverVersion;
+        return m_mDriverVersion;
     }
     /*************************************************************************************************************/
 }

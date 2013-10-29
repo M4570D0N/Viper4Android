@@ -201,13 +201,8 @@ public class ShellCommand {
 
         try {
             Log.i("ViPER4Android_ShellCommand", "Starting system shell");
-            m_psShellProcess = Runtime.getRuntime().exec("sh"); /*
-                                                                 * Maybe we
-                                                                 * should parse
-                                                                 * init.rc to
-                                                                 * find out the
-                                                                 * $PATH
-                                                                 */
+            /* Maybe we should parse init.rc to find out the $PATH */
+            m_psShellProcess = Runtime.getRuntime().exec("sh");
         } catch (IOException ioe) {
             Log.i("ViPER4Android_ShellCommand",
                     "Start system shell failed, msg = " + ioe.getMessage());
@@ -537,7 +532,7 @@ public class ShellCommand {
         return true;
     }
 
-    public static int setLastReturnValue() {
+    public static int getLastReturnValue() {
         clearStdOutAndErr();
         /* Lets print the last command's exit value to stdout */
         if (!sendShellCommandPreserveOut("echo $?", 1.0f))

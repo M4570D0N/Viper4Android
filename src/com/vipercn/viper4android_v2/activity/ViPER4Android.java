@@ -520,7 +520,7 @@ public final class ViPER4Android extends FragmentActivity {
         boolean mEnableNotify = preferences.getBoolean("viper4android.settings.show_notify_icon", false);
         String mDriverMode = preferences.getString("viper4android.settings.compatiblemode", "global");
 
-    	/* Just for debug */
+        /* Just for debug */
         String mLockedEffect = preferences.getString("viper4android.settings.lock_effect", "none");
         Log.i("ViPER4Android", "lock_effect = " + mLockedEffect);
         /******************/
@@ -748,7 +748,7 @@ public final class ViPER4Android extends FragmentActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String mProfilePath = StaticEnvironment.getV4AProfilePath();
                         Log.i("ViPER4Android", "Load effect profile, current page = " + mCurrentPage);
-                        String[] mPreferenceName = new String[3];
+                        String[] mPreferenceName = new String[4];
                         mPreferenceName[0] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".headset";
                         mPreferenceName[1] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".speaker";
                         mPreferenceName[2] = ViPER4Android.SHARED_PREFERENCES_BASENAME + ".bluetooth";

@@ -83,7 +83,7 @@ public class IrsUtils {
         }
     }
 
-    public boolean loadIRS(String mIRSPathName) {
+    public boolean loadIrs(String mIRSPathName) {
         if (mIRSPathName == null)
             return false;
         if (mIRSPathName.equals(""))
