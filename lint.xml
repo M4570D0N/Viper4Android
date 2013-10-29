@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
-    <!-- Suppress UsesMinSdkAttributes since we know what version we are building for -->
-    <issue id="UsesMinSdkAttributes" severity="ignore" />
-
     <issue id="LintError" severity="ignore" />
+    <issue id="UsesMinSdkAttributes" severity="ignore" />
 </lint>

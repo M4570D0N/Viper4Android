@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+
 #include "gsm610_priv.h"
 
 #define saturate(x) \
@@ -171,7 +172,7 @@ longword gsm_L_asr (longword a, int n) {
 }
 
 /*
- *word gsm_asr (word a, int n)
+ *word gsm_asr (word a, int n) {
  *    if (n >= 16) return -(a < 0);
  *    if (n <= -16) return 0;
  *    if (n < 0) return a << -n;

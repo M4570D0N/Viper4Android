@@ -49,11 +49,9 @@ static sf_count_t vox_read_d(SF_PRIVATE *psf, double *ptr, sf_count_t len);
 static sf_count_t vox_write_s(SF_PRIVATE *psf, const short *ptr, sf_count_t len);
 static sf_count_t vox_write_i(SF_PRIVATE *psf, const int *ptr, sf_count_t len);
 static sf_count_t vox_write_f(SF_PRIVATE *psf, const float *ptr, sf_count_t len);
-static sf_count_t vox_write_d(SF_PRIVATE *psf, const double *ptr,
-                sf_count_t len);
+static sf_count_t vox_write_d(SF_PRIVATE *psf, const double *ptr, sf_count_t len);
 
-static int vox_read_block(SF_PRIVATE *psf, IMA_OKI_ADPCM *pvox, short *ptr,
-                int len);
+static int vox_read_block(SF_PRIVATE *psf, IMA_OKI_ADPCM *pvox, short *ptr, int len);
 
 /*------------------------------------------------------------------------------
  */
@@ -62,8 +60,7 @@ static int codec_close(SF_PRIVATE * psf) {
     IMA_OKI_ADPCM * p = (IMA_OKI_ADPCM *) psf->codec_data;
 
     if (p->errors)
-        psf_log_printf(psf, "*** Warning : ADPCM state errors: %d\n",
-                        p->errors);
+        psf_log_printf(psf, "*** Warning : ADPCM state errors: %d\n", p->errors);
     return p->errors;
 } /* code_close */
 

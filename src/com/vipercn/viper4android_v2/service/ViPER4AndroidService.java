@@ -60,7 +60,7 @@ public class ViPER4AndroidService extends Service {
     private class V4ADSPModule {
         private final UUID EFFECT_TYPE_NULL =
                 UUID.fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
-        public AudioEffect mInstance = null;
+        public AudioEffect mInstance;
 
         public V4ADSPModule(int mAudioSession) {
             try {
@@ -503,15 +503,15 @@ public class ViPER4AndroidService extends Service {
      */
 
     private final LocalBinder mBinder = new LocalBinder();
-    protected boolean mUseHeadset = false;
-    protected boolean mUseBluetooth = false;
-    protected boolean mUseUSB = false;
+    protected boolean mUseHeadset;
+    protected boolean mUseBluetooth;
+    protected boolean mUseUSB;
     protected String mPreviousMode = "none";
     private float[] mOverriddenEqualizerLevels;
 
-    private boolean mServicePrepared = false;
-    private boolean mDriverIsReady = false;
-    private V4ADSPModule mGeneralFX = null;
+    private boolean mServicePrepared;
+    private boolean mDriverIsReady;
+    private V4ADSPModule mGeneralFX;
     private SparseArray<V4ADSPModule> mGeneralFXList = new SparseArray<V4ADSPModule>();
     private ResourceMutex mV4AMutex = new ResourceMutex();
 
@@ -552,20 +552,20 @@ public class ViPER4AndroidService extends Service {
         }
     };
 
-    private boolean bMediaMounted = false;
-    private final Timer tmMediaStatusTimer = new Timer();
-    private TimerTask ttMediaStatusTimer = new TimerTask() {
+    private boolean mediaMounted;
+    private final Timer mediaStatusTimer = new Timer();
+    private TimerTask mediaTimerTask = new TimerTask() {
         @Override
         public void run() {
             /* This is the *best* way to solve the fragmentation of android system */
             /* Use a media mounted broadcast is not safe */
 
             if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-                bMediaMounted = false;
+                mediaMounted = false;
             else {
-                if (!bMediaMounted) {
+                if (!mediaMounted) {
                     Log.i("ViPER4Android", "Media mounted, now updating parameters");
-                    bMediaMounted = true;
+                    mediaMounted = true;
                     updateSystem(false);
                 }
             }
@@ -800,7 +800,7 @@ public class ViPER4AndroidService extends Service {
             mServicePrepared = true;
 
             tmDrvStatusCommTimer.schedule(ttDrvStatusCommTimer, 60000, 60000);
-            tmMediaStatusTimer.schedule(ttMediaStatusTimer, 15000, 60000);  /* First is 15 secs, then 60 secs */
+            mediaStatusTimer.schedule(mediaTimerTask, 15000, 60000);  /* First is 15 secs, then 60 secs */
         } catch (Exception e) {
             mServicePrepared = false;
             cancelNotification();
@@ -816,7 +816,7 @@ public class ViPER4AndroidService extends Service {
 
         try {
             tmDrvStatusCommTimer.cancel();
-            tmMediaStatusTimer.cancel();
+            mediaStatusTimer.cancel();
 
             if (Build.VERSION.SDK_INT < 18)
                 stopForeground(true);

@@ -16,6 +16,8 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.vipercn.viper4android_v2.R;
+import com.vipercn.viper4android_v2.preference.Biquad;
+import com.vipercn.viper4android_v2.preference.Complex;
 
 public class EqualizerSurface extends SurfaceView {
     private static int MIN_FREQ = 10;
@@ -98,7 +100,6 @@ public class EqualizerSurface extends SurfaceView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
         buildLayer();
     }
@@ -110,6 +111,7 @@ public class EqualizerSurface extends SurfaceView {
      * @param intensity desired physical intensity of color component
      * @param alpha alpha value of color component
      */
+    @SuppressWarnings("unused")
     private static int gamma(float intensity, float alpha) {
         /* intensity = (component * alpha)^2.2
          * <=>

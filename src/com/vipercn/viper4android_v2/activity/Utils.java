@@ -30,50 +30,48 @@ import java.util.StringTokenizer;
 
 public class Utils {
     public static class CpuInfo {
-        private boolean m_bCPUHasNEON = false;
-        private boolean m_bCPUHasVFP = false;
+        private boolean m_bCPUHasNEON;
+        private boolean m_bCPUHasVFP;
 
         // Lets read /proc/cpuinfo in java
         private boolean readCPUInfo() {
             String mCPUInfoFile = "/proc/cpuinfo";
-            FileReader frCPUInfoReader = null;
-            BufferedReader brReader = null;
+            FileReader cpuReader = null;
+            BufferedReader bufferReader = null;
 
             m_bCPUHasNEON = false;
             m_bCPUHasVFP = false;
 
             // Find "Features" line, extract neon and vfp
             try {
-                frCPUInfoReader = new FileReader(mCPUInfoFile);
-                brReader = new BufferedReader(frCPUInfoReader);
+                cpuReader = new FileReader(mCPUInfoFile);
+                bufferReader = new BufferedReader(cpuReader);
                 while (true) {
-                    String mLine = brReader.readLine();
-                    if (mLine == null) break;
-                    mLine = mLine.trim();
-                    if (mLine.startsWith("Features")) {
-                        Log.i("ViPER4Android_Utils", "CpuInfo[java] = <" + mLine + ">");
-                        StringTokenizer stBlock = new StringTokenizer(mLine);
+                    String line = bufferReader.readLine();
+                    if (line == null) break;
+                    line = line.trim();
+                    if (line.startsWith("Features")) {
+                        Log.i("ViPER4Android_Utils", "CpuInfo[java] = <" + line + ">");
+                        StringTokenizer stBlock = new StringTokenizer(line);
                         while (stBlock.hasMoreElements()) {
                             String mFeature = stBlock.nextToken();
                             if (mFeature != null) {
                                 if (mFeature.equalsIgnoreCase("neon")) m_bCPUHasNEON = true;
                                 else if (mFeature.equalsIgnoreCase("vfp")) m_bCPUHasVFP = true;
                             }
-                            continue;
                         }
                     }
                 }
-                brReader.close();
-                frCPUInfoReader.close();
+                bufferReader.close();
+                cpuReader.close();
 
-                Log.i("ViPER4Android_Utils", "CpuInfo[java] = NEON:" + m_bCPUHasNEON + ", VFP:" + m_bCPUHasVFP);
-                if (!m_bCPUHasNEON && !m_bCPUHasVFP)
-                    return false;
-                return true;
+                Log.i("ViPER4Android_Utils", "CpuInfo[java] = NEON:"
+                        + m_bCPUHasNEON + ", VFP:" + m_bCPUHasVFP);
+                return !(!m_bCPUHasNEON && !m_bCPUHasVFP);
             } catch (IOException e) {
                 try {
-                    if (brReader != null) brReader.close();
-                    if (frCPUInfoReader != null) frCPUInfoReader.close();
+                    if (bufferReader != null) bufferReader.close();
+                    if (cpuReader != null) cpuReader.close();
                     return false;
                 } catch (Exception ex) {
                     return false;
@@ -82,7 +80,7 @@ public class Utils {
         }
 
         // Lets read /proc/cpuinfo in jni
-        private void ReadCPUInfoJni() {
+        private void readCPUInfoJni() {
             m_bCPUHasNEON = V4AJniInterface.isCPUSupportNEON();
             m_bCPUHasVFP = V4AJniInterface.isCPUSupportVFP();
         }
@@ -92,14 +90,14 @@ public class Utils {
             m_bCPUHasNEON = false;
             m_bCPUHasVFP = false;
             if (!readCPUInfo())
-                ReadCPUInfoJni();
+                readCPUInfoJni();
         }
 
-        public boolean HasNEON() {
+        public boolean hasNEON() {
             return m_bCPUHasNEON;
         }
 
-        public boolean HasVFP() {
+        public boolean hasVFP() {
             return m_bCPUHasVFP;
         }
     }
@@ -123,24 +121,24 @@ public class Utils {
         }
     }
 
-    // Download a file from internet
+    // Download a file from Internet
     public static boolean downloadFile(String mURL, String mFileName, String mStorePath) {
         try {
             URL url = new URL(mURL);
-            URLConnection conn = url.openConnection();
-            conn.connect();
-            InputStream is = conn.getInputStream();
-            if (conn.getContentLength() <= 0) return false;
-            if (is == null) return false;
+            URLConnection connection = url.openConnection();
+            connection.connect();
+            InputStream stream = connection.getInputStream();
+            if (connection.getContentLength() <= 0) return false;
+            if (stream == null) return false;
             FileOutputStream fos = new FileOutputStream(mStorePath + mFileName);
 
             byte[] buf = new byte[1024];
             do {
-                int numread = is.read(buf);
+                int numread = stream.read(buf);
                 if (numread == -1) break;
                 fos.write(buf, 0, numread);
             } while (true);
-            is.close();
+            stream.close();
 
             return true;
         } catch (Exception e) {
@@ -149,22 +147,22 @@ public class Utils {
     }
 
     // Check a file with checksum
-    public static boolean fileChecksum(String mFilePathName, String mCheckSum) {
+    public static boolean fileChecksum(String filePathName, String mCheckSum) {
         long checkSum = 0;
 
         try {
-            FileInputStream fis = new FileInputStream(mFilePathName);
+            FileInputStream fis = new FileInputStream(filePathName);
             byte[] buf = new byte[1024];
             do {
-                int numread = fis.read(buf);
-                if (numread == -1) break;
-                for (int idx = 0; idx < numread; idx++)
+                int numRead = fis.read(buf);
+                if (numRead == -1)
+                    break;
+                for (int idx = 0; idx < numRead; idx++)
                     checkSum = checkSum + (long) buf[idx];
             } while (true);
             fis.close();
             String mNewChecksum = Long.toString(checkSum);
-            if (mCheckSum.equals(mNewChecksum)) return true;
-            else return false;
+            return mCheckSum.equals(mNewChecksum);
         } catch (Exception e) {
             return false;
         }
@@ -174,7 +172,8 @@ public class Utils {
     public static void getFileNameList(File path, String fileExt, ArrayList<String> fileList) {
         if (path.isDirectory()) {
             File[] files = path.listFiles();
-            if (null == files) return;
+            if (null == files)
+                return;
             for (File file : files) getFileNameList(file, fileExt, fileList);
         } else {
             String filePath = path.getAbsolutePath();
@@ -189,10 +188,10 @@ public class Utils {
         try {
             FileInputStream fisInput = new FileInputStream(mProfileFileName);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
-            BufferedReader brInput = new BufferedReader(isrInput);
+            BufferedReader bufferInput = new BufferedReader(isrInput);
             String mProfileName = "";
             while (true) {
-                String mLine = brInput.readLine();
+                String mLine = bufferInput.readLine();
                 if (mLine == null) break;
                 if (mLine.startsWith("#")) continue;
 
@@ -203,7 +202,7 @@ public class Utils {
                     break;
                 }
             }
-            brInput.close();
+            bufferInput.close();
             isrInput.close();
             fisInput.close();
 
@@ -217,12 +216,12 @@ public class Utils {
     public static ArrayList<String> getProfileList(String mProfileDir) {
         try {
             File fProfileDirHandle = new File(mProfileDir);
-            ArrayList<String> mProfileList = new ArrayList<String>();
-            getFileNameList(fProfileDirHandle, ".prf", mProfileList);
+            ArrayList<String> profileList = new ArrayList<String>();
+            getFileNameList(fProfileDirHandle, ".prf", profileList);
 
             ArrayList<String> mProfileNameList = new ArrayList<String>();
-            for (String profileList : mProfileList) {
-                String mFileName = mProfileDir + profileList;
+            for (String mProfileList : profileList) {
+                String mFileName = mProfileDir + mProfileList;
                 String mName = getProfileName(mFileName);
                 mProfileNameList.add(mName.trim());
             }
@@ -237,12 +236,12 @@ public class Utils {
     public static boolean checkProfileExists(String mProfileName, String mProfileDir) {
         try {
             File fProfileDirHandle = new File(mProfileDir);
-            ArrayList<String> mProfileList = new ArrayList<String>();
-            getFileNameList(fProfileDirHandle, ".prf", mProfileList);
+            ArrayList<String> profileList = new ArrayList<String>();
+            getFileNameList(fProfileDirHandle, ".prf", profileList);
 
             boolean mFoundProfile = false;
-            for (String profileList : mProfileList) {
-                String mFileName = mProfileDir + profileList;
+            for (String mProfileList : profileList) {
+                String mFileName = mProfileDir + mProfileList;
                 String mName = getProfileName(mFileName);
                 if (mProfileName.trim().equalsIgnoreCase(mName.trim())) {
                     mFoundProfile = true;
@@ -257,14 +256,15 @@ public class Utils {
     }
 
     // Load profile from file
-    public static boolean loadProfile(String mProfileName, String mProfileDir, String mPreferenceName, Context ctx) {
+    public static boolean loadProfile(String mProfileName, String mProfileDir,
+            String mPreferenceName, Context ctx) {
         try {
             File fProfileDirHandle = new File(mProfileDir);
-            ArrayList<String> mProfileFileList = new ArrayList<String>();
-            getFileNameList(fProfileDirHandle, ".prf", mProfileFileList);
+            ArrayList<String> profileFileList = new ArrayList<String>();
+            getFileNameList(fProfileDirHandle, ".prf", profileFileList);
             String mProfileFileName = "";
-            for (String aMProfileFileList : mProfileFileList) {
-                String mFileName = mProfileDir + aMProfileFileList;
+            for (String mProfileFileList : profileFileList) {
+                String mFileName = mProfileDir + mProfileFileList;
                 String mName = getProfileName(mFileName);
                 if (mProfileName.trim().equalsIgnoreCase(mName.trim())) {
                     mProfileFileName = mFileName;
@@ -277,10 +277,10 @@ public class Utils {
             if (preferences != null) {
                 FileInputStream fisInput = new FileInputStream(mProfileFileName);
                 InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
-                BufferedReader brInput = new BufferedReader(isrInput);
+                BufferedReader bufferInput = new BufferedReader(isrInput);
                 Editor e = preferences.edit();
                 while (true) {
-                    String mLine = brInput.readLine();
+                    String mLine = bufferInput.readLine();
                     if (mLine == null) break;
                     if (mLine.startsWith("#")) continue;
 
@@ -298,12 +298,13 @@ public class Utils {
                     }
                 }
                 e.commit();
-                brInput.close();
+                bufferInput.close();
                 isrInput.close();
                 fisInput.close();
 
                 return true;
-            } else return false;
+            } else
+                return false;
         } catch (Exception e) {
             return false;
         }
@@ -427,82 +428,89 @@ public class Utils {
 
     // Modify audio_effects.conf
     public static boolean modifyFXConfig(String mInputFile, String mOutputFile) {
-        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = " + mInputFile + ", output = " + mOutputFile);
+        Log.i("ViPER4Android_Utils", "Editing audio configuration, input = "
+                + mInputFile + ", output = " + mOutputFile);
         try {
-            long lInputFileLength = getFileLength(mInputFile);
+            long inputFileLength = getFileLength(mInputFile);
 
             // Create reading and writing stuff
             FileInputStream fisInput = new FileInputStream(mInputFile);
             FileOutputStream fosOutput = new FileOutputStream(mOutputFile);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "ASCII");
             OutputStreamWriter oswOutput = new OutputStreamWriter(fosOutput, "ASCII");
-            BufferedReader brInput = new BufferedReader(isrInput);
-            BufferedWriter bwOutput = new BufferedWriter(oswOutput);
+            BufferedReader bufferInput = new BufferedReader(isrInput);
+            BufferedWriter bufferOutput = new BufferedWriter(oswOutput);
 
             // Check whether the file has already modified
-            boolean bConfigModified = false;
-            brInput.mark((int) lInputFileLength);
+            boolean configModified = false;
+            bufferInput.mark((int) inputFileLength);
             do {
-                String mLine = brInput.readLine();
-                if (mLine == null) break;
-                if (mLine.startsWith("#")) continue;
+                String mLine = bufferInput.readLine();
+                if (mLine == null)
+                    break;
+                if (mLine.trim().startsWith("#"))
+                    continue;
                 /* This is v4a effect uuid */
-                if (mLine.toLowerCase(Locale.US).contains("41d3c987-e6cf-11e3-a88a-11aba5d5c51b")) {
-                    Log.i("ViPER4Android_Utils", "Source file has been modified, line = " + mLine);
-                    bConfigModified = true;
+                if (mLine.toLowerCase(Locale.US).contains(
+                        "41d3c987-e6cf-11e3-a88a-11aba5d5c51b")) {
+                    Log.i("ViPER4Android_Utils",
+                            "Source file has been modified, line = " + mLine);
+                    configModified = true;
                     break;
                 }
             } while (true);
 
             boolean bLibraryAppend = false;
             boolean bEffectAppend = false;
-            if (bConfigModified) {
+            if (configModified) {
                 // Already modified, just copy
-                brInput.reset();
+                bufferInput.reset();
                 do {
-                    String mLine = brInput.readLine();
-                    if (mLine == null) break;
-                    bwOutput.write(mLine + "\n");
+                    String mLine = bufferInput.readLine();
+                    if (mLine == null)
+                        break;
+                    bufferOutput.write(mLine + "\n");
                 } while (true);
-                bwOutput.flush();
+                bufferOutput.flush();
 
-                brInput.close();
+                bufferInput.close();
                 isrInput.close();
                 fisInput.close();
-                bwOutput.close();
+                bufferOutput.close();
                 oswOutput.close();
                 fosOutput.close();
 
                 return true;
             } else {
                 // Lets append v4a library and effect to configuration
-                brInput.reset();
+                bufferInput.reset();
                 do {
-                    String mLine = brInput.readLine();
+                    String mLine = bufferInput.readLine();
                     if (mLine == null) break;
                     if (mLine.trim().equalsIgnoreCase("libraries {") && !bLibraryAppend) {
                         // Append library
-                        bwOutput.write(mLine + "\n");
-                        bwOutput.write("  v4a_fx {\n");
-                        bwOutput.write("    path /system/lib/soundfx/libv4a_fx_ics.so\n");
-                        bwOutput.write("  }\n");
+                        bufferOutput.write(mLine + "\n");
+                        bufferOutput.write("  v4a_fx {\n");
+                        bufferOutput.write("    path /system/lib/soundfx/libv4a_fx_ics.so\n");
+                        bufferOutput.write("  }\n");
                         bLibraryAppend = true;
                     } else if (mLine.trim().equalsIgnoreCase("effects {") && !bEffectAppend) {
                         // Append effect
-                        bwOutput.write(mLine + "\n");
-                        bwOutput.write("  v4a_standard_fx {\n");
-                        bwOutput.write("    library v4a_fx\n");
-                        bwOutput.write("    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n");
-                        bwOutput.write("  }\n");
+                        bufferOutput.write(mLine + "\n");
+                        bufferOutput.write("  v4a_standard_fx {\n");
+                        bufferOutput.write("    library v4a_fx\n");
+                        bufferOutput.write("    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n");
+                        bufferOutput.write("  }\n");
                         bEffectAppend = true;
-                    } else bwOutput.write(mLine + "\n");
+                    } else
+                        bufferOutput.write(mLine + "\n");
                 } while (true);
-                bwOutput.flush();
+                bufferOutput.flush();
 
-                brInput.close();
+                bufferInput.close();
                 isrInput.close();
                 fisInput.close();
-                bwOutput.close();
+                bufferOutput.close();
                 oswOutput.close();
                 fosOutput.close();
 
@@ -539,7 +547,7 @@ public class Utils {
 
             myOutput = new FileOutputStream(outFileName);
             myInput = ctx.getAssets().open(mSourceName);
-            byte[] tBuffer = new byte[4096];  /* 4K page size */
+            byte[] tBuffer = new byte[4096]; /* 4K page size */
             int mLength = 0;
             while ((mLength = myInput.read(tBuffer)) > 0)
                 myOutput.write(tBuffer, 0, mLength);
@@ -576,7 +584,6 @@ public class Utils {
                 RootTools.closeAllShells();
             }
         } catch (Exception e) {
-            return;
         }
     }
 

@@ -64,7 +64,7 @@ int g723_16_encoder(int sl, G72x_STATE *state_ptr) {
     /* Since quantize() only produces a three level output
      * (1, 2, or 3), we must create the fourth one on our own
      */
-    if (i == 3 /* i code for the zero region */
+    if (i == 3) /* i code for the zero region */
     if ((d & 0x8000) == 0) /* If d > 0, i=3 isn't right... */
         i = 0;
 

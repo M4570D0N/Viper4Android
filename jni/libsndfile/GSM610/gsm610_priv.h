@@ -24,7 +24,7 @@ struct gsm_state {
 
     word u[8] ;         /* short_term_aly_filter.c */
     word LARpp[2][8];   /*                         */
-    word j              /*                         */
+    word j;             /*                         */
 
     word ltp_cut;   /* long_term.c, LTP crosscorr.  */
     word nrp;       /* 40 */ /* long_term.c, synthesis */

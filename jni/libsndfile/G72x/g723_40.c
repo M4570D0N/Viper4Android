@@ -5,7 +5,7 @@
  * Maps G.723_40 code word to ructeconstructed scale factor normalized log
  * magnitude values.
  */
-static short dqlntab[32] = {
+static short _dqlntab[32] = {
     -2048, -66, 28, 104, 169, 224, 274, 318, 358, 395, 429,
     459, 488, 514, 539, 566, 566, 539, 514, 488, 459, 429,
     395, 358, 318, 274, 224, 169, 104, 28, -66, -2048

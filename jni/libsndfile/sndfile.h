@@ -334,7 +334,7 @@ typedef struct {
 
     float bpm;
     /* suggestion, as it can be calculated using other fields:*/
-    /* file's lenght, file's sampleRate and our time_sig_den*/
+    /* file's length, file's sampleRate and our time_sig_den*/
     /* -> bpms are always the amount of _quarter notes_ per minute */
 
     int root_key;   /* MIDI note, or -1 for None */

@@ -109,7 +109,7 @@
 #define SF_MAX_CHANNELS 256
 
 /*
- * Macros for spliting the format file of SF_INFI into contrainer type,
+ * Macros for splitting the format file of SF_INFI into container type,
  * codec type and endian-ness.
  */
 #define SF_CONTAINER(x) ((x) & SF_FORMAT_TYPEMASK)
@@ -141,7 +141,7 @@ enum {
 
 /*---------------------------------------------------------------------------------------
  * Formats that may be supported at some time in the future.
- * When support is finalised, these values move to src/sndfile.h.
+ * When support is finalized, these values move to src/sndfile.h.
  */
 
 enum {
@@ -285,8 +285,8 @@ typedef struct sf_private_tag {
             double dbuf[SF_BUFFER_LEN / sizeof(double)];
         #if (defined (SIZEOF_INT64_T) && (SIZEOF_INT64_T == 8))
             int64_t lbuf[SF_BUFFER_LEN / sizeof(int64_t)];
-        else
-            long lbuf [SF_BUFFER_LEN / sizeof (double)];
+        #else
+            long lbuf[SF_BUFFER_LEN / sizeof (double)];
         #endif
             float fbuf[SF_BUFFER_LEN / sizeof(float)];
             int ibuf[SF_BUFFER_LEN / sizeof(int)];

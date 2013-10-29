@@ -11,7 +11,7 @@ LOCAL_REQUIRED_MODULES := libV4AJniUtils
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_PACKAGE_NAME := ViPER4Android
+LOCAL_PACKAGE_NAME := ViPER4Android_v2
 
 LOCAL_OVERRIDES_PACKAGES := MusicFX
 
@@ -29,5 +29,5 @@ LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := roottools:libs/RootTools-2.6.jar
 
 include $(BUILD_MULTI_PREBUILT)
 
-# Use the folloing include to make our test apk.
+# Use the following include to make our test apk.
 include $(call all-makefiles-under,$(LOCAL_PATH))
