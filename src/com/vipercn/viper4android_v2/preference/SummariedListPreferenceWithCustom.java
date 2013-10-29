@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.vipercn.viper4android_v2.R;
+import com.vipercn.viper4android_v2.activity.StaticEnvironment;
 import com.vipercn.viper4android_v2.activity.Utils;
 
 import java.io.File;
@@ -28,13 +29,13 @@ public class SummariedListPreferenceWithCustom extends ListPreference {
                 setEntries(new String[0]);
                 setEntryValues(new String[0]);
                 String tip = getContext().getResources().getString(R.string.text_ir_dir_isempty);
-                tip = String.format(tip, Environment.getExternalStorageDirectory() + "/ViPER4Android/Kernel/");
+                tip = String.format(tip, StaticEnvironment.getV4AKernelPath());
                 Toast.makeText(getContext(), tip, Toast.LENGTH_LONG).show();
                 super.onPrepareDialogBuilder(builder);
                 return;
             }
 
-            final String kernelPath = Environment.getExternalStorageDirectory() + "/ViPER4Android/Kernel/";
+            final String kernelPath = StaticEnvironment.getV4AKernelPath();
             File kernelFile = new File(kernelPath);
 
             if (!kernelFile.exists()) {
@@ -49,7 +50,7 @@ public class SummariedListPreferenceWithCustom extends ListPreference {
 
             if (kernelList.isEmpty()) {
                 String tip = getContext().getResources().getString(R.string.text_ir_dir_isempty);
-                tip = String.format(tip, Environment.getExternalStorageDirectory() + "/ViPER4Android/Kernel/");
+                tip = String.format(tip, StaticEnvironment.getV4AKernelPath());
                 Toast.makeText(getContext(), tip, Toast.LENGTH_LONG).show();
             } else Collections.sort(kernelList);
 
@@ -68,7 +69,7 @@ public class SummariedListPreferenceWithCustom extends ListPreference {
             setEntries(new String[0]);
             setEntryValues(new String[0]);
             String tip = getContext().getResources().getString(R.string.text_ir_dir_isempty);
-            tip = String.format(tip, Environment.getExternalStorageDirectory() + "/ViPER4Android/Kernel/");
+            tip = String.format(tip, StaticEnvironment.getV4AKernelPath());
             Toast.makeText(getContext(), tip, Toast.LENGTH_LONG).show();
             super.onPrepareDialogBuilder(builder);
         }

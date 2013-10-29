@@ -12,6 +12,11 @@
             android:disableDependentsState="false"
             android:title="@string/pref_dsp_enable" />
 
+        <CheckBoxPreference
+            android:key="viper4android.global.forceenable.enable"
+            android:disableDependentsState="false"
+            android:title="@string/pref_force_enable_text" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -22,7 +27,7 @@
             android:summaryOn="@string/pref_playback_summary_on"
             android:summaryOff="@string/pref_playback_summary_off"
             android:disableDependentsState="false"
-           android:title="@string/pref_dsp_enable"/>
+            android:title="@string/pref_dsp_enable"/>
 
         <com.vipercn.viper4android_v2.preference.SummariedListPreference
             android:entries="@array/playbackgain_ratio"
@@ -39,6 +44,7 @@
             android:defaultValue="400"
             android:title="@string/pref_playback_maxgain"
             android:entryValues="@array/multi_factor_values"/>
+
         <com.vipercn.viper4android_v2.preference.SummariedListPreference
             android:entries="@array/output_db"
             android:dialogTitle="@string/pref_effect_title"
@@ -88,6 +94,13 @@
             android:title="@string/pref_convolver_knl"
             android:key="viper4android.headphonefx.convolver.kernel"/>
 
+        <com.vipercn.viper4android_v2.preference.SummariedListPreference
+            android:defaultValue="0"
+            android:dialogTitle="@string/pref_convolver_crosschannel_title"
+            android:entries="@array/conv_cross_channel"
+            android:entryValues="@array/conv_cross_channel_values"
+            android:title="@string/pref_convolver_crosschannel"
+            android:key="viper4android.headphonefx.convolver.crosschannel"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -350,6 +363,7 @@
             android:defaultValue="100"
             android:title="@string/pref_fx_limiter_threshold"
             android:entryValues="@array/output_db_values"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

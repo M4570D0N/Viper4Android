@@ -23,6 +23,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import com.vipercn.viper4android_v2.activity.IrsUtils;
+import com.vipercn.viper4android_v2.activity.StaticEnvironment;
 import com.vipercn.viper4android_v2.activity.V4AJniInterface;
 import com.vipercn.viper4android_v2.activity.ViPER4Android;
 
@@ -191,7 +193,7 @@ public class ViPER4AndroidService extends Service {
             }
         }
 
-        @SuppressWarnings("unused")  /* For future use */
+        @SuppressWarnings("unused")
         public void setParameter_px4_vxString(int param, String szData) {
             int stringLen = szData.length();
             byte[] stringBytes = szData.getBytes(Charset.forName("US-ASCII"));
@@ -213,7 +215,7 @@ public class ViPER4AndroidService extends Service {
                 byte[] p = intToByteArray(param);
                 byte[] v = new byte[4];
                 getParameter_Native(p, v);
-                int val = byteArrayToInt(v);
+                int val = byteArrayToInt(v, 0);
                 return val;
             } catch (Exception e) {
                 Log.i("ViPER4Android", "getParameter_px4_vx4x1: " + e.getMessage());

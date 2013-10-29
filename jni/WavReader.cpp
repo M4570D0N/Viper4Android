@@ -60,21 +60,21 @@ uint32_t WavReader_R32::SeekToChunk(int8_t cCode[4], uint8_t uiCodeLen) {
 
 uint32_t WavReader_R32::ReadUINT32() {
     if (m_pFileHandle == NULL) return 0;
-    uint8_t szBuffer[4];
-    uint32_t nReadSize = (uint32_t)fread(szBuffer, sizeof(int8_t), 4, m_pFileHandle);
+    uint8_t mBuffer[4];
+    uint32_t nReadSize = (uint32_t)fread(mBuffer, sizeof(int8_t), 4, m_pFileHandle);
     if (nReadSize != 4) return 0;
-    return ((uint32_t)szBuffer[0]) |
-           ((uint32_t)szBuffer[1] <<  8) |
-           ((uint32_t)szBuffer[2] << 16) |
-           ((uint32_t)szBuffer[3] << 24);
+    return ((uint32_t)mBuffer[0]) |
+           ((uint32_t)mBuffer[1] <<  8) |
+           ((uint32_t)mBuffer[2] << 16) |
+           ((uint32_t)mBuffer[3] << 24);
 }
 
 uint16_t WavReader_R32::ReadUINT16() {
     if (m_pFileHandle == NULL) return 0;
-    uint8_t szBuffer[2];
-    uint32_t nReadSize = (uint32_t)fread(szBuffer, sizeof(int8_t), 2, m_pFileHandle);
+    uint8_t mBuffer[2];
+    uint32_t nReadSize = (uint32_t)fread(mBuffer, sizeof(int8_t), 2, m_pFileHandle);
     if (nReadSize != 2) return 0;
-    return ((uint16_t)szBuffer[0]) | ((uint16_t)szBuffer[1] <<  8);
+    return ((uint16_t)mBuffer[0]) | ((uint16_t)mBuffer[1] <<  8);
 }
 
 void WavReader_R32::ConvertInt8ToFloat32(uint8_t *ptrInput, int32_t nSamplesCount, int32_t nChannels, float *ptrOutput) {

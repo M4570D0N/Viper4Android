@@ -18,6 +18,9 @@ public class V4AJniInterface {
         }
     }
 
+    /* Library Check Utils */
+    private native static int checkLibraryUsable();
+
     /* CPU Check Utils */
     private native static int checkCPUHasNEON();
     private native static int checkCPUHasVFP();
@@ -26,6 +29,17 @@ public class V4AJniInterface {
     private native static int[] getImpulseResponseInfo(byte[] mIRFileName);
     private native static byte[] readImpulseResponse(byte[] mIRFileName);
     private native static int[] hashImpulseResponse(byte[] mBuffer, int mBufferSize);
+
+    /* This method is just making sure jni has been loaded */
+    public static boolean checkLibrary() {
+        if (!m_JniLoadOK) return false;
+        int mUsable = checkLibraryUsable();
+        return mUsable == 1;
+    }
+
+    public static boolean isLibraryUsable() {
+        return m_JniLoadOK;
+    }
 
     public static boolean isCPUSupportNEON() {
         if (!m_JniLoadOK) return false;
@@ -44,6 +58,7 @@ public class V4AJniInterface {
     }
 
     public static int[] getImpulseResponseInfoArray(String mIRFileName) {
+        if (!m_JniLoadOK) return null;
         // Convert unicode string to multi-byte string
         byte[] stringBytes = mIRFileName.getBytes(Charset.forName("US-ASCII"));
         if (stringBytes == null) return null;
@@ -52,6 +67,7 @@ public class V4AJniInterface {
     }
 
     public static byte[] readImpulseResponseToArray(String mIRFileName) {
+        if (!m_JniLoadOK) return null;
         // Convert unicode string to multi-byte string
         byte[] stringBytes = mIRFileName.getBytes(Charset.forName("US-ASCII"));
         if (stringBytes == null) return null;
@@ -60,6 +76,7 @@ public class V4AJniInterface {
     }
 
     public static int[] getHashImpulseResponseArray(byte[] mBuffer) {
+        if (!m_JniLoadOK) return null;
         if (mBuffer == null) return null;
         // Call native
         return hashImpulseResponse(mBuffer, mBuffer.length);
