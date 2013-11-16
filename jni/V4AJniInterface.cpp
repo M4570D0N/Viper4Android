@@ -6,6 +6,17 @@
 #include "V4AJniInterface.h"
 #include "sndfile.h"
 
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "ViPER4Android_v2", __VA_ARGS__)
+
+JNIEXPORT jint JNI_onLoad(JavaVM* vm, void* reserved) {
+    LOGI("Loading JNI ...");
+    return JNI_VERSION_1_1;
+}
+
+JNIEXPORT void JNI_onUnload(JavaVM* vm, void* reserved) {
+    LOGI("Unloading JNI ...");
+}
+
 JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_checkLibraryUsable (
     JNIEnv *env, jclass cls) {
         return (jint)1;
@@ -33,19 +44,19 @@ JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterfa
 }
 
 JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_getImpulseResponseInfo (
-    JNIEnv *env, jclass cls, jbyteArray jbaIRFileName ) {
+    JNIEnv *env, jclass cls, jbyteArray jbaIrFileName ) {
     /* return: [0] = Valid, [1] = Channels, [2] = Frames, [3] = Byte Length */
 
     // Get multi-bytes string
-    jsize nIRFileNameLength = env->GetArrayLength(jbaIRFileName);
-    if (nIRFileNameLength > 4095) return NULL;
-    jbyte *pIRFileNameBuffer = env->GetByteArrayElements(jbaIRFileName, 0);
+    jsize mIrFileNameLength = env->GetArrayLength(jbaIrFileName);
+    if (mIrFileNameLength > 4095) return NULL;
+    jbyte *pIRFileNameBuffer = env->GetByteArrayElements(jbaIrFileName, 0);
     if (pIRFileNameBuffer == NULL) return NULL;
-    char mIRFileName[4096];
-    memset(mIRFileName, 0, sizeof(mIRFileName));
-    memcpy(mIRFileName, pIRFileNameBuffer, nIRFileNameLength);
-    env->ReleaseByteArrayElements(jbaIRFileName, pIRFileNameBuffer, 0);
-    if (strlen(mIRFileName) <= 0) return NULL;
+    char mIrFileName[4096];
+    memset(mIrFileName, 0, sizeof(mIRFileName));
+    memcpy(mIrFileName, pIRFileNameBuffer, mIrFileNameLength);
+    env->ReleaseByteArrayElements(jbaIrFileName, pIRFileNameBuffer, 0);
+    if (strlen(mIrFileName) <= 0) return NULL;
 
     // Prepare return array
     jint iaIRInfo[4] = {0, 0, 0, 0};
@@ -85,22 +96,22 @@ JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniIn
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_readImpulseResponse (
-    JNIEnv *env, jclass cls, jbyteArray jbaIRFileName) {
+    JNIEnv *env, jclass cls, jbyteArray jIrFileName) {
     // Get multi-bytes string
-    jsize nIRFileNameLength = env->GetArrayLength(jbaIRFileName);
-    if (nIRFileNameLength > 4095) return NULL;
-    jbyte *pIRFileNameBuffer = env->GetByteArrayElements(jbaIRFileName, 0);
-    if (pIRFileNameBuffer == NULL) return NULL;
-    char mIRFileName[4096];
-    memset(mIRFileName, 0, sizeof(mIRFileName));
-    memcpy(mIRFileName, pIRFileNameBuffer, nIRFileNameLength);
-    env->ReleaseByteArrayElements(jbaIRFileName, pIRFileNameBuffer, 0);
-    if (strlen(mIRFileName) <= 0) return NULL;
+    jsize mIrFileNameLength = env->GetArrayLength(jIrFileName);
+    if (mIrFileNameLength > 4095) return NULL;
+    jbyte *pIrFileNameBuffer = env->GetByteArrayElements(jIrFileName, 0);
+    if (pIrFileNameBuffer == NULL) return NULL;
+    char mIrFileName[4096];
+    memset(mIrFileName, 0, sizeof(mIrFileName));
+    memcpy(mIrFileName, pIrFileNameBuffer, mIrFileNameLength);
+    env->ReleaseByteArrayElements(jIrFileName, pIrFileNameBuffer, 0);
+    if (strlen(mIrFileName) <= 0) return NULL;
 
-    // Lets deal with mIRFileName, use libsndfile
+    // Lets deal with mIrFileName, use libsndfile
     SF_INFO sfiIRInfo;
     memset(&sfiIRInfo, 0, sizeof(SF_INFO));
-    SNDFILE *sfIRFile = sf_open(mIRFileName, SFM_READ, &sfiIRInfo);
+    SNDFILE *sfIRFile = sf_open(mIrFileName, SFM_READ, &sfiIRInfo);
     if (sfIRFile == NULL) {
         // Open failed or invalid wave file
         return NULL;
@@ -125,50 +136,50 @@ JNIEXPORT jbyteArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniI
         sf_close(sfIRFile);
         return NULL;
     }
-    sf_count_t nReadFrames = sf_readf_float(sfIRFile, pFrameBuffer, sfiIRInfo.frames);
+    sf_count_t readFrames = sf_readf_float(sfIRFile, pFrameBuffer, sfiIRInfo.frames);
     sf_close(sfIRFile);
 
     // Sanity check
-    if (nReadFrames != sfiIRInfo.frames) {
+    if (readFrames != sfiIRInfo.frames) {
         delete [] pFrameBuffer;
         return NULL;
     }
 
     // Prepare return array
     jsize jsFrameBufferSize = sfiIRInfo.frames * sfiIRInfo.channels * sizeof(float);
-    jbyteArray jbaFrames = env->NewByteArray(jsFrameBufferSize);
-    if (jbaFrames == NULL) {
+    jbyteArray jFrames = env->NewByteArray(jsFrameBufferSize);
+    if (jFrames == NULL) {
         delete [] pFrameBuffer;
         return NULL;
     }
     const jbyte *jbBufferPointer = (const jbyte *)pFrameBuffer;
-    env->SetByteArrayRegion(jbaFrames, 0, jsFrameBufferSize, jbBufferPointer);
+    env->SetByteArrayRegion(jFrames, 0, jsFrameBufferSize, jbBufferPointer);
     delete [] pFrameBuffer;
-    return jbaFrames;
+    return jFrames;
 }
 
 extern uint32_t HashCRC32(uint8_t *ucpBuffer, uint32_t uiBufferSize);
 JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_hashImpulseResponse (
-    JNIEnv *env, jclass cls, jbyteArray jbaBuffer, jint nBufferSize) {
+    JNIEnv *env, jclass cls, jbyteArray jBuffer, jint nBufferSize) {
     /* return: [0] = Valid, [2] = Hash Code */
 
     // Extract input buffer
     if (nBufferSize <= 0) return NULL;
-    jsize nRealBufferLength = env->GetArrayLength(jbaBuffer);
+    jsize nRealBufferLength = env->GetArrayLength(jBuffer);
     if (nRealBufferLength != nBufferSize) return NULL;
-    jbyte *pBuffer = env->GetByteArrayElements(jbaBuffer, 0);
-    if (pBuffer == NULL) return NULL;
+    jbyte *mBuffer = env->GetByteArrayElements(jBuffer, 0);
+    if (mBuffer == NULL) return NULL;
 
     // Calc hash
-    uint32_t uiHash = HashCRC32((uint8_t *)pBuffer, (uint32_t)nBufferSize);
+    uint32_t uiHash = HashCRC32((uint8_t *)mBuffer, (uint32_t)nBufferSize);
 
     // Release resources
-    env->ReleaseByteArrayElements(jbaBuffer, pBuffer, 0);
+    env->ReleaseByteArrayElements(jBuffer, mBuffer, 0);
 
     // Prepare return array
-    jintArray jiaHashInfo = env->NewIntArray(2);
-    if (jiaHashInfo == NULL) return NULL;
+    jintArray jHashInfo = env->NewIntArray(2);
+    if (jHashInfo == NULL) return NULL;
     jint iaHashInfo[2] = {1, (jint)uiHash};
-    env->SetIntArrayRegion(jiaHashInfo, 0, 2, iaHashInfo);
-    return jiaHashInfo;
+    env->SetIntArrayRegion(jHashInfo, 0, 2, iaHashInfo);
+    return jHashInfo;
 }

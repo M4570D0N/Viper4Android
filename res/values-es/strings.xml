@@ -168,12 +168,6 @@
     <string name="text_profileload_err">No se puede cargar el perfil.</string>
     <string name="text_rwsd_error">No se puede leer/escribir en almacenamiento externo.</string>
 
-    <string name="text_su_missing">Permisos Root (su binary) requerido.</string>
-
-    <string name="text_busybox_missing">Busybox no encontrado.
-\nPara utilizar ViPER4Android, necesita instalar busybox primero.
-    </string>
-
     <string name="text_ok">Aceptar</string>
     <string name="text_cancel">Cancelar</string>
 

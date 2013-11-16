@@ -6,54 +6,54 @@
     <string name="speaker_title">ДИНАМИК</string>
     <string name="bluetooth_title">BLUETOOTH</string>
     <string name="audio_effects">Аудио эффекты</string>
-    
+
     <string name="dsp_settings_headset">Настройка эффектов - Наушники</string>
     <string name="dsp_settings_speaker">Настройка эффектов - Динамик</string>
     <string name="dsp_settings_bluetooth">Настройка эффектов - Bluetooth</string>
-    
+
     <string name="pref_dsp_enable">Включение</string>
     <string name="pref_effect_title">Выберите уровень</string>
     <string name="dialog_effect">Уровень усиления</string>
-    
-	<string name="pref_force_enable_text">Принудительное включение V4A</string>
+
+    <string name="pref_force_enable_text">Принудительное включение V4A</string>
     <string name="pref_force_enable_warn">"Принудительное включение V4A может помочь решить проблему с неактивными эффектами. 
 n\Но при этом, на некоторых прошивках, Вы можете получить неожиданные результаты, такие как отсутствие звука или быстрый разряд батареи. 
 n\Поэтому, используййте данную опцию на свой страх и риск. Если все же описанное выше произойдет, то пожалуйста, выключите даннуюопцию."
     </string>
-    
+
     <string name="pref_fx_master_title">Обработка</string>
     <string name="pref_fx_master_summary_on">V4A-FX включен</string>
     <string name="pref_fx_master_summary_off">V4A-FX отключен</string>
-    
+
     <string name="pref_spkfx_master_title">Обработка</string>
     <string name="pref_spkfx_master_summary_on">V4A-FX включен</string>
     <string name="pref_spkfx_master_summary_off">V4A-FX отключен</string>
-    
+
     <string name="pref_fx_limiter_title">Ограничитель</string>
     <string name="pref_fx_limiter_threshold">Предельный порог</string>
     <string name="pref_spkfx_limiter_title">Ограничитель</string>
     <string name="pref_spkfx_limiter_threshold">Предельный порог</string>
     <string name="pref_output_gain">Усиление выходного сигнала</string>
     <string name="pref_output_pan">Балансировка каналов</string>
-    
+
     <string name="pref_playback_title">Регулировка усиления</string>
     <string name="pref_playback_summary_on">Автоматическая регулировка усиления (AGC) включена</string>
     <string name="pref_playback_summary_off">Автоматическая регулировка усиления (AGC) отключена</string>
     <string name="pref_playback_output_threshold">Порог выходного сигнала</string>
     <string name="pref_playback_maxgain">Максимальное усиление</string>
-    
+
     <string name="pref_xloud_title">Экстра-громкость</string>
     <string name="pref_xloud_summary_on">Xloud включен</string>
     <string name="pref_xloud_summary_off">Xloud отключен</string>
     <string name="pref_xloud_output_amplifer">Усиление выходного сигнала</string>
     <string name="pref_xloud_spk_lowfreq">Низкая частота</string>
     <string name="pref_xloud_spk_highfreq">Высокая частота</string>
-    
-	<string name="pref_spk_opt_title">Оптимизация звука динамика</string>
+
+    <string name="pref_spk_opt_title">Оптимизация звука динамика</string>
     <string name="pref_spk_opt_summary_on">Оптимизация звука включена</string>
     <string name="pref_spk_opt_summary_off">Оптимизация звука отключена</string>
     
-	<string name="pref_equalizer_title">Эквалайзер</string>
+    <string name="pref_equalizer_title">Эквалайзер</string>
     <string name="pref_equalizer_summary_on">Эквалайзер включен</string>
     <string name="pref_equalizer_summary_off">Эквалайзер отключен</string>
     <string name="pref_equalizer_enable">Включение эквалайзера</string>
@@ -69,7 +69,7 @@ n\Поэтому, используййте данную опцию на свой
     <string name="pref_dynamicsystem_tube_title">Эмуляция лампового усилителя</string>
     <string name="pref_dynamicsystem_tube_summary_on">Эмуляция лампового усилителя (6N1J) включена</string>
     <string name="pref_dynamicsystem_tube_summary_off">Эмуляция лампового усилителя (6N1J) отключена</string>
-    
+
     <string name="pref_fidelity_title">Тонкая настройка</string>
     <string name="pref_fidelity_vb_summary_on">ViPER Bass включен</string>
     <string name="pref_fidelity_vb_summary_off">ViPER Bass отключен</string>
@@ -87,7 +87,7 @@ n\Поэтому, используййте данную опцию на свой
     <string name="pref_fidelity_vc_mode_title">Выберите тип четкости</string>
     <string name="pref_fidelity_vc_bassgain">Выберите уровень</string>
     <string name="pref_fidelity_vc_bassgain_title">Выберите уровень четкости</string>
-    
+
     <string name="pref_curesystem_title">Защита слуховой системы</string>
     <string name="pref_curesystem_summary_on">Cure Tech+ включен</string>
     <string name="pref_curesystem_summary_off">Cure Tech+ отключен</string>
@@ -101,16 +101,16 @@ n\Поэтому, используййте данную опцию на свой
     <string name="pref_convolver_enable">Включение конвольвера</string>
     <string name="pref_convolver_knl">Импульсный отклик (сэмпл)</string>
     <string name="pref_convolver_knl_title">Выберите сэмпл</string>
-	<string name="pref_convolver_crosschannel">Cross Channel</string>
+    <string name="pref_convolver_crosschannel">Cross Channel</string>
     <string name="pref_convolver_crosschannel_title">Выберите Cross Channel</string>
-    
+
     <string name="pref_vhs_title">Virtual Headphone Surround+</string>
     <string name="pref_vhs_summary_on">VHS+ включен</string>
     <string name="pref_vhs_summary_off">VHS+ отключен</string>
     <string name="pref_vhs_enable">Включение VHS+</string>
     <string name="pref_select_vhs_qual_title">Выберите уровень эффекта</string>
     <string name="dialog_vhs_qual">Yровень эффекта</string>
-   
+
     <string name="pref_colorfulmusic_title">Объемное звучание</string>
     <string name="pref_colorfulmusic_summary_on">Объемное звучание включено</string>
     <string name="pref_colorfulmusic_summary_off">Объемное звучание отключено</string>
@@ -120,16 +120,16 @@ n\Поэтому, используййте данную опцию на свой
     <string name="dialog_colorfulmusic">Уровень объемности звука</string>
     <string name="pref_select_colorfulmusic_mi_title">Выберите глубину объемности</string>
     <string name="dialog_colorfulmusic_mi">Глубина объемности звука</string>
-  
+
     <string name="pref_diffsurr_title">Differential Surround</string>
     <string name="pref_diffsurr_summary_on">Diff surround включен</string>
     <string name="pref_diffsurr_summary_off">Diff surround отключен</string>
     <string name="pref_diffsurr_enable">Включение Diff surround</string>
-    
+
     <string name="pref_select_diffsurr_ms_title">Выберите время задержки</string>
     <string name="dialog_diffsurr_ms">Время задержки</string>
     <string name="pref_reverb_title">Реверберация</string>
-   
+
     <string name="pref_reverb_summary_on">Реверберация включена</string>
     <string name="pref_reverb_summary_off">Реверберация отключена</string>
     <string name="pref_reverb_enable">Включение реверберации</string>
@@ -138,7 +138,7 @@ n\Поэтому, используййте данную опцию на свой
     <string name="pref_reverb_damp">Коэффициент затухания</string>
     <string name="pref_reverb_wet">Обработанный сигнал</string>
     <string name="pref_reverb_dry">Исходный сигнал</string>
-   
+
     <string name="eq_preset_acoustic">Акустика</string>
     <string name="eq_preset_bass_booster">Усиленные НЧ</string>
     <string name="eq_preset_bass_reducer">Ослабленные НЧ</string>
@@ -152,7 +152,7 @@ n\Поэтому, используййте данную опцию на свой
     <string name="eq_preset_treble_reducer">Ослабленные ВЧ</string>
     <string name="eq_preset_vocal_booster">Усиленный вокал</string>
     <string name="eq_preset_custom">Пользовательская</string>
-    
+
     <string name="text_ir_dir_isempty">ViPER4Android: Папка с IR сэмплами %1$s пуста.</string>
     <string name="text_token_lost">ViPER4Android: Невозможно запустить эффекты, попробуйте обновить драйвера.</string>
     <string name="text_enabled">Включено</string>
@@ -167,7 +167,7 @@ n\Поэтому, используййте данную опцию на свой
     <string name="text_no">Нет</string>
     <string name="text_normal">Нормально</string>
     <string name="text_abnormal">Ненормально</string>
-   
+
     <string name="text_effectprofile">Профиль эффектов</string>
     <string name="text_loadfxprofile">Загрузить профиль</string>
     <string name="text_savefxprofile">Сохранить профиль</string>
@@ -180,15 +180,15 @@ n\Исключите знак '='"
     <string name="text_profileload_ok">Профиль загружен.</string>
     <string name="text_profileload_err">Не удается загрузить профиль.</string>
     <string name="text_rwsd_error">Не удается произвести чтение/запись с внешних накопителей.</string>
-    
+
     <string name="text_ok">Ok</string>
     <string name="text_cancel">Отмена</string>
-	
-	<string name="text_drvinst_prefer">Пожалуйста, выберите драйвер</string>
+
+    <string name="text_drvinst_prefer">Пожалуйста, выберите драйвер</string>
     <string name="text_drvinst_sqdrv">"Для Супер качества звука нужен, по крайней мере, двухъядерный процессор, при этом будет увеличен разряд батареи. 
 n\Вы хотите продолжить?"
     </string>
-   
+
     <string name="text_drvvernotmatch">"Для использования ViPER4Android, необходимо установить/обновить драйвер V4A. 
 n\Процесс установки пройдет автоматически. 
 n\Установить/Обновить сейчас?"
@@ -253,7 +253,4 @@ n\"
     
     <string name="text_checkupdate">Проверка обновлений</string>
     <string name="text_updatelink">http://vipersaudio.com/swupdate/viper4android/download.html</string>
-    <string name="text_su_missing">Требуется наличие Root прав (su binary).</string>
-    <string name="text_busybox_missing">"Busybox не обнаружен. 
-n\Для использования ViPER4Android, необходимо установить Busybox."</string>
 </resources>

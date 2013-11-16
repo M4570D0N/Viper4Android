@@ -270,7 +270,7 @@ public class EqualizerSurface extends SurfaceView {
         for (int dB = MIN_DB + 3; dB <= MAX_DB - 3; dB += 3) {
             float y = projectY(dB) * mHeight;
             canvas.drawLine(0, y, mWidth - 1, y, mGridLines);
-            canvas.drawText(String.format("%+d", dB), 1, (y - 1), mWhite);
+            canvas.drawText(String.format("%+d", dB), 1, y - 1, mWhite);
         }
 
         for (int i = 0; i < mLevels.length; i ++) {

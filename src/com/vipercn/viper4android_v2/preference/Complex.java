@@ -51,7 +51,7 @@ class Complex {
     }
 
     /**
-     * Complex multipply
+     * Complex multiply
      *
      * @param other
      * @return multiplication result

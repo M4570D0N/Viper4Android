@@ -74,7 +74,7 @@ public class EqualizerPreference extends DialogPreference {
                 int band = mDialogEqualizer.findClosest(x);
 
                 int wy = v.getHeight();
-                float level = (y / wy) * (EqualizerSurface.MIN_DB - EqualizerSurface.MAX_DB)
+                float level = y / wy * (EqualizerSurface.MIN_DB - EqualizerSurface.MAX_DB)
                         - EqualizerSurface.MIN_DB;
                 if (level < EqualizerSurface.MIN_DB) {
                     level = EqualizerSurface.MIN_DB;

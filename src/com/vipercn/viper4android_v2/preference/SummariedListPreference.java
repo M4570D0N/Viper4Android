@@ -15,10 +15,12 @@ public class SummariedListPreference extends ListPreference {
 
         CharSequence[] entries = getEntries();
         CharSequence[] entryValues = getEntryValues();
-        for (int i = 0; i < entryValues.length; i ++) {
-            if (entryValues[i].equals(value)) {
-                setSummary(entries[i]);
-                break;
+        if (entryValues != null) {
+            for (int i = 0; i < entryValues.length; i ++) {
+                if (entryValues[i].equals(value)) {
+                    setSummary(entries[i]);
+                    break;
+                }
             }
         }
     }

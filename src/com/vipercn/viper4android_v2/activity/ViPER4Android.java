@@ -76,9 +76,8 @@ public final class ViPER4Android extends FragmentActivity {
 
         SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", 0);
         String mLastVersion = prefSettings.getString("viper4android.settings.lastversion", "");
-        if (mLastVersion == null) return true;
-        if (mLastVersion.equals("")) return true;
-        return !mLastVersion.equalsIgnoreCase(mVersion);
+        return mLastVersion == null || mLastVersion.equals("") || !mLastVersion
+                .equalsIgnoreCase(mVersion);
     }
 
     private void setFirstRun() {
@@ -117,7 +116,7 @@ public final class ViPER4Android extends FragmentActivity {
 
     private boolean submitInformation() {
         String mCode = "";
-        byte[] mHexTab = (new String("0123456789abcdef")).getBytes();
+        byte[] mHexTab = new String("0123456789abcdef").getBytes();
         Random rndMachine = new Random(System.currentTimeMillis());
         for (int i = 0; i < 8; i++) {
             byte btCode = (byte) rndMachine.nextInt(256);
@@ -153,50 +152,40 @@ public final class ViPER4Android extends FragmentActivity {
         }
     }
 
-    private boolean processDriverCheck() {
-        Log.i("ViPER4Android", "Enter processDriverCheck()");
+    private void processDriverCheck() {
+        boolean isDriverUsable = false;
 
-        if (!StaticEnvironment.driverInited()) {
-            Log.i("ViPER4Android", "Android audio effect engine not prepared");
-            return false;
-        } else {
-            if (!StaticEnvironment.driverIsUsable()) {
-                Log.i("ViPER4Android", "Android audio effect engine reports the v4a driver is not usable");
-                Message message = new Message();
-                message.what = 0xA00A;
-                message.obj = this;
-                proceedDriverHandler.sendMessage(message);
-                return true;
-            } else {
-                String mDrvVer = StaticEnvironment.driverVersion();
-                PackageManager packageMgr = getPackageManager();
-                PackageInfo packageInfo = null;
-                String apkVersion = "";
-                try {
-                    packageInfo = packageMgr.getPackageInfo(getPackageName(), 0);
-                    apkVersion = packageInfo.versionName;
-                    if (!apkVersion.equalsIgnoreCase(mDrvVer)) {
-                        Log.i("ViPER4Android", "Driver version is not compatible with apk");
-                        Message message = new Message();
-                        message.what = 0xA00A;
-                        message.obj = this;
-                        proceedDriverHandler.sendMessage(message);
-                        return true;
-                    } else {
-                        Log.i("ViPER4Android", "Good, driver is fine");
-                        return true;
-                    }
-                } catch (NameNotFoundException e) {
-                    Log.i("ViPER4Android", "Can not get application version, msg = " + e.getMessage());
-                    return false;
-                }
+        Utils.AudioEffectUtils aeuUtils = new Utils().new AudioEffectUtils();
+        if (!aeuUtils.isViPER4AndroidEngineFound())
+            isDriverUsable = false;
+        else {
+            PackageManager packageMgr = getPackageManager();
+            PackageInfo packageInfo = null;
+            String apkVersion = "";
+            try {
+                int[] iaDrvVer = aeuUtils.getViPER4AndroidEngineVersion();
+                String mDriverVersion = iaDrvVer[0] + "." + iaDrvVer[1] + "." + iaDrvVer[2] + "." + iaDrvVer[3];
+                packageInfo = packageMgr.getPackageInfo(getPackageName(), 0);
+                apkVersion = packageInfo.versionName;
+                isDriverUsable = apkVersion.equalsIgnoreCase(mDriverVersion);
+            } catch (NameNotFoundException e) {
+                Log.i("ViPER4Android", "Cannot found ViPER4Android's apk [weird]");
+                isDriverUsable = true;
             }
+        }
+
+        if (!isDriverUsable) {
+            Log.i("ViPER4Android", "Android audio effect engine reports the v4a driver is not usable");
+            Message message = new Message();
+            message.what = 0xA00A;
+            message.obj = this;
+            proceedDriverHandler.sendMessage(message);
         }
     }
 
     public static boolean cpuHasQualitySelection() {
-        Utils.CpuInfo mCPUInfo = new Utils.CpuInfo();
-        return mCPUInfo.hasNEON();
+        Utils.CpuInfo mCpuInfo = new Utils.CpuInfo();
+        return mCpuInfo.hasNEON();
     }
 
     public static String determineCPUWithDriver(String mQual) {
@@ -206,15 +195,15 @@ public final class ViPER4Android extends FragmentActivity {
             mDriverFile = mDriverFile + "jb_";
         else mDriverFile = mDriverFile + "ics_";
 
-        Utils.CpuInfo mCPUInfo = new Utils.CpuInfo();
-        if (mCPUInfo.hasNEON()) {
+        Utils.CpuInfo mCpuInfo = new Utils.CpuInfo();
+        if (mCpuInfo.hasNEON()) {
             if (mQual == null) mDriverFile = mDriverFile + "NEON";
             else if (mQual.equals("")) mDriverFile = mDriverFile + "NEON";
             else if (mQual.equalsIgnoreCase("sq")) mDriverFile = mDriverFile + "NEON_SQ";
             else if (mQual.equalsIgnoreCase("hq")) mDriverFile = mDriverFile + "NEON_HQ";
             else mDriverFile = mDriverFile + "NEON";
         }
-        else if (mCPUInfo.hasVFP()) mDriverFile = mDriverFile + "VFP";
+        else if (mCpuInfo.hasVFP()) mDriverFile = mDriverFile + "VFP";
         else mDriverFile = mDriverFile + "NOVFP";
 
         mDriverFile = mDriverFile + ".so";
@@ -256,9 +245,8 @@ public final class ViPER4Android extends FragmentActivity {
     protected PagerTabStrip pagerTabStrip;
 
     private ArrayList<String> mProfileList = new ArrayList<String>();
-    private boolean mKillAllThread = false;
     private Context mActivityContext = this;
-    private ViPER4AndroidService mAudioServiceInstance = null;
+    private ViPER4AndroidService mAudioServiceInstance;
 
     // Driver install handler
     private static Handler proceedDriverHandler = new Handler() {
@@ -368,6 +356,19 @@ public final class ViPER4Android extends FragmentActivity {
         }
     };
 
+    private ServiceConnection mAudioServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            ViPER4AndroidService service = ((ViPER4AndroidService.LocalBinder)binder).getService();
+            mAudioServiceInstance = service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i("ViPER4Android", "ViPER4Android service disconnected.");
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -382,10 +383,10 @@ public final class ViPER4Android extends FragmentActivity {
         }
 
         // Start background service
-        mKillAllThread = false;
         Log.i("ViPER4Android", "Starting service, reason = ViPER4Android::onCreate");
         Intent serviceIntent = new Intent(this, ViPER4AndroidService.class);
         startService(serviceIntent);
+        bindService(serviceIntent, mAudioServiceConnection, Context.BIND_IMPORTANT);
 
         // Setup ui
         setContentView(R.layout.top);
@@ -452,12 +453,8 @@ public final class ViPER4Android extends FragmentActivity {
                 StaticEnvironment.initEnvironment(mActivityContext);
 
                 // Driver check loop
-                Log.i("ViPER4Android", "Begin driver check");
-                while (!mKillAllThread) {
-                    if (processDriverCheck()) break;
-                    SystemClock.sleep(1000);
-                }
-                Log.i("ViPER4Android", "End driver check");
+                Log.i("ViPER4Android", "Check driver");
+                processDriverCheck();
             }
         });
         postInitThread.start();
@@ -466,51 +463,33 @@ public final class ViPER4Android extends FragmentActivity {
     @Override
     public void onDestroy() {
         Log.i("ViPER4Android", "Main activity onDestroy()");
-        mKillAllThread = true;
+        unbindService(mAudioServiceConnection);
+        mAudioServiceInstance = null;
         super.onDestroy();
     }
 
     @Override
     public void onResume() {
+        Log.i("ViPER4Android", "Main activity onResume()");
+
         super.onResume();
 
-        Log.i("ViPER4Android", "Main activity onResume()");
-        mKillAllThread = false;
-
-        ServiceConnection connection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder binder) {
-                ViPER4AndroidService service = ((ViPER4AndroidService.LocalBinder) binder).getService();
-                mAudioServiceInstance = service;
-
-                String routing = service.getAudioOutputRouting();
-                String[] entries = pagerAdapter.getEntries();
-                for (int i = 0; i < entries.length; i++) {
-                    if (routing.equals(entries[i])) {
-                        viewPager.setCurrentItem(i);
-                        break;
-                    }
+        if (mAudioServiceInstance != null) {
+            String routing = mAudioServiceInstance.getAudioOutputRouting();
+            String[] entries = pagerAdapter.getEntries();
+            for (int i = 0; i < entries.length; i++) {
+                if (routing.equals(entries[i])) {
+                    viewPager.setCurrentItem(i);
+                    break;
                 }
-                unbindService(this);
             }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Log.i("ViPER4Android", "ViPER4Android service disconnected.");
-            }
-        };
-
-        Log.i("ViPER4Android", "Binding service, reason = ViPER4Android::onResume");
-        Intent serviceIntent = new Intent(this, ViPER4AndroidService.class);
-        bindService(serviceIntent, connection, 0);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i("ViPER4Android", "Enter onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
-        Log.i("ViPER4Android", "Exit onCreateOptionsMenu()");
         return true;
     }
 
@@ -554,23 +533,23 @@ public final class ViPER4Android extends FragmentActivity {
             MenuItem drvInstItem = menu.findItem(R.id.drvinst);
             String menuTitle = getResources().getString(R.string.text_install);
             drvInstItem.setTitle(menuTitle);
-            if (!StaticEnvironment.isEnvironmentInited())
+            if (!StaticEnvironment.isEnvironmentInitialized())
                 drvInstItem.setEnabled(false);
             else drvInstItem.setEnabled(true);
         } else {
-            boolean bDriverIsReady = mAudioServiceInstance.getDriverIsReady();
-            if (bDriverIsReady) {
+            boolean mDriverIsReady = mAudioServiceInstance.getDriverIsReady();
+            if (mDriverIsReady) {
                 MenuItem drvInstItem = menu.findItem(R.id.drvinst);
                 String menuTitle = getResources().getString(R.string.text_uninstall);
                 drvInstItem.setTitle(menuTitle);
-                if (!StaticEnvironment.isEnvironmentInited())
+                if (!StaticEnvironment.isEnvironmentInitialized())
                     drvInstItem.setEnabled(false);
                 else drvInstItem.setEnabled(true);
             } else {
                 MenuItem drvInstItem = menu.findItem(R.id.drvinst);
                 String menuTitle = getResources().getString(R.string.text_install);
                 drvInstItem.setTitle(menuTitle);
-                if (!StaticEnvironment.isEnvironmentInited())
+                if (!StaticEnvironment.isEnvironmentInitialized())
                     drvInstItem.setEnabled(false);
                 else drvInstItem.setEnabled(true);
             }
@@ -579,7 +558,7 @@ public final class ViPER4Android extends FragmentActivity {
         // Load&save profile menu
         MenuItem mSaveProfile = menu.findItem(R.id.saveprofile);
         MenuItem mLoadProfile = menu.findItem(R.id.loadprofile);
-        if (!StaticEnvironment.isEnvironmentInited()){
+        if (!StaticEnvironment.isEnvironmentInitialized()){
             mSaveProfile.setEnabled(false);
             mLoadProfile.setEnabled(false);
         } else {
@@ -627,7 +606,7 @@ public final class ViPER4Android extends FragmentActivity {
                     public void onClick(DialogInterface arg0, int arg1) {
                         Uri uri = Uri.parse(getResources().getString(R.string.text_forum_link));
                         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        ViPER4Android.this.startActivity(intent);
+                        startActivity(intent);
                     }
                 });
                 mHelp.show();
@@ -637,7 +616,7 @@ public final class ViPER4Android extends FragmentActivity {
             case R.id.checkupdate: {
                 Uri uri = Uri.parse(getResources().getString(R.string.text_updatelink));
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                ViPER4Android.this.startActivity(intent);
+                startActivity(intent);
                 return true;
             }
 
@@ -674,10 +653,14 @@ public final class ViPER4Android extends FragmentActivity {
                             else if (mAudioServiceInstance.getDriverEffectType() == ViPER4AndroidService.V4A_FX_TYPE_SPEAKER)
                                 mDrvEffType = getResources().getString(R.string.text_speaker);
 
-                            String mDrvStatus;
+                            Utils.AudioEffectUtils aeuUtils = new Utils().new AudioEffectUtils();
+                            int[] iaDrvVer = aeuUtils.getViPER4AndroidEngineVersion();
+                            String mDriverVersion = iaDrvVer[0] + "." + iaDrvVer[1] + "." + iaDrvVer[2] + "." + iaDrvVer[3];
+
+                            String mDrvStatus = "";
                             mDrvStatus = getResources().getString(R.string.text_drv_status_view);
                             mDrvStatus = String.format(mDrvStatus,
-                                    mAudioServiceInstance.getDriverVersion(), mDrvNEONEnabled,
+                                    mDriverVersion, mDrvNEONEnabled,
                                     mDrvEnabled, mDrvUsable, mDrvProcess,
                                     mDrvEffType,
                                     mAudioServiceInstance.getDriverSamplingRate(),
@@ -734,8 +717,8 @@ public final class ViPER4Android extends FragmentActivity {
                 mProfileList = Utils.getProfileList(mProfilePath);
                 if (mProfileList.size() <= 0) return true;
                 String[] arrayProfileList = new String[mProfileList.size()];
-                for (int mPrfIdx = 0; mPrfIdx < mProfileList.size(); mPrfIdx++)
-                    arrayProfileList[mPrfIdx] = mProfileList.get(mPrfIdx);
+                for (int mProfileIndex = 0; mProfileIndex < mProfileList.size(); mProfileIndex++)
+                    arrayProfileList[mProfileIndex] = mProfileList.get(mProfileIndex);
 
                 // Get current audio mode
                 final int mCurrentPage = actionBar.getSelectedNavigationIndex();
@@ -761,8 +744,8 @@ public final class ViPER4Android extends FragmentActivity {
 
                         // Now load the profile please
                         String[] arrayProfileList = new String[mProfileList.size()];
-                        for (int mPrfIdx = 0; mPrfIdx < mProfileList.size(); mPrfIdx++)
-                            arrayProfileList[mPrfIdx] = mProfileList.get(mPrfIdx);
+                        for (int mProfileIndex = 0; mProfileIndex < mProfileList.size(); mProfileIndex++)
+                            arrayProfileList[mProfileIndex] = mProfileList.get(mProfileIndex);
                         String profileName = arrayProfileList[which];
                         if (Utils.loadProfile(profileName, mProfilePath, mPreferenceName[index], mActivityContext)) {
                             AlertDialog.Builder mResult = new AlertDialog.Builder(mActivityContext);
@@ -783,7 +766,7 @@ public final class ViPER4Android extends FragmentActivity {
                             mResult.show();
                         }
                     }
-                        }).setNegativeButton(R.string.text_cancel, new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.text_cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 }).create().show();
@@ -1010,13 +993,13 @@ public final class ViPER4Android extends FragmentActivity {
 
             case R.id.uiprefer: {
                 int nUIPrefer = prefSettings.getInt("viper4android.settings.uiprefer", 0);
-                if ((nUIPrefer < 0) || (nUIPrefer > 2)) nUIPrefer = 0;
+                if (nUIPrefer < 0 || nUIPrefer > 2) nUIPrefer = 0;
                 Dialog selectDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.text_uiprefer_dialog)
                 .setIcon(R.drawable.icon)
                 .setSingleChoiceItems(R.array.ui_prefer, nUIPrefer, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        if ((which < 0) || (which > 2)) which = 0;
+                        if (which < 0 || which > 2) which = 0;
                         SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
                         int nOldSelIdx = prefSettings.getInt("viper4android.settings.uiprefer", 0);
                         if (nOldSelIdx == which){

@@ -83,10 +83,9 @@ public final class MainDSPScreen extends PreferenceFragment {
 
         SharedPreferences prefSettings = getActivity().getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", 0);
         int mControlLevel = prefSettings.getInt("viper4android.settings.uiprefer", 0);
-        if ((mControlLevel < 0) || (mControlLevel > 2)) mControlLevel = 0;
+        if (mControlLevel < 0 || mControlLevel > 2) mControlLevel = 0;
 
         prefManager.setSharedPreferencesName(ViPER4Android.SHARED_PREFERENCES_BASENAME + "." + config);
-
         try {
             int xmlId = R.xml.class.getField(config + "_preferences_l" + mControlLevel).getInt(null);
             addPreferencesFromResource(xmlId);

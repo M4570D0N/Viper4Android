@@ -7,13 +7,13 @@
 
 class WavReader_R32 {
 private:
-    float *m_fpSamples;
+    float *fpSamples;
 
 private:
-    FILE *m_pFileHandle;
-    uint32_t m_uiFrameCount;
-    uint32_t m_uiSamplingRate;
-    uint32_t m_uiChannels;
+    FILE *mFileHandle;
+    uint32_t mUiFrameCount;
+    uint32_t uiSamplingRate;
+    uint32_t mUiChannels;
 
 private:
     bool ReadFOURCC(int8_t cCode[4]);
@@ -32,12 +32,12 @@ public:
     ~WavReader_R32();
 
 public:
-    bool OpenWavFile(const char *pszFilePathName);
+    bool OpenWavFile(const char *mFilePathName);
     void ScalePCM(float rGain);
     uint32_t GetFrameCount();
     uint32_t GetSamplingRate();
     uint32_t GetChannels();
-    uint32_t ReadEntirePCM(float *fpBuffer, uint32_t nFrames);
+    uint32_t ReadEntirePCM(float *fpBuffer, uint32_t mFrames);
     float* GetDataBuffer();
 };
 
