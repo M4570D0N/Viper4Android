@@ -65,8 +65,8 @@ public final class ViPER4Android extends FragmentActivity {
 
     private boolean checkFirstRun() {
         PackageManager packageMgr = getPackageManager();
-        PackageInfo packageInfo;
-        String mVersion;
+        PackageInfo packageInfo = null;;
+        String mVersion = "";
         try {
             packageInfo = packageMgr.getPackageInfo(getPackageName(), 0);
             mVersion = packageInfo.versionName;
@@ -76,8 +76,10 @@ public final class ViPER4Android extends FragmentActivity {
 
         SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", 0);
         String mLastVersion = prefSettings.getString("viper4android.settings.lastversion", "");
-        return mLastVersion == null || mLastVersion.equals("") || !mLastVersion
-                .equalsIgnoreCase(mVersion);
+        if (mLastVersion == null) return true;
+        if (mLastVersion.equals("")) return true;
+        if (mLastVersion.equalsIgnoreCase(mVersion)) return false;
+        return true;
     }
 
     private void setFirstRun() {
@@ -474,14 +476,13 @@ public final class ViPER4Android extends FragmentActivity {
 
         super.onResume();
 
-        if (mAudioServiceInstance != null) {
-            String routing = mAudioServiceInstance.getAudioOutputRouting();
-            String[] entries = pagerAdapter.getEntries();
-            for (int i = 0; i < entries.length; i++) {
-                if (routing.equals(entries[i])) {
-                    viewPager.setCurrentItem(i);
-                    break;
-                }
+        String routing = ViPER4AndroidService.getAudioOutputRouting(getSharedPreferences(
+                        ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE));
+        String[] entries = pagerAdapter.getEntries();
+        for (int i = 0; i < entries.length; i++) {
+            if (routing.equals(entries[i])) {
+                viewPager.setCurrentItem(i);
+                break;
             }
         }
     }
