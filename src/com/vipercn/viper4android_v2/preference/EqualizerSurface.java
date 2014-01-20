@@ -139,25 +139,25 @@ public class EqualizerSurface extends SurfaceView {
          * holo_blue < 0
          * holo_blue_dark < 3
          */
-        int[] responseColors = new int[] {
+        int[] responseColors = {
             res.getColor(R.color.eq_red),
             res.getColor(R.color.eq_yellow),
             res.getColor(R.color.eq_holo_bright),
             res.getColor(R.color.eq_holo_blue),
             res.getColor(R.color.eq_holo_dark)
         };
-        float[] responsePositions = new float[] {
+        float[] responsePositions = {
             0, 0.2f, 0.45f, 0.6f, 1f
         };
 
         mFrequencyResponseBg.setShader(new LinearGradient(0, 0, 0, mHeight,
                 responseColors, responsePositions, Shader.TileMode.CLAMP));
 
-        int[] barColors = new int[] {
+        int[] barColors = {
             res.getColor(R.color.cb_shader),
             res.getColor(R.color.cb_shader_alpha)
         };
-        float[] barPositions = new float[] {
+        float[] barPositions = {
             0, 1
         };
 
@@ -179,7 +179,7 @@ public class EqualizerSurface extends SurfaceView {
         /* clear canvas */
         canvas.drawRGB(0, 0, 0);
 
-        Biquad[] biquads = new Biquad[] {
+        Biquad[] biquads = {
             new Biquad(),
             new Biquad(),
             new Biquad(),

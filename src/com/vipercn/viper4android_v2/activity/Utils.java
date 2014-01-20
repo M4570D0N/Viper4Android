@@ -8,9 +8,8 @@ import android.media.audiofx.AudioEffect;
 import android.os.Environment;
 import android.util.Log;
 
-import com.stericson.RootTools.*;
+import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
-import com.vipercn.viper4android_v2.activity.V4AJniInterface;
 import com.vipercn.viper4android_v2.service.ViPER4AndroidService;
 
 import java.io.BufferedReader;
@@ -111,8 +110,7 @@ public class Utils {
                         return;
                     }
                 }
-            }
-            catch (Exception e) {}
+            } catch (Exception e) {}
 
             Log.e("ViPER4Android_Utils", "Cannot extract ViPER4Android engine version");
             mHasViPER4AndroidEngine = false;
@@ -475,14 +473,14 @@ public class Utils {
                 mOutput.write("viper4android.headphonefx.reverb.enable=boolean=" + mValue + "\n");
                 mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.dynamicsystem.enable", false));
                 mOutput.write("viper4android.headphonefx.dynamicsystem.enable=boolean=" + mValue + "\n");
-                mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.dynamicsystem.tube", false));
-                mOutput.write("viper4android.headphonefx.dynamicsystem.tube=boolean=" + mValue + "\n");
                 mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.fidelity.bass.enable", false));
                 mOutput.write("viper4android.headphonefx.fidelity.bass.enable=boolean=" + mValue + "\n");
                 mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.fidelity.clarity.enable", false));
                 mOutput.write("viper4android.headphonefx.fidelity.clarity.enable=boolean=" + mValue + "\n");
                 mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.cure.enable", false));
                 mOutput.write("viper4android.headphonefx.cure.enable=boolean=" + mValue + "\n");
+                mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.tube.enable", false));
+                mOutput.write("viper4android.headphonefx.tube.enable=boolean=" + mValue + "\n");
 
                 // string values
                 mValue = preferences.getString("viper4android.headphonefx.playbackgain.ratio", "50");
@@ -660,6 +658,13 @@ public class Utils {
         return mBasePath;
     }
 
+    // Check if addon.d folder exists for script installation (Device kernel dependant)
+    public static boolean AddondExists() {
+        File file = new File("/system/addon.d/");
+
+        return (file.exists() && file.isDirectory());
+    }
+
     // Copy assets to local
     public static boolean copyAssetsToLocal(Context ctx, String mSourceName, String mDstName) {
         String mBasePath = getBasePath(ctx);
@@ -735,6 +740,9 @@ public class Utils {
 
     // Install ViPER4Android FX driver through roottools
     private static boolean installDrv_FX_RootTools(Context ctx, String mDriverName) {
+
+        boolean isAddondSupported = false;
+
         // Make sure we can use external storage for temp directory
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return false;
@@ -742,6 +750,12 @@ public class Utils {
         // Copy driver assets to local
         if (!copyAssetsToLocal(ctx, mDriverName, "libv4a_fx_ics.so"))
             return false;
+
+        //Check if addon.d directory exists and copy script if supported
+        if (AddondExists()) {
+            copyAssetsToLocal(ctx, "91-v4a.sh", "91-v4a.sh");
+            isAddondSupported = true;
+        }
 
         // Lets acquire root first :)
         RootTools.useRoot = true;
@@ -817,8 +831,15 @@ public class Utils {
         // Copy back to system
         boolean operationSuccess = true;
         String baseDrvPathName = getBasePath(ctx);
-        if (baseDrvPathName.endsWith("/")) baseDrvPathName = baseDrvPathName + "libv4a_fx_ics.so";
-        else baseDrvPathName = baseDrvPathName + "/libv4a_fx_ics.so";
+        String addondScriptPathName = baseDrvPathName;
+
+        if (baseDrvPathName.endsWith("/")) {
+            baseDrvPathName = baseDrvPathName + "libv4a_fx_ics.so";
+            if (isAddondSupported) addondScriptPathName = addondScriptPathName + "91-v4a.sh";
+        } else {
+            baseDrvPathName = baseDrvPathName + "/libv4a_fx_ics.so";
+            if (isAddondSupported) addondScriptPathName = addondScriptPathName + "/91-v4a.sh";
+        }
         try {
             if (vendorExists) {
                 // Copy files
@@ -836,12 +857,24 @@ public class Utils {
                             mVendorConf + ".out",
                             "/system/vendor/etc/audio_effects.conf", false,
                             false);
+                if (operationSuccess && isAddondSupported)
+                    operationSuccess = RootTools.copyFile(
+                            addondScriptPathName, "/system/addon.d/91-v4a.sh",
+                            false, false);
                 // Modify permission
                 CommandCapture ccSetPermission = new CommandCapture(0, mChmod
                         + " 644 /system/etc/audio_effects.conf", mChmod
                         + " 644 /system/vendor/etc/audio_effects.conf", mChmod
                         + " 644 /system/lib/soundfx/libv4a_fx_ics.so");
                 RootTools.getShell(true).add(ccSetPermission).waitForFinish();
+
+                // Modify permission of addon.d script if applicable
+                if (isAddondSupported) {
+                    CommandCapture ccSetAddondPermission = new CommandCapture(0, mChmod
+                             + " 644 /system/addon.d/91-v4a.sh");
+                    RootTools.getShell(true).add(ccSetAddondPermission).waitForFinish();
+                }
+
                 RootTools.remount("/system", "RO");
             } else {
                 // Copy files
@@ -854,11 +887,24 @@ public class Utils {
                     operationSuccess &= RootTools.copyFile(
                             mSystemConf + ".out",
                             "/system/etc/audio_effects.conf", false, false);
+                if (operationSuccess && isAddondSupported)
+                    operationSuccess = RootTools.copyFile(
+                            addondScriptPathName, "/system/addon.d/91-v4a.sh",
+                            false, false);
+
                 // Modify permission
                 CommandCapture ccSetPermission = new CommandCapture(0, mChmod
                         + " 644 /system/etc/audio_effects.conf", mChmod
                         + " 644 /system/lib/soundfx/libv4a_fx_ics.so");
                 RootTools.getShell(true).add(ccSetPermission).waitForFinish();
+
+                // Modify permission of addon.d script if applicable
+                if (isAddondSupported) {
+                    CommandCapture ccSetAddondPermission = new CommandCapture(0, mChmod
+                            + " 644 /system/addon.d/91-v4a.sh");
+                    RootTools.getShell(true).add(ccSetAddondPermission).waitForFinish();
+                }
+
                 RootTools.remount("/system", "RO");
             }
         } catch (Exception e) {
@@ -894,6 +940,9 @@ public class Utils {
 
     // Install ViPER4Android FX driver through vbox
     private static boolean installDrv_FX_VBoX(Context ctx, String mDriverName) {
+
+        boolean isAddondSupported = false;
+
         // Make sure we can use external storage for temp directory
         if (!Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED))
@@ -902,6 +951,12 @@ public class Utils {
         // Copy driver assets to local
         if (!copyAssetsToLocal(ctx, mDriverName, "libv4a_fx_ics.so"))
             return false;
+
+        //Check if addon.d directory exists and copy script if supported
+        if (AddondExists()) {
+            copyAssetsToLocal(ctx, "91-v4a.sh", "91-v4a.sh");
+            isAddondSupported = true;
+        }
 
         // Open root shell
         String vBox = StaticEnvironment.getVBoxExecutablePath();
@@ -957,8 +1012,15 @@ public class Utils {
 
         // Copy back to system
         String baseDrvPathName = getBasePath(ctx);
-        if (baseDrvPathName.endsWith("/")) baseDrvPathName = baseDrvPathName + "libv4a_fx_ics.so";
-        else baseDrvPathName = baseDrvPathName + "/libv4a_fx_ics.so";
+        String addondScriptPathName = baseDrvPathName;
+
+        if (baseDrvPathName.endsWith("/")) {
+            baseDrvPathName = baseDrvPathName + "libv4a_fx_ics.so";
+            if (isAddondSupported) addondScriptPathName = addondScriptPathName + "91-v4a.sh";
+        } else {
+            baseDrvPathName = baseDrvPathName + "/libv4a_fx_ics.so";
+            if (isAddondSupported) addondScriptPathName = addondScriptPathName + "/91-v4a.sh";
+        }
         int mShellCmdReturn; boolean success;
         if (vendorExists) {
             // Copy files
@@ -984,6 +1046,15 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
+
+            if (isAddondSupported) {
+                success = ShellCommand.sendShellCommand(vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+                if (!success || (mShellCmdReturn != 0)) {
+                    Log.e("ViPER4Android", "Cannot copy addon.d script to /system/addon.d/");
+                    // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
+                }
+            }
+
             success = ShellCommand.sendShellCommand(vBox + " cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
@@ -1025,6 +1096,13 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
+            if (isAddondSupported) {
+                success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+                if (!success || (mShellCmdReturn != 0)) {
+                    Log.e("ViPER4Android", "Cannot change addon.d script permission [/system/addon.d]");
+                    // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
+                }
+            }
             success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
@@ -1059,6 +1137,13 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
+            if (isAddondSupported) {
+                success = ShellCommand.sendShellCommand(vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+                if (!success || (mShellCmdReturn != 0)) {
+                    Log.e("ViPER4Android", "Cannot copy addon.d script to /system/addon.d/");
+                    // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
+                }
+            }
             success = ShellCommand.sendShellCommand(vBox + " cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
@@ -1075,6 +1160,13 @@ public class Utils {
                 Log.e("ViPER4Android", "Cannot change config's permission [/system]");
                 ShellCommand.closeShell();
                 return false;
+            }
+            if (isAddondSupported) {
+                success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+                if (!success || (mShellCmdReturn != 0)) {
+                    Log.e("ViPER4Android", "Cannot change addon.d script permission [/system/addon.d]");
+                    // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
+                }
             }
             success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             if (!success || mShellCmdReturn != 0) {

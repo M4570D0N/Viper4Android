@@ -5,7 +5,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
-import com.stericson.RootTools.RootTools;
+import com.stericson.RootTools.*;
 import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.stericson.RootTools.execution.CommandCapture;
 

@@ -122,7 +122,7 @@ public class ViPER4AndroidService extends Service {
                     });
                 }
             } catch (Exception e) {
-                Log.i("ViPER4Android", e.getMessage());
+                Log.e("ViPER4Android", "Can not create audio effect instance, V4A driver not installed or not supported by this rom");
                 mInstance = null;
             }
         }
@@ -145,10 +145,10 @@ public class ViPER4AndroidService extends Service {
             return converter.array();
         }
 
-        private int byteArrayToInt(byte[] valueBuf, int offset) {
+        private int byteArrayToInt(byte[] valueBuf) {
             ByteBuffer converter = ByteBuffer.wrap(valueBuf);
             converter.order(ByteOrder.nativeOrder());
-            return converter.getInt(offset);
+            return converter.getInt(0);
         }
 
         private byte[] concatArrays(byte[]... arrays) {
@@ -273,7 +273,7 @@ public class ViPER4AndroidService extends Service {
                 byte[] p = intToByteArray(param);
                 byte[] v = new byte[4];
                 getParameter_Native(p, v);
-                int val = byteArrayToInt(v, 0);
+                int val = byteArrayToInt(v);
                 return val;
             } catch (Exception e) {
                 Log.i("ViPER4Android", "getParameter_px4_vx4x1: " + e.getMessage());
@@ -689,25 +689,25 @@ public class ViPER4AndroidService extends Service {
     public static final int PARAM_HPFX_AGC_VOLUME = 65562;
     public static final int PARAM_HPFX_AGC_MAXSCALER = 65563;
     public static final int PARAM_HPFX_DYNSYS_PROCESS_ENABLED = 65564;
-    public static final int PARAM_HPFX_DYNSYS_ENABLETUBE = 65565;
-    public static final int PARAM_HPFX_DYNSYS_XCOEFFS = 65566;
-    public static final int PARAM_HPFX_DYNSYS_YCOEFFS = 65567;
-    public static final int PARAM_HPFX_DYNSYS_SIDEGAIN = 65568;
-    public static final int PARAM_HPFX_DYNSYS_BASSGAIN = 65569;
-    public static final int PARAM_HPFX_VIPERBASS_PROCESS_ENABLED = 65570;
-    public static final int PARAM_HPFX_VIPERBASS_MODE = 65571;
-    public static final int PARAM_HPFX_VIPERBASS_SPEAKER = 65572;
-    public static final int PARAM_HPFX_VIPERBASS_BASSGAIN = 65573;
-    public static final int PARAM_HPFX_VIPERCLARITY_PROCESS_ENABLED = 65574;
-    public static final int PARAM_HPFX_VIPERCLARITY_MODE = 65575;
-    public static final int PARAM_HPFX_VIPERCLARITY_CLARITY = 65576;
-    public static final int PARAM_HPFX_CURE_PROCESS_ENABLED = 65577;
-    public static final int PARAM_HPFX_CURE_CROSSFEED = 65578;
+    public static final int PARAM_HPFX_DYNSYS_XCOEFFS = 65565;
+    public static final int PARAM_HPFX_DYNSYS_YCOEFFS = 65566;
+    public static final int PARAM_HPFX_DYNSYS_SIDEGAIN = 65567;
+    public static final int PARAM_HPFX_DYNSYS_BASSGAIN = 65568;
+    public static final int PARAM_HPFX_VIPERBASS_PROCESS_ENABLED = 65569;
+    public static final int PARAM_HPFX_VIPERBASS_MODE = 65570;
+    public static final int PARAM_HPFX_VIPERBASS_SPEAKER = 65571;
+    public static final int PARAM_HPFX_VIPERBASS_BASSGAIN = 65572;
+    public static final int PARAM_HPFX_VIPERCLARITY_PROCESS_ENABLED = 65573;
+    public static final int PARAM_HPFX_VIPERCLARITY_MODE = 65574;
+    public static final int PARAM_HPFX_VIPERCLARITY_CLARITY = 65575;
+    public static final int PARAM_HPFX_CURE_PROCESS_ENABLED = 65576;
+    public static final int PARAM_HPFX_CURE_CROSSFEED = 65577;
+    public static final int PARAM_HPFX_TUBE_PROCESS_ENABLED = 65578;
     public static final int PARAM_HPFX_OUTPUT_VOLUME = 65579;
     public static final int PARAM_HPFX_OUTPUT_PAN = 65580;
     public static final int PARAM_HPFX_LIMITER_THRESHOLD = 65581;
     public static final int PARAM_SPKFX_CONV_PROCESS_ENABLED = 65582;
-    public static final int PARAM_SPKFX_CONV_UPDATEKERNEL_DEPRECATED = 65583;  /* DEPRECATED in 4.x system, use buffer instead */
+    public static final int PARAM_SPKFX_CONV_UPDATEKERNEL_DEPRECATED = 65583; /* DEPRECATED in 4.x system, use buffer instead */
     public static final int PARAM_SPKFX_CONV_PREPAREBUFFER = 65584;
     public static final int PARAM_SPKFX_CONV_SETBUFFER = 65585;
     public static final int PARAM_SPKFX_CONV_COMMITBUFFER = 65586;
@@ -801,7 +801,7 @@ public class ViPER4AndroidService extends Service {
                         "viper4android.headphonefx.fireq.enable", false);
             itResult.putExtra("equalizer_enabled", mEqEnabled);
             itResult.putExtra("equalizer_bandcount", 10);
-            float[] mEqBands = new float[] {
+            float[] mEqBands = {
                 31.0f, 62.0f, 125.0f, 250.0f, 500.0f, 1000.0f, 2000.0f, 4000.0f, 8000.0f, 16000.0f
             };
             itResult.putExtra("equalizer_bandfreq", mEqBands);
@@ -929,8 +929,7 @@ public class ViPER4AndroidService extends Service {
                     ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
             String mCompatibleMode = prefSettings.getString("viper4android.settings.compatiblemode", "global");
             boolean mFXInLocalMode;
-            if (mCompatibleMode.equals("global")) mFXInLocalMode = false;
-            else mFXInLocalMode = true;
+            mFXInLocalMode = !mCompatibleMode.equals("global");
 
             String action = intent.getAction();
             int sessionId = intent.getIntExtra(AudioEffect.EXTRA_AUDIO_SESSION, 0);
@@ -1277,8 +1276,6 @@ public class ViPER4AndroidService extends Service {
     }
 
     public static String getAudioOutputRouting(SharedPreferences prefSettings) {
-        //SharedPreferences prefSettings = getSharedPreferences(
-        //        ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
         String mLockedEffect = prefSettings.getString("viper4android.settings.lock_effect", "none");
         if (mLockedEffect.equalsIgnoreCase("none")) {
             if (mUseBluetooth)
@@ -1416,8 +1413,7 @@ public class ViPER4AndroidService extends Service {
 
         String mCompatibleMode = prefSettings.getString("viper4android.settings.compatiblemode", "global");
         boolean mFXInLocalMode;
-        if (mCompatibleMode.equals("global")) mFXInLocalMode = false;
-        else mFXInLocalMode = true;
+        mFXInLocalMode = !mCompatibleMode.equals("global");
 
         Log.i("ViPER4Android", "<+++++++++++++++ Update global effect +++++++++++++++>");
         updateSystem_Global(preferences, mFXType, requireReset, mFXInLocalMode);
@@ -1613,10 +1609,6 @@ public class ViPER4AndroidService extends Service {
                     preferences.getString("viper4android.headphonefx.dynamicsystem.bass", "0"));
             mBass = mBass * 20 + 100;
             v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_DYNSYS_BASSGAIN, mBass);
-            if (preferences.getBoolean("viper4android.headphonefx.dynamicsystem.tube", false))
-                v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_DYNSYS_ENABLETUBE, 1);
-            else
-                v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_DYNSYS_ENABLETUBE, 0);
             if (preferences.getBoolean("viper4android.headphonefx.dynamicsystem.enable", false))
                 v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_DYNSYS_PROCESS_ENABLED, 1);
             else
@@ -1650,6 +1642,12 @@ public class ViPER4AndroidService extends Service {
                 v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_CURE_PROCESS_ENABLED, 1);
             else
                 v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_CURE_PROCESS_ENABLED, 0);
+
+            /* Tube Simulator */
+            Log.i("ViPER4Android", "updateSystem(): Updating Tube Simulator.");
+            if (preferences.getBoolean("viper4android.headphonefx.tube.enable", false))
+                v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_TUBE_PROCESS_ENABLED, 1);
+            else v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_TUBE_PROCESS_ENABLED, 0);
 
             /* Speaker Optimization */
             Log.i("ViPER4Android", "updateSystem(): Shutting down speaker optimizer.");
@@ -1758,6 +1756,10 @@ public class ViPER4AndroidService extends Service {
                 v4aModule.setParameter_px4_vx4x1(PARAM_SPKFX_CONV_PROCESS_ENABLED, 1);
             else
                 v4aModule.setParameter_px4_vx4x1(PARAM_SPKFX_CONV_PROCESS_ENABLED, 0);
+
+            /* Tube Simulator */
+            Log.i("ViPER4Android", "updateSystem(): Shutting down tube simulator.");
+            v4aModule.setParameter_px4_vx4x1(PARAM_HPFX_TUBE_PROCESS_ENABLED, 0);
 
             /* Speaker Optimization */
             Log.i("ViPER4Android", "updateSystem(): Updating Speaker Optimizer.");

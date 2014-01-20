@@ -11,11 +11,11 @@
         android:id="@+id/notify"
         android:title="@string/text_drv_blank"/>
     <item
-        android:id="@+id/saveprofile"
-        android:title="@string/text_savefxprofile" />
-    <item
         android:id="@+id/loadprofile"
-        android:title="@string/text_loadfxprofile" />
+        android:title="@string/text_loadfxprofile"/>
+    <item
+        android:id="@+id/saveprofile"
+        android:title="@string/text_savefxprofile"/>
     <item
         android:id="@+id/uiprefer"
         android:title="@string/text_uiprefer"/>
