@@ -295,13 +295,13 @@ public class ViPER4AndroidService extends Service {
 
         private void proceedIRBuffer_Speaker(String convolverIrFile, int mChannels, int mFrames, int mBytes) {
             // 1. Tell driver to prepare kernel buffer
-            Random rndMachine = new Random(System.currentTimeMillis());
+            Random rndMachine = new Random();
             int mKernelBufferID = rndMachine.nextInt();
             setParameter_px4_vx4x3(
                             ViPER4AndroidService.PARAM_SPKFX_CONV_PREPAREBUFFER, mKernelBufferID, mChannels, 0);
 
             // 2. Read entire ir data and get hash code
-            byte[] mKernelData = V4AJniInterface.readImpulseResponseToArray(convolverIrFile);
+            byte[] mKernelData = V4AJniInterface.ReadImpulseResponseToArray(convolverIrFile);
             if (mKernelData == null) {
                 // Read failed
                 setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_SPKFX_CONV_PREPAREBUFFER, 0, 0, 1);
@@ -312,7 +312,7 @@ public class ViPER4AndroidService extends Service {
                 setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_SPKFX_CONV_PREPAREBUFFER, 0, 0, 1);
                 return;
             }
-            int[] mHashCode = V4AJniInterface.getHashImpulseResponseArray(mKernelData);
+            int[] mHashCode = V4AJniInterface.GetHashImpulseResponseArray(mKernelData);
             if (mHashCode == null) {
                 // Wrong with hash
                 setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_SPKFX_CONV_PREPAREBUFFER, 0, 0, 1);
@@ -361,12 +361,12 @@ public class ViPER4AndroidService extends Service {
 
         private void proceedIRBuffer_Headphone(String convolverIrFile, int mChannels, int mFrames, int mBytes) {
             // 1. Tell driver to prepare kernel buffer
-            Random rndMachine = new Random(System.currentTimeMillis());
+            Random rndMachine = new Random();
             int mKernelBufferID = rndMachine.nextInt();
             setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_HPFX_CONV_PREPAREBUFFER, mKernelBufferID, mChannels, 0);
 
             // 2. Read entire ir data and get hash code
-            byte[] mKernelData = V4AJniInterface.readImpulseResponseToArray(convolverIrFile);
+            byte[] mKernelData = V4AJniInterface.ReadImpulseResponseToArray(convolverIrFile);
             if (mKernelData == null) {
                 // Read failed
                 setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_HPFX_CONV_PREPAREBUFFER, 0, 0, 1);
@@ -377,7 +377,7 @@ public class ViPER4AndroidService extends Service {
                 setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_HPFX_CONV_PREPAREBUFFER, 0, 0, 1);
                 return;
             }
-            int[] mHashCode = V4AJniInterface.getHashImpulseResponseArray(mKernelData);
+            int[] mHashCode = V4AJniInterface.GetHashImpulseResponseArray(mKernelData);
             if (mHashCode == null) {
                 // Wrong with hash
                 setParameter_px4_vx4x3(ViPER4AndroidService.PARAM_HPFX_CONV_PREPAREBUFFER, 0, 0, 1);
@@ -428,7 +428,7 @@ public class ViPER4AndroidService extends Service {
 
         private void proceedIRBuffer_Speaker(IrsUtils irs, String convolverIrFile) {
             // 1. Tell driver to prepare kernel buffer
-            Random rndMachine = new Random(System.currentTimeMillis());
+            Random rndMachine = new Random();
             int mKernelBufferID = rndMachine.nextInt();
             setParameter_px4_vx4x3(
                             ViPER4AndroidService.PARAM_SPKFX_CONV_PREPAREBUFFER,
@@ -482,7 +482,7 @@ public class ViPER4AndroidService extends Service {
 
         private void proceedIRBuffer_Headphone(IrsUtils irs, String convolverIrFile) {
             // 1. Tell driver to prepare kernel buffer
-            Random rndMachine = new Random(System.currentTimeMillis());
+            Random rndMachine = new Random();
             int mKernelBufferID = rndMachine.nextInt();
             setParameter_px4_vx4x3(
                             ViPER4AndroidService.PARAM_HPFX_CONV_PREPAREBUFFER,
@@ -596,7 +596,7 @@ public class ViPER4AndroidService extends Service {
                         if (V4AJniInterface.isLibraryUsable()) {
                             Log.i("ViPER4Android", "We are going to load irs through jni");
                             // Get ir file info
-                            int[] iaIRInfo = V4AJniInterface.getImpulseResponseInfoArray(convolverIrFile);
+                            int[] iaIRInfo = V4AJniInterface.GetImpulseResponseInfoArray(convolverIrFile);
                             if (iaIRInfo == null)
                                 setParameter_px4_vx4x3(mCommand, 0, 0, 1);
                             else {
@@ -928,7 +928,7 @@ public class ViPER4AndroidService extends Service {
             SharedPreferences prefSettings = getSharedPreferences(
                     ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
             String mCompatibleMode = prefSettings.getString("viper4android.settings.compatiblemode", "global");
-            boolean mFXInLocalMode = false;
+            boolean mFXInLocalMode;
             if (mCompatibleMode.equals("global")) mFXInLocalMode = false;
             else mFXInLocalMode = true;
 
@@ -1113,13 +1113,13 @@ public class ViPER4AndroidService extends Service {
             mDriverIsReady = false;
             return;
         } else {
-            PackageManager packageMgr = getPackageManager();
-            PackageInfo packageInfo = null;
-            String apkVersion = "";
+            PackageManager pm = getPackageManager();
+            PackageInfo packageInfo;
+            String apkVersion;
             try {
                 int[] iaDrvVer = aeuUtils.getViPER4AndroidEngineVersion();
                 String mDriverVersion = iaDrvVer[0] + "." + iaDrvVer[1] + "." + iaDrvVer[2] + "." + iaDrvVer[3];
-                packageInfo = packageMgr.getPackageInfo(getPackageName(), 0);
+                packageInfo = pm.getPackageInfo(getPackageName(), 0);
                 apkVersion = packageInfo.versionName;
                 if (!apkVersion.equalsIgnoreCase(mDriverVersion)) {
                     Log.i("ViPER4Android", "ViPER4Android engine is not compatible with service");
@@ -1127,7 +1127,7 @@ public class ViPER4AndroidService extends Service {
                     return;
                 }
             }catch (NameNotFoundException e) {
-                Log.i("ViPER4Android", "Cannot found ViPER4Android's apk [weird]");
+                Log.i("ViPER4Android", "Cannot find ViPER4Android's apk [weird]");
                 mDriverIsReady = false;
                 return;
             }
@@ -1141,19 +1141,20 @@ public class ViPER4AndroidService extends Service {
             if (mUseBluetooth) {
                 Log.i("ViPER4Android", "Current is a2dp mode [bluetooth]");
                 mUseHeadset = false;
-                mUseUSBSoundCard = false;
+                mUseUSB = false;
             } else {
                 mUseHeadset = mAudioManager.isWiredHeadsetOn();
                 if (mUseHeadset) {
                     Log.i("ViPER4Android", "Current is headset mode");
-                    mUseUSBSoundCard = false;
+                    mUseUSB = false;
                 } else {
                     Log.i("ViPER4Android", "Current is speaker mode");
-                    mUseUSBSoundCard = false;
+                    mUseUSB = false;
                 }
             }
         }
-        Log.i("ViPER4Android", "Get current mode from system [" + getAudioOutputRouting(getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE)) + "]");
+        Log.i("ViPER4Android", "Get current mode from system [" + getAudioOutputRouting(getSharedPreferences(
+                        ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE)) + "]");
 
         if (mGeneralFX != null)
             Log.e("ViPER4Android", "onCreate, mGeneralFX != null");
@@ -1275,7 +1276,7 @@ public class ViPER4AndroidService extends Service {
         updateSystem(false);
     }
 
-    public String getAudioOutputRouting(SharedPreferences prefSettings) {
+    public static String getAudioOutputRouting(SharedPreferences prefSettings) {
         //SharedPreferences prefSettings = getSharedPreferences(
         //        ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", MODE_PRIVATE);
         String mLockedEffect = prefSettings.getString("viper4android.settings.lock_effect", "none");

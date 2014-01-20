@@ -1,5 +1,6 @@
 package com.vipercn.viper4android_v2.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -59,7 +60,7 @@ public class Utils {
                 return;
             }
 
-            AudioEffect.Descriptor aeViPER4AndroidEngine = null;
+            AudioEffect.Descriptor mViper4AndroidEngine = null;
             Log.i("ViPER4Android_Utils", "Found " + mAudioEffectList.length + " effects");
             for (int i = 0; i < mAudioEffectList.length; i++) {
                 if (mAudioEffectList[i] == null) continue;
@@ -68,13 +69,13 @@ public class Utils {
                     Log.i("ViPER4Android_Utils", "[" + (i + 1) + "], " + aeEffect.name + ", " + aeEffect.implementor);
                     if (aeEffect.uuid.equals(ViPER4AndroidService.ID_V4A_GENERAL_FX)) {
                         Log.i("ViPER4Android_Utils", "Perfect, found ViPER4Android engine at " + (i + 1));
-                        aeViPER4AndroidEngine = aeEffect;
+                        mViper4AndroidEngine = aeEffect;
                     }
                 } catch (Exception e) {
                 }
             }
 
-            if (aeViPER4AndroidEngine == null) {
+            if (mViper4AndroidEngine == null) {
                 Log.i("ViPER4Android_Utils", "ViPER4Android engine not found");
                 mHasViPER4AndroidEngine = false;
                 mV4AEngineVersion[0] = 0;
@@ -86,7 +87,7 @@ public class Utils {
 
             // Extract engine version
             try {
-                String v4aVersionLine = aeViPER4AndroidEngine.name;
+                String v4aVersionLine = mViper4AndroidEngine.name;
                 if (v4aVersionLine.contains("[") && v4aVersionLine.contains("]")) {
                     if (v4aVersionLine.length() >= 23) {
                         // v4aVersionLine should be "ViPER4Android [A.B.C.D]"
@@ -135,8 +136,8 @@ public class Utils {
     }
 
     public static class CpuInfo {
-        private boolean m_bCPUHasNEON;
-        private boolean m_bCPUHasVFP;
+        private boolean mCPUHasNEON;
+        private boolean mCPUHasVFP;
 
         // Lets read /proc/cpuinfo in java
         private boolean readCPUInfo() {
@@ -144,8 +145,8 @@ public class Utils {
             FileReader cpuReader = null;
             BufferedReader bufferReader = null;
 
-            m_bCPUHasNEON = false;
-            m_bCPUHasVFP = false;
+            mCPUHasNEON = false;
+            mCPUHasVFP = false;
 
             // Find "Features" line, extract neon and vfp
             try {
@@ -161,8 +162,8 @@ public class Utils {
                         while (stBlock.hasMoreElements()) {
                             String mFeature = stBlock.nextToken();
                             if (mFeature != null) {
-                                if (mFeature.equalsIgnoreCase("neon")) m_bCPUHasNEON = true;
-                                else if (mFeature.equalsIgnoreCase("vfp")) m_bCPUHasVFP = true;
+                                if (mFeature.equalsIgnoreCase("neon")) mCPUHasNEON = true;
+                                else if (mFeature.equalsIgnoreCase("vfp")) mCPUHasVFP = true;
                             }
                         }
                     }
@@ -171,8 +172,8 @@ public class Utils {
                 cpuReader.close();
 
                 Log.i("ViPER4Android_Utils", "CpuInfo[java] = NEON:"
-                        + m_bCPUHasNEON + ", VFP:" + m_bCPUHasVFP);
-                return !(!m_bCPUHasNEON && !m_bCPUHasVFP);
+                        + mCPUHasNEON + ", VFP:" + mCPUHasVFP);
+                return !(!mCPUHasNEON && !mCPUHasVFP);
             } catch (IOException e) {
                 try {
                     if (bufferReader != null)
@@ -188,24 +189,24 @@ public class Utils {
 
         // Lets read /proc/cpuinfo in jni
         private void readCPUInfoJni() {
-            m_bCPUHasNEON = V4AJniInterface.isCPUSupportNEON();
-            m_bCPUHasVFP = V4AJniInterface.isCPUSupportVFP();
+            mCPUHasNEON = V4AJniInterface.isCPUSupportNEON();
+            mCPUHasVFP = V4AJniInterface.isCPUSupportVFP();
         }
 
         // Buffered result
         public CpuInfo() {
-            m_bCPUHasNEON = false;
-            m_bCPUHasVFP = false;
+            mCPUHasNEON = false;
+            mCPUHasVFP = false;
             if (!readCPUInfo())
                 readCPUInfoJni();
         }
 
         public boolean hasNEON() {
-            return m_bCPUHasNEON;
+            return mCPUHasNEON;
         }
 
         public boolean hasVFP() {
-            return m_bCPUHasVFP;
+            return mCPUHasVFP;
         }
     }
 
@@ -255,6 +256,7 @@ public class Utils {
                 fos.write(buf, 0, numRead);
             } while (true);
             stream.close();
+            fos.close();
 
             return true;
         } catch (Exception e) {
@@ -448,7 +450,7 @@ public class Utils {
                 mOutput.write("# Created " + mDate + "\n\n");
                 mOutput.write("profile_name=" + mProfileName + "\n\n");
 
-                String mValue = "";
+                String mValue;
 
                 // boolean values
                 mValue = String.valueOf(preferences.getBoolean("viper4android.headphonefx.enable", false));
@@ -664,8 +666,8 @@ public class Utils {
         if (mBasePath.equals("")) return false;
         mDstName = mBasePath + "/" + mDstName;
 
-        InputStream myInput = null;
-        OutputStream myOutput = null;
+        InputStream myInput;
+        OutputStream myOutput;
         String outFileName = mDstName;
         try {
             File hfOutput = new File(mDstName);
@@ -674,7 +676,7 @@ public class Utils {
             myOutput = new FileOutputStream(outFileName);
             myInput = ctx.getAssets().open(mSourceName);
             byte[] tBuffer = new byte[4096]; /* 4K page size */
-            int mLength = 0;
+            int mLength;
             while ((mLength = myInput.read(tBuffer)) > 0)
                 myOutput.write(tBuffer, 0, mLength);
             myOutput.flush();
@@ -957,7 +959,7 @@ public class Utils {
         String baseDrvPathName = getBasePath(ctx);
         if (baseDrvPathName.endsWith("/")) baseDrvPathName = baseDrvPathName + "libv4a_fx_ics.so";
         else baseDrvPathName = baseDrvPathName + "/libv4a_fx_ics.so";
-        int mShellCmdReturn = 0; boolean success = false;
+        int mShellCmdReturn; boolean success;
         if (vendorExists) {
             // Copy files
             success = ShellCommand.sendShellCommand(vBox + " mount -o remount,rw /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
@@ -1110,5 +1112,21 @@ public class Utils {
             return installDrv_FX_RootTools(ctx, mDriverName);
         else
             return installDrv_FX_VBoX(ctx, mDriverName);
+    }
+
+    /**
+     * Restart the activity smoothly
+     *
+     * @param activity
+     */
+    public static void restartActivity(final Activity activity) {
+        if (activity == null)
+            return;
+        final int enter_anim = android.R.anim.fade_in;
+        final int exit_anim = android.R.anim.fade_out;
+        activity.overridePendingTransition(enter_anim, exit_anim);
+        activity.finish();
+        activity.overridePendingTransition(enter_anim, exit_anim);
+        activity.startActivity(activity.getIntent());
     }
 }

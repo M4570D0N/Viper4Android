@@ -1,5 +1,7 @@
 package com.vipercn.viper4android_v2.activity;
 
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,8 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import android.util.Log;
 
 public class IrsUtils {
     public static long hashIrs(byte[] mArray, int mLength) {

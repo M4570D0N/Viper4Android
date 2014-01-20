@@ -16,8 +16,6 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.vipercn.viper4android_v2.R;
-import com.vipercn.viper4android_v2.preference.Biquad;
-import com.vipercn.viper4android_v2.preference.Complex;
 
 public class EqualizerSurface extends SurfaceView {
     private static int MIN_FREQ = 10;

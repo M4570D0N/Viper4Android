@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/v4a_action_tabbed"
-        android:title="@string/navigation_toggle_tabbed"
+        android:title="@string/navigation_toggle_drawer"
         android:showAsAction="never" />
     <item
         android:id="@+id/lockeffect"
@@ -11,11 +11,11 @@
         android:id="@+id/notify"
         android:title="@string/text_drv_blank"/>
     <item
-        android:id="@+id/loadprofile"
-        android:title="@string/text_loadfxprofile"/>
-    <item
         android:id="@+id/saveprofile"
-        android:title="@string/text_savefxprofile"/>
+        android:title="@string/text_savefxprofile" />
+    <item
+        android:id="@+id/loadprofile"
+        android:title="@string/text_loadfxprofile" />
     <item
         android:id="@+id/uiprefer"
         android:title="@string/text_uiprefer"/>

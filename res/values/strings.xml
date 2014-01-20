@@ -20,8 +20,7 @@
     <string name="pref_force_enable_text">Force Enable V4A</string>
     <string name="pref_force_enable_warn">Turning on Force-Enable could solve no effect problem.
 \nHowever in certain roms, you may get unexpected results such as no sound and cause battery drain.
-\nSo, use at your own risks. If such cases happen, please turn this off.
-    </string>
+\nSo, use at your own risks. If such cases happen, please turn this off.</string>
 
     <string name="pref_fx_master_title">Master Power</string>
     <string name="pref_fx_master_summary_on">V4A-FX is powered on</string>
@@ -173,6 +172,7 @@
 
     <string name="text_effectprofile">Effect Profile</string>
     <string name="text_loadfxprofile">Load Effect Profile</string>
+    <string name="text_newfxprofile">New Effect Profile&#8230;</string>
     <string name="text_savefxprofile">Save Effect Profile</string>
     <string name="text_pleaseinputname">Please input the name of profile
 \nDo not include \'=\'
@@ -239,8 +239,7 @@
 \nBased on some code of Cyanogenmod\'s DSPManager.
 \n
 \nVersion %1$s (FX), Codename "Beautiful".
-\n
-    </string>
+\n</string>
 
     <string name="text_help_content">***General help***
 \n
@@ -263,4 +262,11 @@
 
     <string name="text_checkupdate">Check Update</string>
     <string name="text_updatelink">http://vipersaudio.com/swupdate/viper4android/download.html</string>
+
+    <!-- Drawer -->
+    <string name="navigation_drawer_toggle">Toggle Drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_toggle_drawer">Switch to Drawer view</string>
+    <string name="navigation_toggle_tabbed">Switch to Tab view</string>
 </resources>

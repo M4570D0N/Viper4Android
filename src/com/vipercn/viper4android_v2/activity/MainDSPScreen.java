@@ -1,6 +1,7 @@
 package com.vipercn.viper4android_v2.activity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -85,7 +86,9 @@ public final class MainDSPScreen extends PreferenceFragment {
         int mControlLevel = prefSettings.getInt("viper4android.settings.uiprefer", 0);
         if (mControlLevel < 0 || mControlLevel > 2) mControlLevel = 0;
 
-        prefManager.setSharedPreferencesName(ViPER4Android.SHARED_PREFERENCES_BASENAME + "." + config);
+        prefManager.setSharedPreferencesName(
+                ViPER4Android.SHARED_PREFERENCES_BASENAME + "." + config);
+        prefManager.setSharedPreferencesMode(Context.MODE_MULTI_PROCESS);
         try {
             int xmlId = R.xml.class.getField(config + "_preferences_l" + mControlLevel).getInt(null);
             addPreferencesFromResource(xmlId);
@@ -99,7 +102,7 @@ public final class MainDSPScreen extends PreferenceFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PreferenceManager prefManager = getPreferenceManager();
-        prefManager.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(listener);
+        getPreferenceManager().getSharedPreferences()
+                .unregisterOnSharedPreferenceChangeListener(listener);
     }
 }

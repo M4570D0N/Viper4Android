@@ -19,21 +19,21 @@ public class V4AJniInterface {
     }
 
     /* Library Check Utils */
-    private native static int checkLibraryUsable();
+    private native static int CheckLibraryUsable();
 
     /* CPU Check Utils */
-    private native static int checkCPUHasNEON();
-    private native static int checkCPUHasVFP();
+    private native static int CheckCPUHasNEON();
+    private native static int CheckCPUHasVFP();
 
     /* Impulse Response Utils */
-    private native static int[] getImpulseResponseInfo(byte[] mIRFileName);
-    private native static byte[] readImpulseResponse(byte[] mIRFileName);
-    private native static int[] hashImpulseResponse(byte[] mBuffer, int mBufferSize);
+    private native static int[] GetImpulseResponseInfo(byte[] mIRFileName);
+    private native static byte[] ReadImpulseResponse(byte[] mIRFileName);
+    private native static int[] HashImpulseResponse(byte[] mBuffer, int mBufferSize);
 
     /* This method is just making sure jni has been loaded */
     public static boolean checkLibrary() {
         if (!mJniLoadOK) return false;
-        int mUsable = checkLibraryUsable();
+        int mUsable = CheckLibraryUsable();
         return mUsable == 1;
     }
 
@@ -43,42 +43,40 @@ public class V4AJniInterface {
 
     public static boolean isCPUSupportNEON() {
         if (!mJniLoadOK) return false;
-        int result = checkCPUHasNEON();
+        int result = CheckCPUHasNEON();
         Log.i("ViPER4Android_Utils", "CpuInfo[jni] = NEON:" + result);
-        if (result == 0) return false;
-        return true;
+        return result != 0;
     }
 
     public static boolean isCPUSupportVFP() {
         if (!mJniLoadOK) return false;
-        int result = checkCPUHasVFP();
+        int result = CheckCPUHasVFP();
         Log.i("ViPER4Android_Utils", "CpuInfo[jni] = VFP:" + result);
-        if (result == 0) return false;
-        return true;
+        return result != 0;
     }
 
-    public static int[] getImpulseResponseInfoArray(String mIRFileName) {
+    public static int[] GetImpulseResponseInfoArray(String mIRFileName) {
         if (!mJniLoadOK) return null;
         // Convert unicode string to multi-byte string
         byte[] stringBytes = mIRFileName.getBytes(Charset.forName("US-ASCII"));
         if (stringBytes == null) return null;
         // Call native
-        return getImpulseResponseInfo(stringBytes);
+        return GetImpulseResponseInfo(stringBytes);
     }
 
-    public static byte[] readImpulseResponseToArray(String mIRFileName) {
+    public static byte[] ReadImpulseResponseToArray(String mIRFileName) {
         if (!mJniLoadOK) return null;
         // Convert unicode string to multi-byte string
         byte[] stringBytes = mIRFileName.getBytes(Charset.forName("US-ASCII"));
         if (stringBytes == null) return null;
         // Call native
-        return readImpulseResponse(stringBytes);
+        return ReadImpulseResponse(stringBytes);
     }
 
-    public static int[] getHashImpulseResponseArray(byte[] mBuffer) {
+    public static int[] GetHashImpulseResponseArray(byte[] mBuffer) {
         if (!mJniLoadOK) return null;
         if (mBuffer == null) return null;
         // Call native
-        return hashImpulseResponse(mBuffer, mBuffer.length);
+        return HashImpulseResponse(mBuffer, mBuffer.length);
     }
 }

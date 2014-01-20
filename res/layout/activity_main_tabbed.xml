@@ -14,11 +14,10 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_gravity="top"
-            android:textColor="@android:color/holo_blue_light"
+            android:textColor="@color/white"
             android:background="@drawable/pager_background"
             android:textSize="12sp"
             android:textStyle="bold" />
-
     </android.support.v4.view.ViewPager>
 
     <View

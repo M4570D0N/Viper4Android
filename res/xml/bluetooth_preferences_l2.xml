@@ -3,7 +3,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/pref_fx_master_title">
+        android:title="@string/pref_fx_master_title" >
 
         <CheckBoxPreference
             android:key="viper4android.headphonefx.enable"
@@ -27,7 +27,7 @@
             android:summaryOn="@string/pref_playback_summary_on"
             android:summaryOff="@string/pref_playback_summary_off"
             android:disableDependentsState="false"
-            android:title="@string/pref_dsp_enable"/>
+            android:title="@string/pref_dsp_enable" />
 
         <com.vipercn.viper4android_v2.preference.SummariedListPreference
             android:entries="@array/playbackgain_ratio"
@@ -43,14 +43,14 @@
             android:key="viper4android.headphonefx.playbackgain.maxscaler"
             android:defaultValue="400"
             android:title="@string/pref_playback_maxgain"
-            android:entryValues="@array/multi_factor_values"/>
+            android:entryValues="@array/multi_factor_values" />
         <com.vipercn.viper4android_v2.preference.SummariedListPreference
             android:entries="@array/output_db"
             android:dialogTitle="@string/pref_effect_title"
             android:key="viper4android.headphonefx.playbackgain.volume"
             android:defaultValue="80"
             android:title="@string/pref_playback_output_threshold"
-            android:entryValues="@array/output_db_values"/>
+            android:entryValues="@array/output_db_values" />
 
     </PreferenceCategory>
 

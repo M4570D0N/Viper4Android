@@ -38,8 +38,7 @@
         <service
             android:exported="false"
             android:enabled="true"
-            android:name=".service.ViPER4AndroidService">
-        </service>
+            android:name=".service.ViPER4AndroidService" />
 
         <receiver android:name=".receiver.BootCompletedReceiver">
             <intent-filter>

@@ -8,21 +8,21 @@
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "ViPER4Android_v2", __VA_ARGS__)
 
-JNIEXPORT jint JNI_onLoad(JavaVM* vm, void* reserved) {
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     LOGI("Loading JNI ...");
     return JNI_VERSION_1_1;
 }
 
-JNIEXPORT void JNI_onUnload(JavaVM* vm, void* reserved) {
+JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved) {
     LOGI("Unloading JNI ...");
 }
 
-JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_checkLibraryUsable (
+JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_CheckLibraryUsable (
     JNIEnv *env, jclass cls) {
         return (jint)1;
 }
 
-JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_checkCPUHasNEON (
+JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_CheckCPUHasNEON (
     JNIEnv *env, jclass cls) {
     if (android_getCpuFamily() != ANDROID_CPU_FAMILY_ARM) return (jint)0;
     uint64_t uiCPUFeatures = android_getCpuFeatures();
@@ -30,7 +30,7 @@ JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterfa
     return (jint)1;
 }
 
-JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_checkCPUHasVFP (
+JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_CheckCPUHasVFP (
     JNIEnv *env, jclass cls) {
     if (android_getCpuFamily() != ANDROID_CPU_FAMILY_ARM) return (jint)0;
     uint64_t uiCPUFeatures = android_getCpuFeatures();
@@ -43,7 +43,7 @@ JNIEXPORT jint JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterfa
     }
 }
 
-JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_getImpulseResponseInfo (
+JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_GetImpulseResponseInfo (
     JNIEnv *env, jclass cls, jbyteArray jbaIrFileName ) {
     /* return: [0] = Valid, [1] = Channels, [2] = Frames, [3] = Byte Length */
 
@@ -95,7 +95,7 @@ JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniIn
     return jiaIRInfo;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_readImpulseResponse (
+JNIEXPORT jbyteArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_ReadImpulseResponse (
     JNIEnv *env, jclass cls, jbyteArray jIrFileName) {
     // Get multi-bytes string
     jsize mIrFileNameLength = env->GetArrayLength(jIrFileName);
@@ -159,7 +159,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniI
 }
 
 extern uint32_t HashCRC32(uint8_t *ucpBuffer, uint32_t uiBufferSize);
-JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_hashImpulseResponse (
+JNIEXPORT jintArray JNICALL Java_com_vipercn_viper4android_1v2_activity_V4AJniInterface_HashImpulseResponse (
     JNIEnv *env, jclass cls, jbyteArray jBuffer, jint nBufferSize) {
     /* return: [0] = Valid, [2] = Hash Code */
 
