@@ -586,35 +586,51 @@ public class ShellCommand {
         return exitValue;
     }
 
-    public static int rootExecuteWithoutShell(String mExecutable,
-            File directory) {
+    public static int rootExecuteWithoutShell(String mExecutable) {
         if (mExecutable == null)
             return -65536;
         if (mExecutable.equals(""))
             return -65536;
 
-        Log.i("ViPER4Android_ShellCommand", "Root executing " + mExecutable
-                + " ...");
+        Log.i("ViPER4Android_ShellCommand", "Root executing " + mExecutable + " ...");
         int exitValue = -65536;
         try {
-            Process mProcess = Runtime.getRuntime()
-                    .exec(new String[] { "su", "-c", mExecutable }, null,
-                            directory);
+            Process mProcess = Runtime.getRuntime().exec(new String[] { "su", "-c", mExecutable });
             mProcess.waitFor();
             exitValue = mProcess.exitValue();
             mProcess.destroy();
         } catch (IOException e) {
-            Log.i("ViPER4Android_ShellCommand",
-                    "IOException, msg = " + e.getMessage());
+            Log.i("ViPER4Android_ShellCommand", "IOException, msg = " + e.getMessage());
             return exitValue;
         } catch (InterruptedException e) {
-            Log.i("ViPER4Android_ShellCommand", "InterruptedException, msg = "
-                    + e.getMessage());
+            Log.i("ViPER4Android_ShellCommand", "InterruptedException, msg = " + e.getMessage());
             return exitValue;
         }
-        Log.i("ViPER4Android_ShellCommand", "Program " + mExecutable
-                + " returned " + exitValue);
+        Log.i("ViPER4Android_ShellCommand", "Program " + mExecutable + " returned " + exitValue);
 
         return exitValue;
     }
+
+        public static int rootExecuteWithoutShell(String mExecutable, File directory) {
+                if (mExecutable == null) return -65536;
+                if (mExecutable.equals("")) return -65536;
+
+                Log.i("ViPER4Android_ShellCommand", "Root executing " + mExecutable + " ...");
+                int exitValue = -65536;
+                try {
+                        Process mProcess = Runtime.getRuntime().exec(new String[] {"su", "-c", mExecutable}, null, directory);
+                        mProcess.waitFor();
+                        exitValue = mProcess.exitValue();
+                        mProcess.destroy();
+                } catch (IOException e) {
+                        Log.i("ViPER4Android_ShellCommand", "IOException, msg = " + e.getMessage());
+                        return exitValue;
+                } catch (InterruptedException e) {
+                        Log.i("ViPER4Android_ShellCommand", "InterruptedException, msg = " + e.getMessage());
+                        return exitValue;
+                }
+                Log.i("ViPER4Android_ShellCommand", "Program " + mExecutable + " returned " + exitValue);
+
+                return exitValue;
+        }
 }

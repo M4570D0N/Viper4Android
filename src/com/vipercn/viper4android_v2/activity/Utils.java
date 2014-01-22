@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.os.Environment;
 import android.util.Log;
@@ -31,10 +32,11 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 public class Utils {
+
     public class AudioEffectUtils {
         private AudioEffect.Descriptor[] mAudioEffectList;
         private boolean mHasViPER4AndroidEngine;
-        private int[] mV4AEngineVersion = new int[4];
+        private final int[] mV4AEngineVersion = new int[4];
 
         public AudioEffectUtils() {
             try {
@@ -209,7 +211,7 @@ public class Utils {
     }
 
     // Check if the specified file exists.
-    public static boolean fileExists(String filename) {
+    private static boolean fileExists(String filename) {
         boolean mExist = new File(filename).exists();
         if (!mExist) {
             if (!StaticEnvironment.getVBoxUsable()) {
@@ -227,7 +229,7 @@ public class Utils {
     }
 
     // Get a file length
-    public static long getFileLength(String mFileName) {
+    private static long getFileLength(String mFileName) {
         try {
             return new File(mFileName).length();
         } catch (Exception e) {
@@ -300,7 +302,7 @@ public class Utils {
     }
 
     // Get profile name from a file
-    public static String getProfileName(String mProfileFileName) {
+    private static String getProfileName(String mProfileFileName) {
         try {
             FileInputStream fisInput = new FileInputStream(mProfileFileName);
             InputStreamReader isrInput = new InputStreamReader(fisInput, "UTF-8");
@@ -550,7 +552,7 @@ public class Utils {
     }
 
     // Modify audio_effects.conf
-    public static boolean modifyFXConfig(String mInputFile, String mOutputFile) {
+    private static boolean modifyFXConfig(String mInputFile, String mOutputFile) {
         Log.i("ViPER4Android_Utils", "Editing audio configuration, input = "
                 + mInputFile + ", output = " + mOutputFile);
         try {
@@ -659,10 +661,10 @@ public class Utils {
     }
 
     // Check if addon.d folder exists for script installation (Device kernel dependant)
-    public static boolean AddondExists() {
+    public static boolean addondExists() {
         File file = new File("/system/addon.d/");
 
-        return (file.exists() && file.isDirectory());
+        return file.exists() && file.isDirectory();
     }
 
     // Copy assets to local
@@ -717,21 +719,25 @@ public class Utils {
                 if (RootTools.exists(mDriverPathName)) {
                     RootTools rtTools = new RootTools();
                     rtTools.deleteFileOrDirectory(mDriverPathName, true);
+                    if (RootTools.exists("/system/addon.d/91-v4a.sh"))
+                        rtTools.deleteFileOrDirectory("/system/addon.d/91-v4a.sh",true);
                 }
                 RootTools.closeAllShells();
             } catch (IOException e) {
             }
         } else {
-            String vBoX = StaticEnvironment.getVBoxExecutablePath();
+            String vBox = StaticEnvironment.getVBoxExecutablePath();
             String mDriverPathName = "/system/lib/soundfx/libv4a_fx_ics.so";
             if (ShellCommand.openRootShell(true)) {
-                ShellCommand.sendShellCommand(vBoX + " mount -o remount,rw /system", 5.0f);
+                ShellCommand.sendShellCommand(vBox + " mount -o remount,rw /system", 5.0f);
                 Log.i("ViPER4Android", "Command return = " + ShellCommand.getLastReturnValue());
-                ShellCommand.sendShellCommand(vBoX + " rm " + mDriverPathName, 1.0f);
+                ShellCommand.sendShellCommand(vBox + " rm " + mDriverPathName, 1.0f);
                 Log.i("ViPER4Android", "Command return = " + ShellCommand.getLastReturnValue());
-                ShellCommand.sendShellCommand(vBoX + " sync", 5.0f);
+                ShellCommand.sendShellCommand(vBox + " rm /system/addon.d/91-v4a.sh", 1.0f);
                 Log.i("ViPER4Android", "Command return = " + ShellCommand.getLastReturnValue());
-                ShellCommand.sendShellCommand(vBoX + " mount -o remount,ro /system", 5.0f);
+                ShellCommand.sendShellCommand(vBox + " sync", 5.0f);
+                Log.i("ViPER4Android", "Command return = " + ShellCommand.getLastReturnValue());
+                ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f);
                 Log.i("ViPER4Android", "Command return = " + ShellCommand.getLastReturnValue());
                 ShellCommand.closeShell();
             }
@@ -752,7 +758,7 @@ public class Utils {
             return false;
 
         //Check if addon.d directory exists and copy script if supported
-        if (AddondExists()) {
+        if (addondExists()) {
             copyAssetsToLocal(ctx, "91-v4a.sh", "91-v4a.sh");
             isAddondSupported = true;
         }
@@ -775,7 +781,7 @@ public class Utils {
                     mChmod = "toolbox chmod";
             }
         }
-        if (mChmod == null || mChmod.equals(""))
+        if (mChmod.equals(""))
             return false;
 
         // Generate temp config file path, thanks to 'ste71m'
@@ -798,8 +804,8 @@ public class Utils {
         }
 
         // Modifing configuration
-        boolean modifyResult = true;
-        modifyResult &= modifyFXConfig(mSystemConf, mSystemConf + ".out");
+        boolean modifyResult;
+        modifyResult = modifyFXConfig(mSystemConf, mSystemConf + ".out");
         if (vendorExists) modifyResult &= modifyFXConfig(mVendorConf, mVendorConf + ".out");
         if (!modifyResult) {
             /* Modify the configuration failed, lets cleanup temp file(s) */
@@ -843,17 +849,17 @@ public class Utils {
         try {
             if (vendorExists) {
                 // Copy files
-                operationSuccess &= RootTools.remount("/system", "RW");
+                operationSuccess = RootTools.remount("/system", "RW");
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(baseDrvPathName,
+                    operationSuccess = RootTools.copyFile(baseDrvPathName,
                             "/system/lib/soundfx/libv4a_fx_ics.so", false,
                             false);
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(
+                    operationSuccess = RootTools.copyFile(
                             mSystemConf + ".out",
                             "/system/etc/audio_effects.conf", false, false);
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(
+                    operationSuccess = RootTools.copyFile(
                             mVendorConf + ".out",
                             "/system/vendor/etc/audio_effects.conf", false,
                             false);
@@ -878,13 +884,13 @@ public class Utils {
                 RootTools.remount("/system", "RO");
             } else {
                 // Copy files
-                operationSuccess &= RootTools.remount("/system", "RW");
+                operationSuccess = RootTools.remount("/system", "RW");
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(baseDrvPathName,
+                    operationSuccess = RootTools.copyFile(baseDrvPathName,
                             "/system/lib/soundfx/libv4a_fx_ics.so", false,
                             false);
                 if (operationSuccess)
-                    operationSuccess &= RootTools.copyFile(
+                    operationSuccess = RootTools.copyFile(
                             mSystemConf + ".out",
                             "/system/etc/audio_effects.conf", false, false);
                 if (operationSuccess && isAddondSupported)
@@ -941,7 +947,7 @@ public class Utils {
     // Install ViPER4Android FX driver through vbox
     private static boolean installDrv_FX_VBoX(Context ctx, String mDriverName) {
 
-        boolean isAddondSupported = false;
+        boolean isAddondSupported = false, isUsingSuperSU;
 
         // Make sure we can use external storage for temp directory
         if (!Environment.getExternalStorageState().equals(
@@ -953,7 +959,7 @@ public class Utils {
             return false;
 
         //Check if addon.d directory exists and copy script if supported
-        if (AddondExists()) {
+        if (addondExists()) {
             copyAssetsToLocal(ctx, "91-v4a.sh", "91-v4a.sh");
             isAddondSupported = true;
         }
@@ -990,8 +996,8 @@ public class Utils {
         }
 
         // Modifing configuration
-        boolean modifyResult = true;
-        modifyResult &= modifyFXConfig(mSystemConf, mSystemConf + ".out");
+        boolean modifyResult;
+        modifyResult = modifyFXConfig(mSystemConf, mSystemConf + ".out");
         if (vendorExists)
             modifyResult &= modifyFXConfig(mVendorConf, mVendorConf + ".out");
         if (!modifyResult) {
@@ -1021,10 +1027,23 @@ public class Utils {
             baseDrvPathName = baseDrvPathName + "/libv4a_fx_ics.so";
             if (isAddondSupported) addondScriptPathName = addondScriptPathName + "/91-v4a.sh";
         }
-        int mShellCmdReturn; boolean success;
+        int mShellCmdReturn;
+        boolean success;
+        isUsingSuperSU = usingSuperSU(ctx);
+
         if (vendorExists) {
             // Copy files
-            success = ShellCommand.sendShellCommand(vBox + " mount -o remount,rw /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                success = ShellCommand
+                        .sendShellCommand(vBox + " mount -o remount,rw /system", 5.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("mount -o rw,remount /system");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1034,9 +1053,30 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
-            ShellCommand.sendShellCommand(vBox + " rm /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-            Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
-            success = ShellCommand.sendShellCommand(vBox + " cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                ShellCommand
+                        .sendShellCommand(vBox + " rm /system/lib/soundfx/libv4a_fx_ics.so", 1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+                Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("rm /system/lib/soundfx/libv4a_fx_ics.so");
+                Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+            }
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                success = ShellCommand.sendShellCommand(
+                        vBox + " cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so",
+                        1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                        "cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1048,14 +1088,34 @@ public class Utils {
             }
 
             if (isAddondSupported) {
-                success = ShellCommand.sendShellCommand(vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-                if (!success || (mShellCmdReturn != 0)) {
+                //Determine command structure based on SuperUser or SuperSU use
+                if (isUsingSuperSU) {
+                success = ShellCommand.sendShellCommand(vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f);
+                    mShellCmdReturn = ShellCommand.getLastReturnValue();
+                } else {
+                    mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                            "cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh");
+                    success = mShellCmdReturn == 0;
+                }
+
+                if (!success || mShellCmdReturn != 0) {
                     Log.e("ViPER4Android", "Cannot copy addon.d script to /system/addon.d/");
                     // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
                 }
             }
 
-            success = ShellCommand.sendShellCommand(vBox + " cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                success = ShellCommand.sendShellCommand(
+                        vBox + " cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf",
+                        1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                        "cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf");
+                success = mShellCmdReturn == 0;
+            }
+
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1065,7 +1125,18 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
-            success = ShellCommand.sendShellCommand(vBox + " cp " + mVendorConf + ".out" + " /system/vendor/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                success = ShellCommand.sendShellCommand(vBox + " cp " + mVendorConf + ".out"
+                        + " /system/vendor/etc/audio_effects.conf", 1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                        "cp " + mVendorConf + ".out" + " /system/vendor/etc/audio_effects.conf");
+                success = mShellCmdReturn == 0;
+            }
+
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1076,7 +1147,18 @@ public class Utils {
                 return false;
             }
             // Modify permission
-            success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                success = ShellCommand
+                        .sendShellCommand(vBox + " chmod 644 /system/etc/audio_effects.conf", 1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("chmod 644 /system/etc/audio_effects.conf");
+                success = mShellCmdReturn == 0;
+            }
+
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1086,7 +1168,17 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
-            success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/vendor/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                success = ShellCommand
+                        .sendShellCommand(vBox + " chmod 644 /system/vendor/etc/audio_effects.conf",
+                                1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("chmod 644 /system/vendor/etc/audio_effects.conf");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1097,13 +1189,31 @@ public class Utils {
                 return false;
             }
             if (isAddondSupported) {
-                success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-                if (!success || (mShellCmdReturn != 0)) {
+                //Determine command structure based on SuperUser or SuperSU use
+                if (isUsingSuperSU) {
+                    success = ShellCommand
+                            .sendShellCommand(vBox + " chmod 644 /system/addon.d/91-v4a.sh", 1.0f);
+                    mShellCmdReturn = ShellCommand.getLastReturnValue();
+                } else {
+                    mShellCmdReturn = ShellCommand
+                            .rootExecuteWithoutShell("chmod 644 /system/addon.d/91-v4a.sh");
+                    success = mShellCmdReturn == 0;
+                }
+
+                if (!success || mShellCmdReturn != 0) {
                     Log.e("ViPER4Android", "Cannot change addon.d script permission [/system/addon.d]");
                     // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
                 }
             }
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("chmod 644 /system/lib/soundfx/libv4a_fx_ics.so");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mVendorConf).delete();
@@ -1117,9 +1227,28 @@ public class Utils {
             Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
             ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+                ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("mount -o ro,remount /system");
+            }
+            Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
         } else {
             // Copy files
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             success = ShellCommand.sendShellCommand(vBox + " mount -o remount,rw /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("mount -o rw,remount /system");
+                success = mShellCmdReturn == 0;
+            }
+
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mSystemConf + ".out").delete();
@@ -1127,9 +1256,21 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             ShellCommand.sendShellCommand(vBox + " rm /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+            }
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             success = ShellCommand.sendShellCommand(vBox + " cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("rm /system/lib/soundfx/libv4a_fx_ics.so");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mSystemConf + ".out").delete();
@@ -1138,13 +1279,28 @@ public class Utils {
                 return false;
             }
             if (isAddondSupported) {
+                //Determine command structure based on SuperUser or SuperSU use
+                if (isUsingSuperSU) {
                 success = ShellCommand.sendShellCommand(vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-                if (!success || (mShellCmdReturn != 0)) {
+                } else {
+                    mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                            "cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh");
+                    success = mShellCmdReturn == 0;
+                }
+                if (!success || mShellCmdReturn != 0) {
                     Log.e("ViPER4Android", "Cannot copy addon.d script to /system/addon.d/");
                     // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
                 }
             }
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             success = ShellCommand.sendShellCommand(vBox + " cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                        "cp " + mSystemConf + ".out" + " /system/etc/audio_effects.conf");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mSystemConf + ".out").delete();
@@ -1153,7 +1309,15 @@ public class Utils {
                 return false;
             }
             // Modify permission
+
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/etc/audio_effects.conf", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("chmod 644 /system/etc/audio_effects.conf");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mSystemConf + ".out").delete();
@@ -1162,13 +1326,28 @@ public class Utils {
                 return false;
             }
             if (isAddondSupported) {
+                //Determine command structure based on SuperUser or SuperSU use
+                if (isUsingSuperSU) {
+
                 success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/addon.d/91-v4a.sh", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-                if (!success || (mShellCmdReturn != 0)) {
+                } else {
+                    mShellCmdReturn = ShellCommand
+                            .rootExecuteWithoutShell("chmod 644 /system/addon.d/91-v4a.sh");
+                    success = mShellCmdReturn == 0;
+                }
+                if (!success || mShellCmdReturn != 0) {
                     Log.e("ViPER4Android", "Cannot change addon.d script permission [/system/addon.d]");
                     // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
                 }
             }
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
             success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("chmod 644 /system/lib/soundfx/libv4a_fx_ics.so");
+                success = mShellCmdReturn == 0;
+            }
             if (!success || mShellCmdReturn != 0) {
                 new File(mSystemConf).delete();
                 new File(mSystemConf + ".out").delete();
@@ -1178,8 +1357,14 @@ public class Utils {
             }
             ShellCommand.sendShellCommand(vBox + " sync", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
-           	ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-           	Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+            //Determine command structure based on SuperUser or SuperSU use
+            if (isUsingSuperSU) {
+            ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand
+                        .rootExecuteWithoutShell("mount -o ro,remount /system");
+            }
+            Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
         }
 
         /* Cleanup temp file(s) and close root shell */
@@ -1196,6 +1381,20 @@ public class Utils {
         ShellCommand.closeShell();
 
         return fileExists("/system/lib/soundfx/libv4a_fx_ics.so");
+    }
+
+    // Check if SuperSU is current root tool installed
+    private static boolean usingSuperSU(Context ctx) {
+        PackageManager pm = ctx.getPackageManager();
+        boolean installed;
+        try {
+            assert pm != null;
+            pm.getPackageInfo("eu.chainfire.supersu", PackageManager.GET_ACTIVITIES);
+            installed = true;
+        } catch (PackageManager.NameNotFoundException e) {
+            installed = false;
+        }
+        return installed;
     }
 
     // Install ViPER4Android FX driver
