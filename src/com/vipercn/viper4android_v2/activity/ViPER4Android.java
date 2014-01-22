@@ -21,7 +21,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -82,7 +81,6 @@ public final class ViPER4Android extends Activity {
     //==================================
     public static final String SHARED_PREFERENCES_BASENAME = "com.vipercn.viper4android_v2";
     public static final String ACTION_UPDATE_PREFERENCES = "com.vipercn.viper4android_v2.UPDATE";
-    private static final String PROFILES_FOLDER = "Profiles";
     public static final String ACTION_SHOW_NOTIFY = "com.vipercn.viper4android_v2.SHOWNOTIFY";
     public static final String ACTION_CANCEL_NOTIFY = "com.vipercn.viper4android_v2.CANCELNOTIFY";
     public static final int NOTIFY_FOREGROUND_ID = 1;
@@ -130,8 +128,7 @@ public final class ViPER4Android extends Activity {
         SharedPreferences prefSettings = getSharedPreferences(ViPER4Android.SHARED_PREFERENCES_BASENAME + ".settings", 0);
         String mLastVersion = prefSettings.getString("viper4android.settings.lastversion", "");
         if (mLastVersion == null) return true;
-        if (mLastVersion.equals("")) return true;
-        return !mLastVersion.equalsIgnoreCase(mVersion);
+        return mLastVersion.equals("") || !mLastVersion.equalsIgnoreCase(mVersion);
     }
 
     private void setFirstRun() {
@@ -287,11 +284,11 @@ public final class ViPER4Android extends Activity {
         return sb.toString();
     }
 
-    private Context mActivityContext = this;
+    private final Context mActivityContext = this;
     private ViPER4AndroidService mAudioServiceInstance;
 
     // Driver install handler
-    private static Handler proceedDriverHandler = new Handler() {
+    private static final Handler proceedDriverHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             try {
@@ -772,7 +769,7 @@ public final class ViPER4Android extends Activity {
             }
 
             case R.id.saveprofile: {
-                savePresetDialog();
+                saveProfileDialog();
                 return true;
             }
 
@@ -1071,15 +1068,14 @@ public final class ViPER4Android extends Activity {
         }
     }
 
-    public void savePresetDialog() {
+    public void saveProfileDialog() {
         // We first list existing profiles
-        File profileDir = new File(Environment.getExternalStorageDirectory()
-                .getAbsolutePath() + "/" + PROFILES_FOLDER);
+        File profileDir = new File(StaticEnvironment.getV4AProfilePath());
         profileDir.mkdirs();
 
         Log.e("ViPER4Android", "Saving preset to " + profileDir.getAbsolutePath());
 
-        // The first entry is "New preset", so we offset
+        // The first entry is "New profile", so we offset
         File[] profiles = profileDir.listFiles((FileFilter) null);
         final String[] names = new String[profiles != null ? profiles.length + 1 : 1];
         names[0] = getString(R.string.text_savefxprofile);
@@ -1129,8 +1125,7 @@ public final class ViPER4Android extends Activity {
     }
 
     public void loadProfileDialog() {
-        File profileDir = new File(Environment.getExternalStorageDirectory()
-                .getAbsolutePath() + "/" + PROFILES_FOLDER);
+        File profileDir = new File(StaticEnvironment.getV4AProfilePath());
         profileDir.mkdirs();
 
         File[] profiles = profileDir.listFiles((FileFilter) null);
@@ -1155,8 +1150,7 @@ public final class ViPER4Android extends Activity {
         final String spDir = getApplicationInfo().dataDir + "/shared_prefs/";
 
         // Copy the SharedPreference to our output directory
-        File profileDir = new File(Environment.getExternalStorageDirectory()
-                .getAbsolutePath() + "/" + PROFILES_FOLDER + "/" + name);
+        File profileDir = new File(StaticEnvironment.getV4AProfilePath() + "/" + name);
         profileDir.mkdirs();
 
         Log.e("ViPER4Android", "Saving profile to " + profileDir.getAbsolutePath());
@@ -1179,8 +1173,7 @@ public final class ViPER4Android extends Activity {
 
     public void loadProfile(String name) {
         // Copy the SharedPreference to our local directory
-        File profileDir = new File(Environment.getExternalStorageDirectory()
-                .getAbsolutePath() + "/" + PROFILES_FOLDER + "/" + name);
+        File profileDir = new File(StaticEnvironment.getV4AProfilePath() + "/" + name);
         if (!profileDir.exists()) profileDir.mkdirs();
 
         final String packageName = "com.vipercn.viper4android_v2.";
