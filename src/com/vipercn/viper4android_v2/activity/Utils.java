@@ -34,8 +34,11 @@ import java.util.StringTokenizer;
 public class Utils {
 
     public class AudioEffectUtils {
+
         private AudioEffect.Descriptor[] mAudioEffectList;
+
         private boolean mHasViPER4AndroidEngine;
+
         private final int[] mV4AEngineVersion = new int[4];
 
         public AudioEffectUtils() {
@@ -720,7 +723,7 @@ public class Utils {
                     RootTools rtTools = new RootTools();
                     rtTools.deleteFileOrDirectory(mDriverPathName, true);
                     if (RootTools.exists("/system/addon.d/91-v4a.sh"))
-                        rtTools.deleteFileOrDirectory("/system/addon.d/91-v4a.sh",true);
+                        rtTools.deleteFileOrDirectory("/system/addon.d/91-v4a.sh", true);
                 }
                 RootTools.closeAllShells();
             } catch (IOException e) {
@@ -740,13 +743,31 @@ public class Utils {
                 ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f);
                 Log.i("ViPER4Android", "Command return = " + ShellCommand.getLastReturnValue());
                 ShellCommand.closeShell();
+                if (!fileExists(mDriverPathName)) return;
+            }
+
+            // If vbox malfunctions, try roottools
+            RootTools.useRoot = true;
+            RootTools.debugMode = true;
+            if (!RootTools.isRootAvailable()) return;
+            if (!RootTools.isAccessGiven()) return;
+            try {
+                RootTools.useRoot = true;
+                RootTools.debugMode = true;
+                RootTools rtTools = new RootTools();
+                rtTools.deleteFileOrDirectory(mDriverPathName, true);
+                if (RootTools.exists("/system/addon.d/91-v4a.sh"))
+                    rtTools.deleteFileOrDirectory("/system/addon.d/91-v4a.sh", true);
+                RootTools.closeAllShells();
+            }
+            catch (IOException e) {
+                return;
             }
         }
     }
 
     // Install ViPER4Android FX driver through roottools
     private static boolean installDrv_FX_RootTools(Context ctx, String mDriverName) {
-
         boolean isAddondSupported = false;
 
         // Make sure we can use external storage for temp directory
@@ -946,12 +967,10 @@ public class Utils {
 
     // Install ViPER4Android FX driver through vbox
     private static boolean installDrv_FX_VBoX(Context ctx, String mDriverName) {
-
         boolean isAddondSupported = false, isUsingSuperSU;
 
         // Make sure we can use external storage for temp directory
-        if (!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED))
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return false;
 
         // Copy driver assets to local
@@ -1090,7 +1109,8 @@ public class Utils {
             if (isAddondSupported) {
                 //Determine command structure based on SuperUser or SuperSU use
                 if (isUsingSuperSU) {
-                success = ShellCommand.sendShellCommand(vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f);
+                    success = ShellCommand.sendShellCommand(
+                            vBox + " cp " + addondScriptPathName + " /system/addon.d/91-v4a.sh", 1.0f);
                     mShellCmdReturn = ShellCommand.getLastReturnValue();
                 } else {
                     mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
@@ -1168,6 +1188,7 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
+
             //Determine command structure based on SuperUser or SuperSU use
             if (isUsingSuperSU) {
                 success = ShellCommand
@@ -1201,13 +1222,17 @@ public class Utils {
                 }
 
                 if (!success || mShellCmdReturn != 0) {
-                    Log.e("ViPER4Android", "Cannot change addon.d script permission [/system/addon.d]");
+                    Log.e("ViPER4Android",
+                            "Cannot change addon.d script permission [/system/addon.d]");
                     // NO RETURN FALSE OR CLOSESHELL - addon.d script failure should not stop v4a from installing
                 }
             }
+
             //Determine command structure based on SuperUser or SuperSU use
             if (isUsingSuperSU) {
-            success = ShellCommand.sendShellCommand(vBox + " chmod 644 /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            success = ShellCommand.sendShellCommand(
+                    vBox + " chmod 644 /system/lib/soundfx/libv4a_fx_ics.so", 1.0f);
+            mShellCmdReturn = ShellCommand.getLastReturnValue();
 
             } else {
                 mShellCmdReturn = ShellCommand
@@ -1223,8 +1248,10 @@ public class Utils {
                 ShellCommand.closeShell();
                 return false;
             }
-            ShellCommand.sendShellCommand(vBox + " sync", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
+            ShellCommand.sendShellCommand(vBox + " sync", 5.0f);
+            mShellCmdReturn = ShellCommand.getLastReturnValue();
             Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+
             ShellCommand.sendShellCommand(vBox + " mount -o remount,ro /system", 5.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
             Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
 
@@ -1259,16 +1286,21 @@ public class Utils {
 
             //Determine command structure based on SuperUser or SuperSU use
             if (isUsingSuperSU) {
-            ShellCommand.sendShellCommand(vBox + " rm /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-            Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+            ShellCommand.sendShellCommand(vBox + " rm /system/lib/soundfx/libv4a_fx_ics.so", 1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
+            } else {
+                mShellCmdReturn = ShellCommand.rootExecuteWithoutShell("rm /system/lib/soundfx/libv4a_fx_ics.so");
             }
+            Log.i("ViPER4Android", "Command return = " + mShellCmdReturn);
+
             //Determine command structure based on SuperUser or SuperSU use
             if (isUsingSuperSU) {
-            success = ShellCommand.sendShellCommand(vBox + " cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so", 1.0f); mShellCmdReturn = ShellCommand.getLastReturnValue();
-
+                success = ShellCommand.sendShellCommand(
+                        vBox + " cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so", 1.0f);
+                mShellCmdReturn = ShellCommand.getLastReturnValue();
             } else {
-                mShellCmdReturn = ShellCommand
-                        .rootExecuteWithoutShell("rm /system/lib/soundfx/libv4a_fx_ics.so");
+                mShellCmdReturn = ShellCommand.rootExecuteWithoutShell(
+                        "cp " + baseDrvPathName + " /system/lib/soundfx/libv4a_fx_ics.so");
                 success = mShellCmdReturn == 0;
             }
             if (!success || mShellCmdReturn != 0) {
@@ -1399,10 +1431,14 @@ public class Utils {
 
     // Install ViPER4Android FX driver
     public static boolean installDrv_FX(Context ctx, String mDriverName) {
-        if (!StaticEnvironment.getVBoxUsable())
-            return installDrv_FX_RootTools(ctx, mDriverName);
-        else
-            return installDrv_FX_VBoX(ctx, mDriverName);
+        if (StaticEnvironment.getVBoxUsable()) {
+            if (!installDrv_FX_VBoX(ctx, mDriverName)) {
+                // If vbox malfunction, try roottools
+                return installDrv_FX_RootTools(ctx, mDriverName);
+            }
+            return true;
+        }
+        return installDrv_FX_VBoX(ctx, mDriverName);
     }
 
     /**

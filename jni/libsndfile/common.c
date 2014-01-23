@@ -406,7 +406,8 @@ header_put_marker (SF_PRIVATE *psf, int x) {
 } /* header_put_marker */
 
 #elif (CPU_IS_LITTLE_ENDIAN == 1)
-static inline void header_put_marker(SF_PRIVATE *psf, int x) {
+static inline void
+header_put_marker (SF_PRIVATE *psf, int x) {
     if (psf->headindex < SIGNED_SIZEOF (psf->header) - 4) {
         psf->header[psf->headindex++] = x;
         psf->header[psf->headindex++] = (x >> 8);
@@ -731,51 +732,41 @@ int psf_binheader_writef(SF_PRIVATE *psf, const char *format, ...) {
  *
  * Format specifiers are the same as for header write function above with the following
  * additions:
- *
  * p   - jump a given number of position from start of file.
  *
  * If format is NULL, psf_binheader_readf returns the current offset.
  */
 
 #if (CPU_IS_BIG_ENDIAN == 1)
-#define GET_MARKER(ptr) (
-        ((ptr) [0] << 24) | ((ptr) [1] << 16) | \
+#define GET_MARKER(ptr) ( ((ptr) [0] << 24) | ((ptr) [1] << 16) | \
         ((ptr) [2] << 8) | ((ptr) [3]) )
 
 #elif (CPU_IS_LITTLE_ENDIAN == 1)
-#define GET_MARKER(ptr) (
-        ((ptr) [0]) | ((ptr) [1] << 8) | \
+#define GET_MARKER(ptr) ( ((ptr) [0]) | ((ptr) [1] << 8) | \
         ((ptr) [2] << 16) | ((ptr) [3] << 24) )
 
 #else
 # error "Cannot determine endian-ness of processor."
 #endif
 
-#define GET_LE_SHORT(ptr) (
-        ((ptr) [1] << 8) | ((ptr) [0]) )
+#define GET_LE_SHORT(ptr) ( ((ptr) [1] << 8) | ((ptr) [0]) )
 #define GET_BE_SHORT(ptr) ( ((ptr) [0] << 8) | ((ptr) [1]) )
 
-#define GET_LE_3BYTE(ptr) (
-        ((ptr) [2] << 16) | ((ptr) [1] << 8) | ((ptr) [0]) )
-#define GET_BE_3BYTE(ptr) (
-        ((ptr) [0] << 16) | ((ptr) [1] << 8) | ((ptr) [2]) )
+#define GET_LE_3BYTE(ptr) ( ((ptr) [2] << 16) | ((ptr) [1] << 8) | ((ptr) [0]) )
+#define GET_BE_3BYTE(ptr) ( ((ptr) [0] << 16) | ((ptr) [1] << 8) | ((ptr) [2]) )
 
-#define GET_LE_INT(ptr) (
-        ((ptr) [3] << 24) | ((ptr) [2] << 16) | \
+#define GET_LE_INT(ptr) ( ((ptr) [3] << 24) | ((ptr) [2] << 16) | \
         ((ptr) [1] << 8) | ((ptr) [0]) )
 
-#define GET_BE_INT(ptr) (
-        ((ptr) [0] << 24) | ((ptr) [1] << 16) | \
+#define GET_BE_INT(ptr) ( ((ptr) [0] << 24) | ((ptr) [1] << 16) | \
         ((ptr) [2] << 8) | ((ptr) [3]) )
 
-#define GET_LE_8BYTE(ptr) (
-        (((sf_count_t) (ptr) [7]) << 56) | (((sf_count_t) (ptr) [6]) << 48) | \
+#define GET_LE_8BYTE(ptr) ( (((sf_count_t) (ptr) [7]) << 56) | (((sf_count_t) (ptr) [6]) << 48) | \
         (((sf_count_t) (ptr) [5]) << 40) | (((sf_count_t) (ptr) [4]) << 32) | \
         (((sf_count_t) (ptr) [3]) << 24) | (((sf_count_t) (ptr) [2]) << 16) | \
         (((sf_count_t) (ptr) [1]) << 8 ) | ((ptr) [0]))
 
-#define	GET_BE_8BYTE(ptr) (
-        (((sf_count_t) (ptr) [0]) << 56) | (((sf_count_t) (ptr) [1]) << 48) | \
+#define	GET_BE_8BYTE(ptr) ( (((sf_count_t) (ptr) [0]) << 56) | (((sf_count_t) (ptr) [1]) << 48) | \
         (((sf_count_t) (ptr) [2]) << 40) | (((sf_count_t) (ptr) [3]) << 32) | \
         (((sf_count_t) (ptr) [4]) << 24) | (((sf_count_t) (ptr) [5]) << 16) | \
         (((sf_count_t) (ptr) [6]) << 8 ) | ((ptr) [7]))

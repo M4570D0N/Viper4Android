@@ -740,7 +740,8 @@ static void Cut_Fast_Calculation_of_the_LTP_parameters (
 
 #endif /* LTP_CUT */
 
-static void Fast_Calculation_of_the_LTP_parameters(register word * din, /* [0..39] IN */
+static void Fast_Calculation_of_the_LTP_parameters(
+                register word * din, /* [0..39] IN */
                 register word * dp, /* [-120..-1] IN */
                 word * bc_out, /*  OUT */
                 word * Nc_out) { /*  OUT */
@@ -785,7 +786,7 @@ static void Fast_Calculation_of_the_LTP_parameters(register word * din, /* [0..3
             E = W * e; S4 += E; \
             E = W * f; S3 += E; \
             E = W * g; S2 += E; \
-            E = W * h; S1 += E;
+            E = W * h; S1 += E; \
             a = lp[K]; \
             E = W * a; S0 += E
 

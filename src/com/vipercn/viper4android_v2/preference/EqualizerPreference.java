@@ -13,6 +13,7 @@ import android.view.View.OnTouchListener;
 
 import com.vipercn.viper4android_v2.R;
 import com.vipercn.viper4android_v2.service.ViPER4AndroidService;
+import com.vipercn.viper4android_v2.preference.EqualizerSurface;
 
 import java.util.Locale;
 

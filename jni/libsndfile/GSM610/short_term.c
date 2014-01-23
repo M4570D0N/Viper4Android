@@ -307,8 +307,9 @@ void Gsm_Short_Term_Analysis_Filter(
 
 #undef FILTER
 #if defined(FAST) && defined(USE_FLOAT_MUL)
-#define FILTER(* (S->fast ? Fast_Short_term_analysis_filtering: \
-            Short_term_analysis_filtering))
+#define FILTER (* (S->fast \
+        ? Fast_Short_term_analysis_filtering \
+        : Short_term_analysis_filtering))
 
 #else
 #define FILTER Short_term_analysis_filtering

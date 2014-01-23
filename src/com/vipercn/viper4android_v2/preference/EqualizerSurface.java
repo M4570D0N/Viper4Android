@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.SurfaceView;
-import android.view.View;
 
 import com.vipercn.viper4android_v2.R;
 

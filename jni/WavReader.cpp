@@ -152,7 +152,7 @@ bool WavReader_R32::OpenWavFile(const char *mFilePathName) {
     uint32_t uiFrameCount = uiDataSize / (uiBitsPerSample / 8) / uiChannels;
     if (uiFrameCount == 0) return false;
 
-    if (nFormatTag == 0x0003) {
+    if (mFormatTag == 0x0003) {
         fpSamples = new float[uiFrameCount * uiChannels];
         if (fpSamples == NULL) return false;
         uint32_t mReadFrameCount = (uint32_t)fread(fpSamples, sizeof(float), uiFrameCount * uiChannels, mFileHandle);
